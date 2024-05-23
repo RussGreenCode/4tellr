@@ -7,6 +7,9 @@
 4tellr-app/.venv/bin
 4tellr-app/.venv/lib
 4tellr-app/pyennv.cfg
+4tellr-frontend/.idea
+4tellr-app/.idea
+./idea
 
 
 # testing
