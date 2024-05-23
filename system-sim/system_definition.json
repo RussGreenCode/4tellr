@@ -1,0 +1,226 @@
+{
+  "systems": [
+    {
+      "name": "Market Data Providers",
+      "type": "External",
+      "sources": [
+        "Bloomberg",
+        "Reuters"
+      ],
+      "dataTypes": [
+        {
+          "name": "Market Data",
+          "description": "Market Prices, Interest Rates, FX Rates, Commodity Prices",
+          "formats": ["CSV", "XML", "JSON"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Data Ingestion Layer",
+          "eventType": "Retrieve EoD Market Prices"
+        }
+      ]
+    },
+    {
+      "name": "Trade Data from Exchanges",
+      "type": "External",
+      "dataTypes": [
+        {
+          "name": "Trade Data",
+          "description": "Trade Confirmations, Executions, Market Orders",
+          "formats": ["FIX Protocol", "CSV", "JSON"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Data Ingestion Layer",
+          "eventType": "Receive Trade Data"
+        }
+      ]
+    },
+    {
+      "name": "Counterparty Data",
+      "type": "External",
+      "dataTypes": [
+        {
+          "name": "Counterparty Data",
+          "description": "Counterparty Details, Settlement Instructions",
+          "formats": ["CSV", "XML"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Data Ingestion Layer",
+          "eventType": "Receive Counterparty Data"
+        }
+      ]
+    },
+    {
+      "name": "Data Ingestion Layer",
+      "type": "Internal",
+      "systems": ["Informatica", "Talend"],
+      "dataTypes": [
+        {
+          "name": "Normalized Data",
+          "description": "Normalized market data, trade data, and counterparty data",
+          "formats": ["CSV", "Parquet", "JSON"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Trade Processing System",
+          "eventType": "Process Normalized Trade Data"
+        },
+        {
+          "system": "Data Lake",
+          "eventType": "Store Raw and Processed Data"
+        }
+      ]
+    },
+    {
+      "name": "Trade Processing System",
+      "type": "Internal",
+      "systems": ["OMS", "TMS"],
+      "dataTypes": [
+        {
+          "name": "Trade Data",
+          "description": "Validated and enriched trade data",
+          "formats": ["JSON", "XML"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Risk Management System",
+          "eventType": "Send Validated Trade Data"
+        },
+        {
+          "system": "Sub-Ledger System",
+          "eventType": "Post Trades to Sub-Ledger"
+        },
+        {
+          "system": "Data Lake",
+          "eventType": "Store Processed Trade Data"
+        }
+      ]
+    },
+    {
+      "name": "Risk Management System",
+      "type": "Internal",
+      "systems": ["Murex", "Calypso"],
+      "dataTypes": [
+        {
+          "name": "Risk Metrics",
+          "description": "Calculated risk metrics and stress testing results",
+          "formats": ["JSON", "XML", "Parquet"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Data Lake",
+          "eventType": "Store Risk Metrics"
+        }
+      ]
+    },
+    {
+      "name": "Sub-Ledger System",
+      "type": "Internal",
+      "systems": ["Oracle Financials", "SAP"],
+      "dataTypes": [
+        {
+          "name": "Ledger Entries",
+          "description": "Ledger entries and trade postings",
+          "formats": ["JSON", "XML", "CSV"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Data Lake",
+          "eventType": "Store Ledger Entries"
+        }
+      ]
+    },
+    {
+      "name": "Data Lake",
+      "type": "Internal",
+      "systems": ["Hadoop", "Amazon S3"],
+      "dataTypes": [
+        {
+          "name": "All Data",
+          "description": "Raw and processed data for analytics and reporting",
+          "formats": ["Parquet", "ORC", "CSV", "JSON"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Data Warehouse",
+          "eventType": "Move Data for Structured Storage"
+        }
+      ]
+    },
+    {
+      "name": "Data Warehouse",
+      "type": "Internal",
+      "systems": ["Amazon Redshift", "Snowflake"],
+      "dataTypes": [
+        {
+          "name": "Aggregated Data",
+          "description": "Structured and aggregated data for reporting and analytics",
+          "formats": ["Parquet", "ORC", "CSV", "JSON"]
+        }
+      ],
+      "nextSystems": [
+        {
+          "system": "Customer Reports",
+          "eventType": "Generate Customer Reports"
+        },
+        {
+          "system": "Financial Reports",
+          "eventType": "Generate Financial Reports"
+        },
+        {
+          "system": "Regulatory Reports",
+          "eventType": "Generate Regulatory Reports"
+        }
+      ]
+    },
+    {
+      "name": "Customer Reports",
+      "type": "Internal",
+      "systems": ["Tableau", "Power BI"],
+      "dataTypes": [
+        {
+          "name": "Customer Reports",
+          "description": "Customer trade summaries, portfolio reports",
+          "formats": ["PDF", "Excel", "HTML"]
+        }
+      ],
+      "nextSystems": []
+    },
+    {
+      "name": "Financial Reports",
+      "type": "Internal",
+      "systems": ["SAP BPC", "Oracle Hyperion"],
+      "dataTypes": [
+        {
+          "name": "Financial Reports",
+          "description": "Financial statements and internal reports",
+          "formats": ["PDF", "Excel", "HTML"]
+        }
+      ],
+      "nextSystems": []
+    },
+    {
+      "name": "Regulatory Reports",
+      "type": "Internal",
+      "systems": ["AxiomSL", "Wolters Kluwer"],
+      "dataTypes": [
+        {
+          "name": "Regulatory Reports",
+          "description": "Regulatory filings and compliance reports",
+          "formats": ["XML", "PDF", "Excel"]
+        }
+      ],
+      "nextSystems": []
+    }
+  ]
+}
