@@ -1,38 +1,64 @@
-.App {
-  text-align: center;
+/* src/styles/App.css */
+.date-select {
+  margin-bottom: 1rem;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.date-input {
+  margin: 0 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* src/styles/App.css */
+.scatter-circle {
+  fill: green;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.scatter-square {
+  fill: red;
+}
+
+.scatter-diamond {
+  fill: yellow;
+}
+
+.chart-container {
+  width: 100%;
+  height: calc(100vh - 200px); /* Adjust the height as needed */
+}
+
+/* src/styles/App.css */
+.chart-container {
+  width: 100%;
+  height: calc(100vh - 200px); /* Adjust as necessary to fit your layout */
+}
+
+.date-select {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.date-input {
+  margin: 0 10px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* src/styles/App.css */
+.chart-container {
+  width: 100%;
+  height: calc(100vh - 200px); /* Adjust as necessary to fit your layout */
 }
+
+/* src/styles/App.css */
+.chart-container {
+  width: 100%;
+  height: calc(100vh - 200px); /* Adjust as necessary to fit your layout */
+}
+
+/* src/styles/App.css */
+.chart-container {
+  width: 100%;
+  height: calc(100vh - 200px); /* Adjust as necessary to fit your layout */
+}
+
+button {
+  margin: 1rem;
+}
+

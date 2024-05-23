@@ -13,8 +13,67 @@ Then open the Pycharm on the project directory to get going.
 
 Now lets create a Git repo for the react part of this project.
 
+first we set up credentials and an SSH certificate
 
 
+`git init`
+
+`git branch`
+
+`git add .`
+
+`git commit -m "Initial commit for 4tellr"`
+
+`git config --global user.email "email address"`
+
+`git config --global user.name "username"`
+
+`git commit -m "Initial commit for 4tellr"`
+
+git remote set-url origin git@github.com:RussGreenCode/4tellr.git
+
+git remote -v
+
+git config --global --list
+
+ssh-keygen -t ed25519 -C "email"
+
+eval "$(ssh-agent -s)"
+
+ssh-add ~/.ssh/id_ed25519
+
+cat ~/.ssh/id_ed25519.pub`
+
+#### This prints out the key - this needs to be added to Github certificates.
+
+ssh-add -l
+
+ssh -T git@github.com
+
+git push -u origin master
+
+----------------------------------
+
+react-package to install
+
+
+# Install react-router-dom for routing
+npm install react-router-dom
+
+# Install react-bootstrap and bootstrap for UI components and styles
+npm install react-bootstrap bootstrap
+
+# Install recharts for creating charts
+npm install recharts
+
+npm install react-icons
+
+npm install axios
+
+
+
+
+----------------------------------------------
 ## Available Scripts
 
 In the project directory, you can run:
