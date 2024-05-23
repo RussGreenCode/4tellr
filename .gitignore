@@ -4,6 +4,10 @@
 4tellr-frontend/node_modules
 4tellr-frontend/.pnp
 4tellr-frontend/.pnp.js
+4tellr-app/.venv/bin
+4tellr-app/.venv/lib
+4tellr-app/pyennv.cfg
+
 
 # testing
 4tellr-frontend/coverage
