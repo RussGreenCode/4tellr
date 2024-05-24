@@ -15,17 +15,7 @@ class APIHelper:
             validator.validate(message)
 
     def create_event_payload(self, event_type, details):
-        payload = {
-            "businessDate": "2023-11-30",
-            "eventName": f"Test Event {datetime.utcnow().isoformat()}",
-            "eventType": event_type,
-            "batchOrRealtime": "Batch",
-            "timestamp": datetime.utcnow().isoformat() + 'Z',
-            "eventStatus": "Started",
-            "resource": "test-machine",
-            "message": "Test event message.",
-            "details": details
-        }
+        payload = details
         self.validate_message(payload)
         return payload
 

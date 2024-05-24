@@ -1,12 +1,17 @@
-import random
+import json
 from api_helper.event_helper import APIHelper
 from api_helper.validators import CommonFieldValidator, FileEventValidator, MessageEventValidator, \
     DatabaseEventValidator
+from event_simulator import EventSimulator, load_config
 
 API_URL = "http://127.0.0.1:5000/api/events"
 
 
 def main():
+    config = load_config('config.txt')
+    delta = config['DELTA']
+    business_days = config['BUSINESS_DAYS']
+
     api_helper = APIHelper(API_URL)
 
     # Add validators
@@ -15,34 +20,14 @@ def main():
     api_helper.add_validator(MessageEventValidator())
     api_helper.add_validator(DatabaseEventValidator())
 
-    # Example details for different event types
-    file_details = {
-        "fileName": "testfile.csv",
-        "fileLocation": "/tmp/",
-        "fileSize": 1024,
-        "numberOfRows": 100
-    }
+    # Load systems flow from JSON
+    with open('system_definition.json', 'r') as file:
+        systems_flow = json.load(file)
 
-    message_details = {
-        "messageId": "msg-12345",
-        "messageQueue": "queue-01"
-    }
+    event_simulator = EventSimulator(api_helper, systems_flow, delta, business_days)
 
-    database_details = {
-        "databaseName": "test_db",
-        "tableName": "test_table",
-        "operation": "INSERT"
-    }
-
-    # Send events
-    for i in range(10):
-        event_type = random.choice(["File", "Message", "Database"])
-        if event_type == "File":
-            api_helper.send_event(event_type, file_details)
-        elif event_type == "Message":
-            api_helper.send_event(event_type, message_details)
-        elif event_type == "Database":
-            api_helper.send_event(event_type, database_details)
+    # Run simulation
+    event_simulator.run_simulation()
 
 
 if __name__ == "__main__":

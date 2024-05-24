@@ -9,7 +9,15 @@
 4tellr-app/pyennv.cfg
 4tellr-frontend/.idea
 4tellr-app/.idea
-./idea
+.idea/
+system-sim/.idea
+system-sim/.venv
+system-sim/pyenv.cfg
+system-sim/.gitignore
+4tellr-app/__pycache__/
+system-sim/__pycache__/
+system-sim/api_helper/__pycache__/
+.gitignore.swp
 
 
 # testing

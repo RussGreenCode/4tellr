@@ -1,7 +1,7 @@
 import json
 
 # Load the JSON structure from a file or directly from the string
-with open('system_definition.json', 'r') as file:
+with open('systems_definition.json', 'r') as file:
     systems_flow = json.load(file)
 
 flow_diagram = []
@@ -22,6 +22,9 @@ def print_system_flow(system_name, systems_flow, level=0):
         print(f"{indent}Next Systems:")
         for next_system in system['nextSystems']:
             print(f"{indent}  - {next_system['system']} (Event Type: {next_system['eventType']})")
+            print(f"{indent}    Events:")
+            for event in next_system['events']:
+                print(f"{indent}      - {event['name']} (Status: {event['status']}, Expected Time: {event['expectedTime']})")
             flow_diagram.append(f"{indent}  -> {next_system['system']} (Event Type: {next_system['eventType']})")
         print()
         for next_system in system['nextSystems']:

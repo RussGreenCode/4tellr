@@ -29,7 +29,7 @@ def ceate_event():
     event_type = data.get('eventType')
     details = data.get('details', {})
 
-    if event_type == 'File':
+    if event_type == 'FILE':
         file_fields = ['fileName', 'fileLocation', 'fileSize', 'numberOfRows']
         for field in file_fields:
             if field not in details:
@@ -41,7 +41,7 @@ def ceate_event():
             if field not in details:
                 return jsonify({'error': f'{field} is required for message-based events'}), 400
 
-    elif event_type == 'Database':
+    elif event_type == 'DATABASE':
         db_fields = ['databaseName', 'tableName', 'operation']
         for field in db_fields:
             if field not in details:
@@ -53,6 +53,8 @@ def ceate_event():
     # Here you would typically save the event to a database
     # For demonstration, we're just returning the data
     event_id = datetime.now().strftime('%Y%m%d%H%M%S')  # Simulating an event ID
+
+    print(data)
 
     return jsonify({'status': 'success', 'event_id': event_id, 'event_data': data}), 201
 

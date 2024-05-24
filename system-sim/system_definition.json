@@ -17,7 +17,21 @@
       "nextSystems": [
         {
           "system": "Data Ingestion Layer",
-          "eventType": "Retrieve EoD Market Prices"
+          "description": "Retrieve EoD Market Prices",
+          "events": [
+            {
+              "name": "SENDING_MARKET_DATA",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 18:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "SENDING_MARKET_DATA",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 18:30:00",
+              "eventType": "FILE"
+            }
+          ]
         }
       ]
     },
@@ -34,7 +48,21 @@
       "nextSystems": [
         {
           "system": "Data Ingestion Layer",
-          "eventType": "Receive Trade Data"
+          "description": "Receive Trade Data",
+          "events": [
+            {
+              "name": "SENDING_TRADE_DATA",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 19:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "SENDING_TRADE_DATA",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 19:30:00",
+              "eventType": "FILE"
+            }
+          ]
         }
       ]
     },
@@ -51,7 +79,21 @@
       "nextSystems": [
         {
           "system": "Data Ingestion Layer",
-          "eventType": "Receive Counterparty Data"
+          "description": "Receive Counterparty Data",
+          "events": [
+            {
+              "name": "SENDING_COUNTERPARTY_DATA",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 20:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "SENDING_COUNTERPARTY_DATA",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 20:30:00",
+              "eventType": "FILE"
+            }
+          ]
         }
       ]
     },
@@ -69,11 +111,39 @@
       "nextSystems": [
         {
           "system": "Trade Processing System",
-          "eventType": "Process Normalized Trade Data"
+          "description": "Process Normalized Trade Data",
+          "events": [
+            {
+              "name": "SENDING_NORMALIZED_DATA",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 21:00:00",
+              "eventType": "DATABASE"
+            },
+            {
+              "name": "SENDING_NORMALIZED_DATA",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 21:30:00",
+              "eventType": "DATABASE"
+            }
+          ]
         },
         {
           "system": "Data Lake",
-          "eventType": "Store Raw and Processed Data"
+          "description": "Store Raw and Processed Data",
+          "events": [
+            {
+              "name": "SENDING_RAW_PROCESSED_DATA",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 22:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "SENDING_RAW_PROCESSED_DATA",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 22:30:00",
+              "eventType": "FILE"
+            }
+          ]
         }
       ]
     },
@@ -91,15 +161,57 @@
       "nextSystems": [
         {
           "system": "Risk Management System",
-          "eventType": "Send Validated Trade Data"
+          "description": "Send Validated Trade Data",
+          "events": [
+            {
+              "name": "SENDING_TRADE_DATA",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 23:00:00",
+              "eventType": "DATABASE"
+            },
+            {
+              "name": "SENDING_TRADE_DATA",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 23:30:00",
+              "eventType": "DATABASE"
+            }
+          ]
         },
         {
           "system": "Sub-Ledger System",
-          "eventType": "Post Trades to Sub-Ledger"
+          "description": "Post Trades to Sub-Ledger",
+          "events": [
+            {
+              "name": "SENDING_TRADE_DATA_TO_SUB_LEDGER",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 24:00:00",
+              "eventType": "DATABASE"
+            },
+            {
+              "name": "SENDING_TRADE_DATA_TO_SUB_LEDGER",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 24:30:00",
+              "eventType": "DATABASE"
+            }
+          ]
         },
         {
           "system": "Data Lake",
-          "eventType": "Store Processed Trade Data"
+          "description": "Store Processed Trade Data",
+          "events": [
+            {
+              "name": "SENDING_PROCESSED_TRADE_DATA",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 25:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "SENDING_PROCESSED_TRADE_DATA",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 25:30:00",
+              "eventType": "FILE"
+            }
+          ]
         }
       ]
     },
@@ -117,7 +229,21 @@
       "nextSystems": [
         {
           "system": "Data Lake",
-          "eventType": "Store Risk Metrics"
+          "description": "Store Risk Metrics",
+          "events": [
+            {
+              "name": "SENDING_RISK_METRICS",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 26:00:00",
+              "eventType": "DATABASE"
+            },
+            {
+              "name": "SENDING_RISK_METRICS",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 26:30:00",
+              "eventType": "DATABASE"
+            }
+          ]
         }
       ]
     },
@@ -135,7 +261,21 @@
       "nextSystems": [
         {
           "system": "Data Lake",
-          "eventType": "Store Ledger Entries"
+          "description": "Store Ledger Entries",
+          "events": [
+            {
+              "name": "SENDING_LEDGER_ENTRIES",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 27:00:00",
+              "eventType": "DATABASE"
+            },
+            {
+              "name": "SENDING_LEDGER_ENTRIES",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 27:30:00",
+              "eventType": "DATABASE"
+            }
+          ]
         }
       ]
     },
@@ -153,7 +293,21 @@
       "nextSystems": [
         {
           "system": "Data Warehouse",
-          "eventType": "Move Data for Structured Storage"
+          "description": "Move Data for Structured Storage",
+          "events": [
+            {
+              "name": "MOVING_DATA_TO_WAREHOUSE",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 28:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "MOVING_DATA_TO_WAREHOUSE",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 28:30:00",
+              "eventType": "FILE"
+            }
+          ]
         }
       ]
     },
@@ -171,15 +325,57 @@
       "nextSystems": [
         {
           "system": "Customer Reports",
-          "eventType": "Generate Customer Reports"
+          "description": "Generate Customer Reports",
+          "events": [
+            {
+              "name": "GENERATING_CUSTOMER_REPORTS",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 29:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "GENERATING_CUSTOMER_REPORTS",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 29:30:00",
+              "eventType": "FILE"
+            }
+          ]
         },
         {
           "system": "Financial Reports",
-          "eventType": "Generate Financial Reports"
+          "description": "Generate Financial Reports",
+          "events": [
+            {
+              "name": "GENERATING_FINANCIAL_REPORTS",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 30:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "GENERATING_FINANCIAL_REPORTS",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 30:30:00",
+              "eventType": "FILE"
+            }
+          ]
         },
         {
           "system": "Regulatory Reports",
-          "eventType": "Generate Regulatory Reports"
+          "description": "Generate Regulatory Reports",
+          "events": [
+            {
+              "name": "GENERATING_REGULATORY_REPORTS",
+              "status": "STARTED",
+              "expectedTime": "BUSINESS_DATE + 31:00:00",
+              "eventType": "FILE"
+            },
+            {
+              "name": "GENERATING_REGULATORY_REPORTS",
+              "status": "SUCCESS",
+              "expectedTime": "BUSINESS_DATE + 31:30:00",
+              "eventType": "FILE"
+            }
+          ]
         }
       ]
     },
