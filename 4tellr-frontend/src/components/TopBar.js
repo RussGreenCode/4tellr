@@ -1,18 +1,21 @@
 // src/components/TopBar.js
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Box, Button, Popover, TextField, Typography } from '@mui/material';
+import { AppBar, Toolbar, Box, Button, Popover, TextField, Typography, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { Brightness4, Brightness7 } from '@mui/icons-material';
 import axios from 'axios';
-import '../styles/App.css';
 import SearchBar from "./SearchBar";
 import DateSelect from "./DateSelect";
+import { useThemeContext } from '../contexts/ThemeContext';
+import '../styles/App.css';
 
-const TopBar = () => {
+const TopBar = ({ businessDate, setBusinessDate }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { mode, toggleTheme } = useThemeContext();
 
   const handleLoginClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -50,10 +53,13 @@ const TopBar = () => {
 
   return (
     <AppBar position="static" color="default">
-      <Toolbar>
-        <DateSelect />
+      <Toolbar style={{ display: 'flex', alignItems: 'center' }}>
+        <DateSelect selectedDate={businessDate} setSelectedDate={setBusinessDate} />
         <SearchBar />
-        <Box ml="auto">
+        <Box ml="auto" display="flex" alignItems="center">
+          <IconButton onClick={toggleTheme} color="inherit">
+            {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
+          </IconButton>
           <Button variant="contained" color="primary" onClick={handleLoginClick}>
             Login
           </Button>

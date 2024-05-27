@@ -1,0 +1,132 @@
+openapi: 3.0.3
+info:
+  title: Event API
+  description: API for managing events in a business process system.
+  version: 1.0.0
+
+paths:
+  /api/events:
+    post:
+      summary: Create a new event
+      requestBody:
+        description: Event object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Event:
+      type: object
+      required:
+        - businessDate
+        - eventName
+        - eventType
+        - batchOrRealtime
+        - timestamp
+        - eventStatus
+        - resource
+        - details
+      properties:
+        businessDate:
+          type: string
+          format: date
+          description: "The business date for the event in YYYY-MM-DD format."
+        eventName:
+          type: string
+          description: "A unique name for the event."
+        eventType:
+          type: string
+          description: "The type of event."
+          enum:
+            - FILE
+            - MESSAGE
+            - DATABASE
+        batchOrRealtime:
+          type: string
+          description: "Indicates whether the event is part of a batch process or is realtime."
+          enum:
+            - Batch
+            - Realtime
+        timestamp:
+          type: string
+          format: date-time
+          description: "The timestamp when the event occurred in ISO 8601 format."
+        eventStatus:
+          type: string
+          description: "The status of the event."
+          enum:
+            - STARTED
+            - SUCCESS
+            - ERROR
+        resource:
+          type: string
+          description: "The resource or machine where the event is running."
+        message:
+          type: string
+          description: "A message associated with the event, typically used for error messages or additional information."
+        details:
+          type: object
+          description: "An object containing additional details specific to the event type."
+          properties:
+            fileName:
+              type: string
+              description: "The name of the file for FILE events."
+            fileLocation:
+              type: string
+              description: "The location of the file for FILE events."
+            fileSize:
+              type: integer
+              description: "The size of the file in bytes for FILE events."
+            numberOfRows:
+              type: integer
+              description: "The number of rows in the file for FILE events."
+            messageId:
+              type: string
+              description: "The ID of the message for MESSAGE events."
+            messageQueue:
+              type: string
+              description: "The queue where the message is located for MESSAGE events."
+            databaseName:
+              type: string
+              description: "The name of the database for DATABASE events."
+            tableName:
+              type: string
+              description: "The name of the table in the database for DATABASE events."
+            operation:
+              type: string
+              description: "The database operation, e.g., INSERT, UPDATE, DELETE for DATABASE events."
+
+    EventResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: "The status of the event creation process."
+        event_id:
+          type: string
+          description: "A unique identifier for the created event."
+        event_data:
+          $ref: '#/components/schemas/Event'
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: "Error message describing what went wrong."

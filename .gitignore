@@ -18,7 +18,7 @@ system-sim/.gitignore
 system-sim/__pycache__/
 system-sim/api_helper/__pycache__/
 .gitignore.swp
-
+4tellr-app/helpers/__pycache__/
 
 # testing
 4tellr-frontend/coverage

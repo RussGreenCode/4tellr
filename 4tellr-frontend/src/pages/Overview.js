@@ -1,13 +1,14 @@
-// src/pages/Overview.js
 import React from 'react';
-import AlertArea from '../components/AlertArea';
-import MainContent from '../components/MainContent';
+import AlertArea from "../components/AlertArea";
+import MainContent from "../components/MainContent";
 
-const Overview = () => (
-  <div>
-    <AlertArea />
-    <MainContent />
-  </div>
-);
+const Overview = ({ businessDate }) => {
+  return (
+    <div>
+      <MainContent businessDate={businessDate}/>
+      <AlertArea />
+    </div>
+  );
+};
 
 export default Overview;

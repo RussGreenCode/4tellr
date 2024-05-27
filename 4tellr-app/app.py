@@ -1,18 +1,33 @@
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 from flask import Flask, request, jsonify
-from datetime import datetime
+from flask_cors import CORS
+from helpers.dynamodb_helper import DynamoDBHelper, load_config
 
 app = Flask(__name__)
+CORS(app)
 
+config = load_config('config.txt')
+db_helper = DynamoDBHelper(config)
 
 @app.route('/')
-def hello_world():  # put application's code here
+def hello_world():
     return 'Hello World!'
 
 
-app.route('/api/events', methods=['POST'])
+@app.route('/api/events', methods=['GET'])
+def get_events_by_date():
+    business_date = request.args.get('businessDate')
+    if not business_date:
+        return jsonify({'error': 'businessDate parameter is required'}), 400
+
+    try:
+        events = db_helper.query_events_by_date(business_date)
+        return jsonify(events), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/events', methods=['POST'])
-def ceate_event():
+def create_event():
     data = request.json
 
     # Basic validation for common fields
@@ -35,7 +50,7 @@ def ceate_event():
             if field not in details:
                 return jsonify({'error': f'{field} is required for file-based events'}), 400
 
-    elif event_type == 'Message':
+    elif event_type == 'MESSAGE':
         message_fields = ['messageId', 'messageQueue']
         for field in message_fields:
             if field not in details:
@@ -50,13 +65,13 @@ def ceate_event():
     else:
         return jsonify({'error': 'Invalid eventType provided'}), 400
 
-    # Here you would typically save the event to a database
-    # For demonstration, we're just returning the data
-    event_id = datetime.now().strftime('%Y%m%d%H%M%S')  # Simulating an event ID
-
-    print(data)
+    # Insert event into DynamoDB
+    try:
+        event_id = db_helper.insert_event(data)
+    except (NoCredentialsError, PartialCredentialsError):
+        return jsonify({'error': 'AWS credentials not configured correctly'}), 500
 
     return jsonify({'status': 'success', 'event_id': event_id, 'event_data': data}), 201
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)

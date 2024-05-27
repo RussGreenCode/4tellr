@@ -1,12 +1,10 @@
 // src/components/DateSelect.js
-import React, { useState } from 'react';
+import React from 'react';
 import { TextField, IconButton, Box } from '@mui/material';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
-import '../styles/DateSelect.css';
+import '../styles/App.css';
 
-const DateSelect = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-
+const DateSelect = ({ selectedDate, setSelectedDate }) => {
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
   };
