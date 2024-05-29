@@ -68,9 +68,10 @@ class EventSimulator:
                         accumulated_delay += (adjusted_time - expected_time).total_seconds()
                 self.simulate_system(next_system['system'], business_date, accumulated_delay)
 
+
     def run_simulation(self):
         for day in range(self.business_days):
-            business_date = (datetime.utcnow() + timedelta(days=day)).strftime('%Y-%m-%d')
+            business_date = (datetime.utcnow() - timedelta(days=day)).strftime('%Y-%m-%d')
             print(f"Simulating events for business date: {business_date}")
             self.simulate_system("Market Data Providers", business_date)
 

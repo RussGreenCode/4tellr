@@ -77,3 +77,22 @@ button {
 .alert-area p {
   margin: 5px 0;
 }
+
+.admin-container {
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.function-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.function-row button {
+  margin-left: 10px;
+}

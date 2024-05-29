@@ -8,6 +8,7 @@ const menuItems = [
   { name: 'Overview', link: '/' },
   { name: 'Metrics', link: '/metrics' },
   { name: 'Settings', link: '/settings' },
+  { name: 'Admin', link: '/admin' },
 ];
 
 const Menu = () => (
@@ -23,4 +24,3 @@ const Menu = () => (
 );
 
 export default Menu;
-        

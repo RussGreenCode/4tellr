@@ -1,6 +1,7 @@
 AWS_ACCESS_KEY_ID=your_access_key_id
 AWS_SECRET_ACCESS_KEY=your_secret_access_key
 AWS_REGION=us-east-1
-DYNAMODB_TABLE=event_details
+EVENT_TABLE=event_details
+STATS_TABLE=event_statistics
 ENVIRONMENT=local
 LOCAL_DYNAMODB_ENDPOINT=http://localhost:8000
