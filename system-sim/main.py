@@ -9,7 +9,8 @@ API_URL = "http://127.0.0.1:5000/api/events"
 
 def main():
     config = load_config('config.txt')
-    delta = config['DELTA']
+    early_delta = config['EARLY_DELTA']
+    late_delta = config['LATE_DELTA']
     business_days = config['BUSINESS_DAYS']
     starting_date = config['STARTING_DATE']
 
@@ -25,7 +26,7 @@ def main():
     with open('system_definition.json', 'r') as file:
         systems_flow = json.load(file)
 
-    event_simulator = EventSimulator(api_helper, systems_flow, delta, business_days, starting_date)
+    event_simulator = EventSimulator(api_helper, systems_flow, late_delta, early_delta, business_days, starting_date)
 
     # Run simulation
     event_simulator.run_simulation()

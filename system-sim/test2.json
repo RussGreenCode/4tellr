@@ -1,0 +1,78 @@
+{
+  "systems": [
+    {
+      "name": "System A",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "EVENT_A",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 09:00:00",
+          "eventType": "PROCESS"
+        },
+        {
+          "name": "EVENT_A",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 09:30:00",
+          "eventType": "PROCESS"
+        }
+      ],
+      "nextSystems": [
+        "System B"
+      ]
+    },
+    {
+      "name": "System B",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "EVENT_B",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 10:00:00",
+          "eventType": "PROCESS",
+          "dependency": "EVENT_A",
+          "dependencyStatus": "SUCCESS"
+        },
+        {
+          "name": "EVENT_B",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 10:30:00",
+          "eventType": "PROCESS",
+          "dependency": "EVENT_A",
+          "dependencyStatus": "SUCCESS"
+        }
+      ],
+      "nextSystems": [
+        "System C"
+      ],
+      "dependencies": [
+        "EVENT_A"
+      ]
+    },
+    {
+      "name": "System C",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "EVENT_C",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 11:00:00",
+          "eventType": "PROCESS",
+          "dependency": "EVENT_B",
+          "dependencyStatus": "SUCCESS"
+        },
+        {
+          "name": "EVENT_C",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 11:30:00",
+          "eventType": "PROCESS",
+          "dependency": "EVENT_B",
+          "dependencyStatus": "SUCCESS"
+        }
+      ],
+      "dependencies": [
+        "EVENT_B"
+      ]
+    }
+  ]
+}

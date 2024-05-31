@@ -1,0 +1,359 @@
+{
+  "systems": [
+    {
+      "name": "Front Office Trading Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "TRADE_CAPTURE",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 09:00:00",
+          "eventType": "DATABASE",
+          "details": {
+            "system": "Murex"
+          }
+        },
+        {
+          "name": "TRADE_CAPTURE",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 09:30:00",
+          "eventType": "DATABASE",
+          "details": {
+            "system": "Calypso"
+          }
+        },
+        {
+          "name": "MARKET_DATABASE_UPDATE",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 09:15:00",
+          "eventType": "DATABASE",
+          "details": {
+            "system": "Bloomberg Terminal"
+          }
+        },
+        {
+          "name": "MARKET_DATABASE_UPDATE",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 09:45:00",
+          "eventType": "DATABASE",
+          "details": {
+            "system": "Bloomberg Terminal"
+          }
+        }
+      ],
+      "nextSystems": [
+        "Market DATABASE Consolidation",
+        "Trade Capture and Enrichment"
+      ]
+    },
+    {
+      "name": "Market DATABASE Consolidation",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "MARKET_DATABASE_CONSOLIDATION",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 10:00:00",
+          "eventType": "PROCESS",
+          "dependency": "MARKET_DATABASE_UPDATE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Reuters", "Bloomberg"]
+          }
+        },
+        {
+          "name": "MARKET_DATABASE_CONSOLIDATION",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 10:30:00",
+          "eventType": "PROCESS",
+          "dependency": "MARKET_DATABASE_UPDATE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Reuters", "Bloomberg"]
+          }
+        }
+      ],
+      "dependencies": [
+        "MARKET_DATABASE_UPDATE"
+      ],
+      "nextSystems": [
+        "Trade Capture and Enrichment",
+        "Risk Management Systems"
+      ]
+    },
+    {
+      "name": "Trade Capture and Enrichment",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "TRADE_ENRICHMENT",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 11:00:00",
+          "eventType": "DATABASE",
+          "dependency": "TRADE_CAPTURE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Murex", "Calypso"]
+          }
+        },
+        {
+          "name": "TRADE_ENRICHMENT",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 11:30:00",
+          "eventType": "DATABASE",
+          "dependency": "TRADE_CAPTURE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Murex", "Calypso"]
+          }
+        }
+      ],
+      "dependencies": [
+        "TRADE_CAPTURE"
+      ],
+      "nextSystems": [
+        "Risk Management Systems",
+        "Subledger Systems"
+      ]
+    },
+    {
+      "name": "Risk Management Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "RISK_ASSESSMENT",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 12:00:00",
+          "eventType": "PROCESS",
+          "dependency": "MARKET_DATABASE_CONSOLIDATION",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["MSCI RiskMetrics", "IBM Algorithmics"]
+          }
+        },
+        {
+          "name": "RISK_ASSESSMENT",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 12:30:00",
+          "eventType": "PROCESS",
+          "dependency": "MARKET_DATABASE_CONSOLIDATION",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["MSCI RiskMetrics", "IBM Algorithmics"]
+          }
+        }
+      ],
+      "dependencies": [
+        "MARKET_DATABASE_CONSOLIDATION"
+      ],
+      "nextSystems": [
+        "Subledger Systems",
+        "Credit Risk Systems"
+      ]
+    },
+    {
+      "name": "Subledger Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "SUBLEDGER_UPDATE",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 13:00:00",
+          "eventType": "PROCESS",
+          "dependency": "TRADE_ENRICHMENT",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["OFSAA", "SAP Financial Services Network"]
+          }
+        },
+        {
+          "name": "SUBLEDGER_UPDATE",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 13:30:00",
+          "eventType": "PROCESS",
+          "dependency": "TRADE_ENRICHMENT",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["OFSAA", "SAP Financial Services Network"]
+          }
+        }
+      ],
+      "dependencies": [
+        "TRADE_ENRICHMENT"
+      ],
+      "nextSystems": [
+        "Credit Risk Systems",
+        "Financial Systems"
+      ]
+    },
+    {
+      "name": "Credit Risk Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "CREDIT_RISK_ASSESSMENT",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 14:00:00",
+          "eventType": "PROCESS",
+          "dependency": "SUBLEDGER_UPDATE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Moody's Analytics", "SAS Credit Risk Management"]
+          }
+        },
+        {
+          "name": "CREDIT_RISK_ASSESSMENT",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 14:30:00",
+          "eventType": "PROCESS",
+          "dependency": "SUBLEDGER_UPDATE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Moody's Analytics", "SAS Credit Risk Management"]
+          }
+        }
+      ],
+      "dependencies": [
+        "SUBLEDGER_UPDATE"
+      ],
+      "nextSystems": [
+        "Financial Systems",
+        "Regulatory Reporting Systems"
+      ]
+    },
+    {
+      "name": "Financial Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "FINANCIAL_AGGREGATION",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 15:00:00",
+          "eventType": "PROCESS",
+          "dependency": "SUBLEDGER_UPDATE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Oracle E-Business Suite", "SAP ERP"]
+          }
+        },
+        {
+          "name": "FINANCIAL_AGGREGATION",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 15:30:00",
+          "eventType": "PROCESS",
+          "dependency": "SUBLEDGER_UPDATE",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Oracle E-Business Suite", "SAP ERP"]
+          }
+        }
+      ],
+      "dependencies": [
+        "SUBLEDGER_UPDATE"
+      ],
+      "nextSystems": [
+        "Regulatory Reporting Systems",
+        "Financial Reporting Systems"
+      ]
+    },
+    {
+      "name": "Regulatory Reporting Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "REGULATORY_REPORTING",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 16:00:00",
+          "eventType": "PROCESS",
+          "dependency": "CREDIT_RISK_ASSESSMENT",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["AxiomSL", "Wolters Kluwer OneSumX"]
+          }
+        },
+        {
+          "name": "REGULATORY_REPORTING",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 16:30:00",
+          "eventType": "PROCESS",
+          "dependency": "CREDIT_RISK_ASSESSMENT",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["AxiomSL", "Wolters Kluwer OneSumX"]
+          }
+        }
+      ],
+      "dependencies": [
+        "CREDIT_RISK_ASSESSMENT"
+      ],
+      "nextSystems": [
+        "Financial Reporting Systems"
+      ]
+    },
+    {
+      "name": "Financial Reporting Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "FINANCIAL_REPORTING",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 17:00:00",
+          "eventType": "PROCESS",
+          "dependency": "FINANCIAL_AGGREGATION",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Hyperion Financial Management", "Cognos"]
+          }
+        },
+        {
+          "name": "FINANCIAL_REPORTING",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 17:30:00",
+          "eventType": "PROCESS",
+          "dependency": "FINANCIAL_AGGREGATION",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["Hyperion Financial Management", "Cognos"]
+          }
+        }
+      ],
+      "dependencies": [
+        "FINANCIAL_AGGREGATION"
+      ],
+      "nextSystems": [
+        "Investor Reporting Systems"
+      ]
+    },
+    {
+      "name": "Investor Reporting Systems",
+      "type": "Internal",
+      "events": [
+        {
+          "name": "INVESTOR_REPORTING",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 18:00:00",
+          "eventType": "PROCESS",
+          "dependency": "FINANCIAL_REPORTING",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["BlackRock Aladdin", "Proprietary Portals"]
+          }
+        },
+        {
+          "name": "INVESTOR_REPORTING",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 18:30:00",
+          "eventType": "PROCESS",
+          "dependency": "FINANCIAL_REPORTING",
+          "dependencyStatus": "SUCCESS",
+          "details": {
+            "systems": ["BlackRock Aladdin", "Proprietary Portals"]
+          }
+        }
+      ],
+      "dependencies": [
+        "FINANCIAL_REPORTING"
+      ]
+    }
+  ]
+}

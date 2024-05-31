@@ -67,13 +67,17 @@
           "name": "FINANCE_REPORT_READY",
           "status": "STARTED",
           "expectedTime": "BUSINESS_DATE + 21:00:00",
-          "eventType": "DATABASE"
+          "eventType": "DATABASE",
+          "dependency": "BOOK_OWNER_SIGN_OFF",
+          "dependencyStatus": "SUCCESS"
         },
         {
           "name": "FINANCE_REPORT_READY",
           "status": "SUCCESS",
           "expectedTime": "BUSINESS_DATE + 21:30:00",
-          "eventType": "DATABASE"
+          "eventType": "DATABASE",
+          "dependency": "BOOK_OWNER_SIGN_OFF",
+          "dependencyStatus": "SUCCESS"
         }
       ],
       "dependencies": [
@@ -88,13 +92,17 @@
           "name": "MARKET_RISK_REPORT_READY",
           "status": "STARTED",
           "expectedTime": "BUSINESS_DATE + 21:00:00",
-          "eventType": "DATABASE"
+          "eventType": "DATABASE",
+          "dependency": "BOOK_OWNER_SIGN_OFF",
+          "dependencyStatus": "SUCCESS"
         },
         {
           "name": "MARKET_RISK_REPORT_READY",
           "status": "SUCCESS",
           "expectedTime": "BUSINESS_DATE + 21:30:00",
-          "eventType": "DATABASE"
+          "eventType": "DATABASE",
+          "dependency": "BOOK_OWNER_SIGN_OFF",
+          "dependencyStatus": "SUCCESS"
         }
       ],
       "dependencies": [
@@ -109,13 +117,17 @@
           "name": "CREDIT_RISK_REPORT_READY",
           "status": "STARTED",
           "expectedTime": "BUSINESS_DATE + 21:00:00",
-          "eventType": "DATABASE"
+          "eventType": "DATABASE",
+          "dependency": "BOOK_OWNER_SIGN_OFF",
+          "dependencyStatus": "SUCCESS"
         },
         {
           "name": "CREDIT_RISK_REPORT_READY",
           "status": "SUCCESS",
           "expectedTime": "BUSINESS_DATE + 21:30:00",
-          "eventType": "DATABASE"
+          "eventType": "DATABASE",
+          "dependency": "BOOK_OWNER_SIGN_OFF",
+          "dependencyStatus": "SUCCESS"
         }
       ],
       "dependencies": [
