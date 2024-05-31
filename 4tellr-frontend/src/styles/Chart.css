@@ -1,0 +1,11 @@
+/* Chart.css */
+.custom-tooltip {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.recharts-symbols {
+  fill: inherit; /* Ensure the fill color is inherited from the data */
+}

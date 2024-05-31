@@ -8,7 +8,7 @@ class Validator:
 class CommonFieldValidator(Validator):
     required_fields = [
         'businessDate', 'eventName', 'eventType', 'batchOrRealtime',
-        'timestamp', 'eventStatus', 'resource', 'details'
+        'eventTime', 'eventStatus', 'resource', 'details'
     ]
 
     def validate(self, message):

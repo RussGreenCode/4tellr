@@ -1,12 +1,12 @@
 // src/components/MainContent.js
 import React from 'react';
-import ChartComponent from './ChartComponent';
+import EventFetcher from './EventFetcher';
 import '../styles/App.css';
 
 const MainContent = ({businessDate}) => {
   return (
     <div className="main-content">
-            <ChartComponent businessDate={businessDate} />
+            <EventFetcher businessDate={businessDate} />
     </div>
   );
 };

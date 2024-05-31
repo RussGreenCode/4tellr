@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ChartComponent from './ChartComponent';
+import moment from 'moment';
 
 const EventFetcher = ({ businessDate }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.error('useEffect being called:');
+    console.log('useEffect called with businessDate:', businessDate);
 
-    const businessDate = '2024-05-24';
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/events', {
+        console.log('Fetching events for businessDate:', businessDate);
+        const response = await axios.get('http://127.0.0.1:5000/api/chart_data', {
           params: { businessDate }
         });
+        console.log('Fetched events response:', response.data);
         setEvents(response.data);
         setLoading(false);
       } catch (error) {
@@ -27,12 +29,30 @@ const EventFetcher = ({ businessDate }) => {
   }, [businessDate]);
 
   const transformDataForChart = (events) => {
-    return events.map(event => ({
-      primary: new Date(event.timestamp), // x-axis
-      secondary: event.eventName,         // y-axis
-      radius: 5,                          // size of the bubble
-      originalDatum: event                // original event data for tooltip
-    }));
+    const currentTime = new Date();
+    return events.map(event => {
+      const eventTime = moment(event.TimeValue).toDate();
+
+      let color;
+      if (event.outcomeStatus !== 'N/A') {
+        color = event.outcomeStatus === 'NEW' ? 'white'
+              : event.outcomeStatus === 'ON_TIME' ? 'lightgreen'
+              : event.outcomeStatus === 'MEETS_SLO' ? 'darkgreen'
+              : event.outcomeStatus === 'MEETS_SLA' ? 'orange'
+              : 'red';
+      } else if (event.type === 'EXP') {
+        color = currentTime < eventTime ? 'grey' : 'red';
+      }
+
+      return {
+        type: event.type,
+        time: eventTime.getTime(),
+        event: event.eventName,
+        size: 5,
+        color,
+        yCoordinate: event.eventKey
+      };
+    });
   };
 
   if (loading) {

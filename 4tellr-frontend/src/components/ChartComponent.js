@@ -1,71 +1,76 @@
-// src/components/ChartComponent.js
 import React, { useMemo } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis } from 'recharts';
-import useEventData from './useEventData';
-import '../styles/App.css';
+import '../styles/Chart.css';
 
 const formatTime = (tick) => {
   const date = new Date(tick);
   return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
 };
 
-const roundToNearestHour = (timestamp, direction) => {
-  const date = new Date(timestamp);
-  if (direction === 'start') {
-    date.setMinutes(0, 0, 0);
-  } else {
-    date.setHours(date.getHours() + 1);
-    date.setMinutes(0, 0, 0);
-  }
-  return date.getTime();
-};
-
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
-    const { time, event, size } = payload[0].payload;
+    const { time, event, type } = payload[0].payload;
     return (
       <div className="custom-tooltip">
-        <p className="label">{`Event: ${event}`}</p>
+        <p className="label">{`Type: ${type}`}</p>
+        <p className="intro">{`Event: ${event}`}</p>
         <p className="intro">{`Time: ${formatTime(time)}`}</p>
       </div>
     );
   }
-
   return null;
 };
 
-const ChartComponent = ({ businessDate }) => {
-  const { data, loading, error } = useEventData(businessDate);
-
-  const transformedData = useMemo(() => {
-    if (data.length > 0) {
-      const sortedData = data[0].data.sort((a, b) => a.primary.getTime() - b.primary.getTime());
-      return sortedData.map((d, index) => ({
-        time: d.primary.getTime(),
-        event: d.secondary,
-        size: d.radius,
-        yCoordinate: index + 1 // Use an index for the y-axis
-      }));
+const getColor = (type, outcomeStatus) => {
+  if (type === 'EVT') {
+    switch (outcomeStatus) {
+      case 'NEW': return 'white';
+      case 'ON_TIME': return 'lightgreen';
+      case 'MEETS_SLO': return 'darkgreen';
+      case 'MEETS_SLA': return 'orange';
+      default: return 'red';
     }
-    return [];
+  } else {
+    return type === 'EXP' ? 'green' : (type === 'SLO' ? 'amber' : 'red');
+  }
+};
+
+const CustomShape = (props) => {
+  const { cx, cy, payload } = props;
+  let shape;
+
+  switch (payload.type) {
+    case 'EVT': shape = <circle cx={cx} cy={cy} r={5} fill={payload.color} />; break;
+    case 'EXP': shape = <rect x={cx - 5} y={cy - 5} width={10} height={10} fill={payload.color} />; break;
+    case 'SLO': shape = <path d={`M${cx},${cy - 5} L${cx - 5},${cy + 5} L${cx + 5},${cy + 5} Z`} fill={payload.color} />; break;
+    case 'SLA': shape = <rect x={cx - 5} y={cy - 5} width={10} height={10} fill={payload.color} transform={`rotate(45, ${cx}, ${cy})`} />; break;
+    default: shape = <circle cx={cx} cy={cy} r={5} fill="black" />;
+  }
+
+  return shape;
+};
+
+const ChartComponent = ({ data }) => {
+  const transformedData = useMemo(() => {
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.error('Invalid data:', data);
+      return [];
+    }
+    return data.flatMap(item => item.data);
   }, [data]);
 
   const yLabelMap = useMemo(() => {
     const map = {};
-    transformedData.forEach((d, index) => {
-      map[index + 1] = d.event;
+    transformedData.forEach(d => {
+      map[d.yCoordinate] = d.event;
     });
     return map;
   }, [transformedData]);
 
   const formatYAxis = (tick) => yLabelMap[tick] || tick;
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
+  if (!transformedData.length) {
+    return <div>No data available</div>;
   }
 
   const rawDomain = [
@@ -74,8 +79,8 @@ const ChartComponent = ({ businessDate }) => {
   ];
 
   const domain = [
-    roundToNearestHour(rawDomain[0], 'start'),
-    roundToNearestHour(rawDomain[1], 'end'),
+    Math.floor(rawDomain[0] / (60 * 60 * 1000)) * (60 * 60 * 1000),
+    Math.ceil(rawDomain[1] / (60 * 60 * 1000)) * (60 * 60 * 1000),
   ];
 
   const ticks = [];
@@ -85,9 +90,7 @@ const ChartComponent = ({ businessDate }) => {
 
   return (
     <ResponsiveContainer width="100%" height={500}>
-      <ScatterChart
-        margin={{ top: 20, right: 20, bottom: 20, left: 100 }} // Increased left margin
-      >
+      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 100 }}>
         <CartesianGrid />
         <XAxis
           type="number"
@@ -98,21 +101,36 @@ const ChartComponent = ({ businessDate }) => {
           ticks={ticks}
         />
         <YAxis
-          type="number"
+          type="category"
           dataKey="yCoordinate"
           name="Event"
           tickFormatter={formatYAxis}
-          tick={{ fontSize: 12, angle: -30, textAnchor: 'end' }} // Rotated labels
+          tick={{ fontSize: 12, angle: -30, textAnchor: 'end' }}
         />
         <ZAxis
           type="number"
           dataKey="size"
-          range={[10, 100]} // Adjust size range here to make dots smaller
+          range={[10, 100]}
           name="Size"
         />
         <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
-        <Legend />
-        <Scatter name="Events" data={transformedData} fill="#8884d8" />
+        <Legend
+          payload={[
+            { value: 'Event', type: 'circle', color: 'lightgreen' },
+            { value: 'Expectation', type: 'square', color: 'green' },
+            { value: 'SLO', type: 'triangle', color: 'amber' },
+            { value: 'SLA', type: 'diamond', color: 'red' }
+          ]}
+        />
+        {['EVT', 'EXP', 'SLO', 'SLA'].map(type => (
+          <Scatter
+            key={type}
+            name={type}
+            data={transformedData.filter(d => d.type === type)}
+            fill={({ payload }) => payload.color}
+            shape={<CustomShape />}
+          />
+        ))}
       </ScatterChart>
     </ResponsiveContainer>
   );

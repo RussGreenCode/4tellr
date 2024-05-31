@@ -1,422 +1,126 @@
 {
   "systems": [
     {
-      "name": "Market Data Providers",
+      "name": "Bloomberg",
       "type": "External",
-      "sources": [
-        "Bloomberg",
-        "Reuters"
-      ],
-      "dataTypes": [
+      "events": [
         {
-          "name": "Market Data",
-          "description": "Market Prices, Interest Rates, FX Rates, Commodity Prices",
-          "formats": ["CSV", "XML", "JSON"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Data Ingestion Layer",
-          "description": "Retrieve EoD Market Prices",
-          "events": [
-            {
-              "name": "SENDING_MARKET_DATA",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 18:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "SENDING_MARKET_DATA",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 18:30:00",
-              "eventType": "FILE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Trade Data from Exchanges",
-      "type": "External",
-      "dataTypes": [
-        {
-          "name": "Trade Data",
-          "description": "Trade Confirmations, Executions, Market Orders",
-          "formats": ["FIX Protocol", "CSV", "JSON"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Data Ingestion Layer",
-          "description": "Receive Trade Data",
-          "events": [
-            {
-              "name": "SENDING_TRADE_DATA",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 19:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "SENDING_TRADE_DATA",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 19:30:00",
-              "eventType": "FILE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Counterparty Data",
-      "type": "External",
-      "dataTypes": [
-        {
-          "name": "Counterparty Data",
-          "description": "Counterparty Details, Settlement Instructions",
-          "formats": ["CSV", "XML"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Data Ingestion Layer",
-          "description": "Receive Counterparty Data",
-          "events": [
-            {
-              "name": "SENDING_COUNTERPARTY_DATA",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 20:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "SENDING_COUNTERPARTY_DATA",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 20:30:00",
-              "eventType": "FILE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Data Ingestion Layer",
-      "type": "Internal",
-      "systems": ["Informatica", "Talend"],
-      "dataTypes": [
-        {
-          "name": "Normalized Data",
-          "description": "Normalized market data, trade data, and counterparty data",
-          "formats": ["CSV", "Parquet", "JSON"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Trade Processing System",
-          "description": "Process Normalized Trade Data",
-          "events": [
-            {
-              "name": "SENDING_NORMALIZED_DATA",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 21:00:00",
-              "eventType": "DATABASE"
-            },
-            {
-              "name": "SENDING_NORMALIZED_DATA",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 21:30:00",
-              "eventType": "DATABASE"
-            }
-          ]
+          "name": "END_OF_DAY_PRICES",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 18:00:00",
+          "eventType": "FILE"
         },
         {
-          "system": "Data Lake",
-          "description": "Store Raw and Processed Data",
-          "events": [
-            {
-              "name": "SENDING_RAW_PROCESSED_DATA",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 22:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "SENDING_RAW_PROCESSED_DATA",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 22:30:00",
-              "eventType": "FILE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Trade Processing System",
-      "type": "Internal",
-      "systems": ["OMS", "TMS"],
-      "dataTypes": [
-        {
-          "name": "Trade Data",
-          "description": "Validated and enriched trade data",
-          "formats": ["JSON", "XML"]
+          "name": "END_OF_DAY_PRICES",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 18:30:00",
+          "eventType": "FILE"
         }
       ],
       "nextSystems": [
+        "Equities Platform"
+      ]
+    },
+    {
+      "name": "Equities Platform",
+      "type": "Internal",
+      "events": [
         {
-          "system": "Risk Management System",
-          "description": "Send Validated Trade Data",
-          "events": [
-            {
-              "name": "SENDING_TRADE_DATA",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 23:00:00",
-              "eventType": "DATABASE"
-            },
-            {
-              "name": "SENDING_TRADE_DATA",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 23:30:00",
-              "eventType": "DATABASE"
-            }
-          ]
+          "name": "EOD_BOOK_CLOSE",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 19:00:00",
+          "eventType": "PROCESS"
         },
         {
-          "system": "Sub-Ledger System",
-          "description": "Post Trades to Sub-Ledger",
-          "events": [
-            {
-              "name": "SENDING_TRADE_DATA_TO_SUB_LEDGER",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 24:00:00",
-              "eventType": "DATABASE"
-            },
-            {
-              "name": "SENDING_TRADE_DATA_TO_SUB_LEDGER",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 24:30:00",
-              "eventType": "DATABASE"
-            }
-          ]
+          "name": "EOD_BOOK_CLOSE",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 19:30:00",
+          "eventType": "PROCESS"
         },
         {
-          "system": "Data Lake",
-          "description": "Store Processed Trade Data",
-          "events": [
-            {
-              "name": "SENDING_PROCESSED_TRADE_DATA",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 25:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "SENDING_PROCESSED_TRADE_DATA",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 25:30:00",
-              "eventType": "FILE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Risk Management System",
-      "type": "Internal",
-      "systems": ["Murex", "Calypso"],
-      "dataTypes": [
-        {
-          "name": "Risk Metrics",
-          "description": "Calculated risk metrics and stress testing results",
-          "formats": ["JSON", "XML", "Parquet"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Data Lake",
-          "description": "Store Risk Metrics",
-          "events": [
-            {
-              "name": "SENDING_RISK_METRICS",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 26:00:00",
-              "eventType": "DATABASE"
-            },
-            {
-              "name": "SENDING_RISK_METRICS",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 26:30:00",
-              "eventType": "DATABASE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Sub-Ledger System",
-      "type": "Internal",
-      "systems": ["Oracle Financials", "SAP"],
-      "dataTypes": [
-        {
-          "name": "Ledger Entries",
-          "description": "Ledger entries and trade postings",
-          "formats": ["JSON", "XML", "CSV"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Data Lake",
-          "description": "Store Ledger Entries",
-          "events": [
-            {
-              "name": "SENDING_LEDGER_ENTRIES",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 27:00:00",
-              "eventType": "DATABASE"
-            },
-            {
-              "name": "SENDING_LEDGER_ENTRIES",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 27:30:00",
-              "eventType": "DATABASE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Data Lake",
-      "type": "Internal",
-      "systems": ["Hadoop", "Amazon S3"],
-      "dataTypes": [
-        {
-          "name": "All Data",
-          "description": "Raw and processed data for analytics and reporting",
-          "formats": ["Parquet", "ORC", "CSV", "JSON"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Data Warehouse",
-          "description": "Move Data for Structured Storage",
-          "events": [
-            {
-              "name": "MOVING_DATA_TO_WAREHOUSE",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 28:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "MOVING_DATA_TO_WAREHOUSE",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 28:30:00",
-              "eventType": "FILE"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Data Warehouse",
-      "type": "Internal",
-      "systems": ["Amazon Redshift", "Snowflake"],
-      "dataTypes": [
-        {
-          "name": "Aggregated Data",
-          "description": "Structured and aggregated data for reporting and analytics",
-          "formats": ["Parquet", "ORC", "CSV", "JSON"]
-        }
-      ],
-      "nextSystems": [
-        {
-          "system": "Customer Reports",
-          "description": "Generate Customer Reports",
-          "events": [
-            {
-              "name": "GENERATING_CUSTOMER_REPORTS",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 29:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "GENERATING_CUSTOMER_REPORTS",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 29:30:00",
-              "eventType": "FILE"
-            }
-          ]
+          "name": "BOOK_OWNER_SIGN_OFF",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 20:00:00",
+          "eventType": "PROCESS"
         },
         {
-          "system": "Financial Reports",
-          "description": "Generate Financial Reports",
-          "events": [
-            {
-              "name": "GENERATING_FINANCIAL_REPORTS",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 30:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "GENERATING_FINANCIAL_REPORTS",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 30:30:00",
-              "eventType": "FILE"
-            }
-          ]
-        },
-        {
-          "system": "Regulatory Reports",
-          "description": "Generate Regulatory Reports",
-          "events": [
-            {
-              "name": "GENERATING_REGULATORY_REPORTS",
-              "status": "STARTED",
-              "expectedTime": "BUSINESS_DATE + 31:00:00",
-              "eventType": "FILE"
-            },
-            {
-              "name": "GENERATING_REGULATORY_REPORTS",
-              "status": "SUCCESS",
-              "expectedTime": "BUSINESS_DATE + 31:30:00",
-              "eventType": "FILE"
-            }
-          ]
+          "name": "BOOK_OWNER_SIGN_OFF",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 20:30:00",
+          "eventType": "PROCESS"
         }
+      ],
+      "nextSystems": [
+        "Finance",
+        "Market Risk",
+        "Credit Risk"
+      ],
+      "dependencies": [
+        "END_OF_DAY_PRICES"
       ]
     },
     {
-      "name": "Customer Reports",
+      "name": "Finance",
       "type": "Internal",
-      "systems": ["Tableau", "Power BI"],
-      "dataTypes": [
+      "events": [
         {
-          "name": "Customer Reports",
-          "description": "Customer trade summaries, portfolio reports",
-          "formats": ["PDF", "Excel", "HTML"]
+          "name": "FINANCE_REPORT_READY",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 21:00:00",
+          "eventType": "DATABASE"
+        },
+        {
+          "name": "FINANCE_REPORT_READY",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 21:30:00",
+          "eventType": "DATABASE"
         }
       ],
-      "nextSystems": []
+      "dependencies": [
+        "BOOK_OWNER_SIGN_OFF"
+      ]
     },
     {
-      "name": "Financial Reports",
+      "name": "Market Risk",
       "type": "Internal",
-      "systems": ["SAP BPC", "Oracle Hyperion"],
-      "dataTypes": [
+      "events": [
         {
-          "name": "Financial Reports",
-          "description": "Financial statements and internal reports",
-          "formats": ["PDF", "Excel", "HTML"]
+          "name": "MARKET_RISK_REPORT_READY",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 21:00:00",
+          "eventType": "DATABASE"
+        },
+        {
+          "name": "MARKET_RISK_REPORT_READY",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 21:30:00",
+          "eventType": "DATABASE"
         }
       ],
-      "nextSystems": []
+      "dependencies": [
+        "BOOK_OWNER_SIGN_OFF"
+      ]
     },
     {
-      "name": "Regulatory Reports",
+      "name": "Credit Risk",
       "type": "Internal",
-      "systems": ["AxiomSL", "Wolters Kluwer"],
-      "dataTypes": [
+      "events": [
         {
-          "name": "Regulatory Reports",
-          "description": "Regulatory filings and compliance reports",
-          "formats": ["XML", "PDF", "Excel"]
+          "name": "CREDIT_RISK_REPORT_READY",
+          "status": "STARTED",
+          "expectedTime": "BUSINESS_DATE + 21:00:00",
+          "eventType": "DATABASE"
+        },
+        {
+          "name": "CREDIT_RISK_REPORT_READY",
+          "status": "SUCCESS",
+          "expectedTime": "BUSINESS_DATE + 21:30:00",
+          "eventType": "DATABASE"
         }
       ],
-      "nextSystems": []
+      "dependencies": [
+        "BOOK_OWNER_SIGN_OFF"
+      ]
     }
   ]
 }

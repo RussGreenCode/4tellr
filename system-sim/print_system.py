@@ -1,7 +1,7 @@
 import json
 
 # Load the JSON structure from a file or directly from the string
-with open('systems_definition.json', 'r') as file:
+with open('./system_definition.json', 'r') as file:
     systems_flow = json.load(file)
 
 flow_diagram = []
