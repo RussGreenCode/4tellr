@@ -268,7 +268,10 @@ class DynamoDBHelper:
         stdev = statistics.stdev(times_in_seconds)
 
         filtered_times = [t for t in times_in_seconds if abs(t - mean) < 2 * stdev]
-        avg_seconds = int(statistics.mean(filtered_times))
+        if filtered_times and len(filtered_times) > 1:
+            avg_seconds = int(statistics.mean(filtered_times))
+        else:
+            avg_seconds = mean
 
         avg_time = datetime.min + timedelta(seconds=avg_seconds)
         avg_time_utc = avg_time.time().replace(tzinfo=utc)  # Ensure the time is in UTC
@@ -281,21 +284,27 @@ class DynamoDBHelper:
 
         grouped_events = {}
         for event in events:
-            key = (event['eventName'], event['eventStatus'])
-            if key not in grouped_events:
-                grouped_events[key] = []
-            grouped_events[key].append(event)
+            if event['type'] == 'event':
+                key = (event['eventName'], event['eventStatus'])
+                if key not in grouped_events:
+                    grouped_events[key] = []
+                grouped_events[key].append(event)
 
         for (event_name, event_status), group in grouped_events.items():
-            expected_time = self.calculate_expected_time(group)
-            if expected_time:
-                self.stats_table.put_item(
-                    Item={
-                        'event_name_and_status': event_name + '#' + event_status,
-                        'expected_time': expected_time.isoformat(),
-                        'last_updated': datetime.now().isoformat()
-                    }
-                )
+            try:
+                expected_time = self.calculate_expected_time(group)
+                self.logger.info(f'Storing {event_name}#{event_status} for expected_time: {expected_time.isoformat()}')
+                if expected_time:
+
+                    self.stats_table.put_item(
+                        Item={
+                            'event_name_and_status': event_name + '#' + event_status,
+                            'expected_time': expected_time.isoformat(),
+                            'last_updated': datetime.now().isoformat()
+                        }
+                    )
+            except ValueError as e:
+                self.logger.error(f'Failed to update expected times for {event_name}#{event_status}: {e}')
 
     def get_expected_time(self, event_name, event_status):
         response = self.stats_table.get_item(

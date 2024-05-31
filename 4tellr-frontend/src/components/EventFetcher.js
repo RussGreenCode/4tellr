@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ChartComponent from './ChartComponent';
 import moment from 'moment';
+import { Box, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 
 const EventFetcher = ({ businessDate }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sortCriterion, setSortCriterion] = useState('EXP'); // Default sorting criterion
 
   useEffect(() => {
     console.log('useEffect called with businessDate:', businessDate);
@@ -50,7 +52,8 @@ const EventFetcher = ({ businessDate }) => {
         event: event.eventName,
         size: 5,
         color,
-        yCoordinate: event.eventKey
+        yCoordinate: event.eventKey,
+        expectationTime: event.type === 'EXP' ? eventTime.getTime() : null // Add expectation time for sorting
       };
     });
   };
@@ -64,7 +67,21 @@ const EventFetcher = ({ businessDate }) => {
   console.log('Transformed data for chart:', data);
 
   return (
-    <ChartComponent data={[{ label: 'Events', data }]} />
+    <Box>
+      <FormControl>
+        <InputLabel id="sort-criterion-label">Sort By</InputLabel>
+        <Select
+          labelId="sort-criterion-label"
+          id="sort-criterion"
+          value={sortCriterion}
+          onChange={(e) => setSortCriterion(e.target.value)}
+        >
+          <MenuItem value="EXP">Expectation Time</MenuItem>
+          <MenuItem value="EVT">Event Time</MenuItem>
+        </Select>
+      </FormControl>
+      <ChartComponent data={[{ label: 'Events', data }]} sortCriterion={sortCriterion} />
+    </Box>
   );
 };
 

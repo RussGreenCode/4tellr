@@ -23,7 +23,7 @@ def main():
     api_helper.add_validator(DatabaseEventValidator())
 
     # Load systems flow from JSON
-    with open('system_definition.json', 'r') as file:
+    with open('bank.json', 'r') as file:
         systems_flow = json.load(file)
 
     event_simulator = EventSimulator(api_helper, systems_flow, late_delta, early_delta, business_days, starting_date)

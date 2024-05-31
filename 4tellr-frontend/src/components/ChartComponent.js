@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis } from 'recharts';
+import React, { useMemo, useState, useEffect } from 'react';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis, ReferenceLine } from 'recharts';
 import '../styles/Chart.css';
 
 const formatTime = (tick) => {
   const date = new Date(tick);
-  return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+  return `${date.getUTCHours()}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
 };
 
 const CustomTooltip = ({ active, payload }) => {
@@ -50,14 +50,30 @@ const CustomShape = (props) => {
   return shape;
 };
 
-const ChartComponent = ({ data }) => {
+const ChartComponent = ({ data, sortCriterion }) => {
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, []);
+
   const transformedData = useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) {
       console.error('Invalid data:', data);
       return [];
     }
-    return data.flatMap(item => item.data);
-  }, [data]);
+    return data.flatMap(item => item.data).sort((a, b) => {
+      if (sortCriterion === 'EVT') {
+        return a.time - b.time;
+      } else if (sortCriterion === 'EXP') {
+        return (a.expectationTime || a.time) - (b.expectationTime || b.time);
+      }
+      return 0;
+    });
+  }, [data, sortCriterion]);
 
   const yLabelMap = useMemo(() => {
     const map = {};
@@ -131,6 +147,7 @@ const ChartComponent = ({ data }) => {
             shape={<CustomShape />}
           />
         ))}
+        <ReferenceLine x={currentTime} stroke="red" label="Current Time" />
       </ScatterChart>
     </ResponsiveContainer>
   );
