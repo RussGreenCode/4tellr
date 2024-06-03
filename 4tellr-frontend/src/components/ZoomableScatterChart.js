@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis, ReferenceLine } from 'recharts';
 import '../styles/Chart.css';
 
@@ -14,7 +14,7 @@ const CustomTooltip = ({ active, payload }) => {
       <div className="custom-tooltip">
         <p className="label">{`Type: ${type}`}</p>
         <p className="intro">{`Event: ${event}`}</p>
-        <p className="intro">{`Y-Coordinate: ${yCoordinate}`}</p>
+        <p className="intro">{`Y Coordinate: ${yCoordinate}`}</p>
         <p className="intro">{`Time: ${formatTime(time)}`}</p>
       </div>
     );
@@ -51,8 +51,11 @@ const CustomShape = (props) => {
   return shape;
 };
 
-const ChartComponent = ({ data, sortCriterion }) => {
+const ZoomableScatterChart = ({ data, sortCriterion }) => {
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [zoomDomain, setZoomDomain] = useState([null, null]);
+
+  const chartRef = useRef();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,16 +64,33 @@ const ChartComponent = ({ data, sortCriterion }) => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleWheel = (event) => {
+    if (event.deltaY < 0) {
+      setZoomDomain(([min, max]) => [min, max - 1]);
+    } else {
+      setZoomDomain(([min, max]) => [min, max + 1]);
+    }
+  };
+
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (chart) {
+      chart.addEventListener('wheel', handleWheel);
+    }
+    return () => {
+      if (chart) {
+        chart.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, []);
+
   const transformedData = useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) {
       console.error('Invalid data:', data);
       return [];
     }
-
-    const yCoordinateMap = {};
-    let yCounter = 0;
-
-    const sortedData = data.flatMap(item => item.data).sort((a, b) => {
+    return data.flatMap(item => item.data).sort((a, b) => {
       if (sortCriterion === 'EVT') {
         return a.time - b.time;
       } else if (sortCriterion === 'EXP') {
@@ -78,24 +98,12 @@ const ChartComponent = ({ data, sortCriterion }) => {
       }
       return 0;
     });
-
-    sortedData.forEach(item => {
-      if (!(item.yCoordinate in yCoordinateMap)) {
-        yCounter += 1;
-        yCoordinateMap[item.yCoordinate] = yCounter;
-      }
-    });
-
-    return sortedData.map(item => ({
-      ...item,
-      yValue: yCoordinateMap[item.yCoordinate]
-    }));
   }, [data, sortCriterion]);
 
   const yLabelMap = useMemo(() => {
     const map = {};
     transformedData.forEach(d => {
-      map[d.yValue] = d.yCoordinate;
+      map[d.yCoordinate] = d.event;
     });
     return map;
   }, [transformedData]);
@@ -111,10 +119,10 @@ const ChartComponent = ({ data, sortCriterion }) => {
     Math.max(...transformedData.map(d => d.time)),
   ];
 
-  const domain = [
+  const domain = zoomDomain[0] === null || zoomDomain[1] === null ? [
     Math.floor(rawDomain[0] / (60 * 60 * 1000)) * (60 * 60 * 1000),
     Math.ceil(rawDomain[1] / (60 * 60 * 1000)) * (60 * 60 * 1000),
-  ];
+  ] : zoomDomain;
 
   const ticks = [];
   for (let tick = domain[0]; tick <= domain[1]; tick += 60 * 60 * 1000) {
@@ -123,7 +131,7 @@ const ChartComponent = ({ data, sortCriterion }) => {
 
   return (
     <ResponsiveContainer width="100%" height={500}>
-      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 100 }}>
+      <ScatterChart ref={chartRef} margin={{ top: 20, right: 20, bottom: 20, left: 100 }}>
         <CartesianGrid />
         <XAxis
           type="number"
@@ -134,8 +142,8 @@ const ChartComponent = ({ data, sortCriterion }) => {
           ticks={ticks}
         />
         <YAxis
-          type="number"
-          dataKey="yValue"
+          type="category"
+          dataKey="yCoordinate"
           name="Event"
           tickFormatter={formatYAxis}
           tick={{ fontSize: 12, angle: -30, textAnchor: 'end' }}
@@ -170,4 +178,4 @@ const ChartComponent = ({ data, sortCriterion }) => {
   );
 };
 
-export default ChartComponent;
+export default ZoomableScatterChart;

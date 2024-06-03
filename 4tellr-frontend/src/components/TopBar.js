@@ -1,5 +1,5 @@
 // src/components/TopBar.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { AppBar, Toolbar, Box, Button, Popover, TextField, Typography, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Brightness4, Brightness7 } from '@mui/icons-material';
@@ -7,15 +7,17 @@ import axios from 'axios';
 import SearchBar from "./SearchBar";
 import DateSelect from "./DateSelect";
 import { useThemeContext } from '../contexts/ThemeContext';
+import { EventsContext } from '../contexts/EventsContext';
 import '../styles/App.css';
 
-const TopBar = ({ businessDate, setBusinessDate }) => {
+const TopBar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { mode, toggleTheme } = useThemeContext();
+  const { businessDate, setBusinessDate } = useContext(EventsContext);
 
   const handleLoginClick = (event) => {
     setAnchorEl(event.currentTarget);

@@ -11,6 +11,7 @@ const DateSelect = ({ selectedDate, setSelectedDate }) => {
 
   const changeDateByDays = (days) => {
     const currentDate = new Date(selectedDate);
+    console.log(currentDate);
     currentDate.setDate(currentDate.getDate() + days);
     setSelectedDate(currentDate.toISOString().split('T')[0]);
   };

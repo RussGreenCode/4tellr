@@ -8,6 +8,7 @@ import Overview from './pages/Overview';
 import Metrics from './pages/Metrics';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
+import { EventsProvider } from './contexts/EventsContext';
 import { ThemeContextProvider } from './contexts/ThemeContext';
 import './styles/App.css';
 
@@ -15,27 +16,29 @@ function App() {
   const [businessDate, setBusinessDate] = useState('2024-05-24'); // Example date
 
   return (
-    <ThemeContextProvider>
-      <CssBaseline />
-      <Router>
-        <Box>
-          <TopBar businessDate={businessDate} setBusinessDate={setBusinessDate} />
-          <Grid container>
-            <Grid item xs={2}>
-              <Menu />
+    <EventsProvider>
+      <ThemeContextProvider>
+        <CssBaseline />
+        <Router>
+          <Box>
+            <TopBar businessDate={businessDate} setBusinessDate={setBusinessDate} />
+            <Grid container>
+              <Grid item xs={2}>
+                <Menu />
+              </Grid>
+              <Grid item xs={10} className="chart-container">
+                <Routes>
+                  <Route path="/" element={<Overview businessDate={businessDate} />} />
+                  <Route path="/metrics" element={<Metrics />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/admin" element={<Admin />} />
+                </Routes>
+              </Grid>
             </Grid>
-            <Grid item xs={10} className="chart-container">
-              <Routes>
-                <Route path="/" element={<Overview businessDate={businessDate} />} />
-                <Route path="/metrics" element={<Metrics />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/admin" element={<Admin />} />
-              </Routes>
-            </Grid>
-          </Grid>
-        </Box>
-      </Router>
-    </ThemeContextProvider>
+          </Box>
+        </Router>
+      </ThemeContextProvider>
+    </EventsProvider>
   );
 }
 

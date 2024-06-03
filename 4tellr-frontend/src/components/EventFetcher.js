@@ -1,34 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import ChartComponent from './ChartComponent';
+import { EventsContext } from '../contexts/EventsContext';
 import moment from 'moment';
 import { Box, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 
+
+
 const EventFetcher = ({ businessDate }) => {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { events, loading } = useContext(EventsContext);
   const [sortCriterion, setSortCriterion] = useState('EXP'); // Default sorting criterion
-
-  useEffect(() => {
-    console.log('useEffect called with businessDate:', businessDate);
-
-    const fetchEvents = async () => {
-      try {
-        console.log('Fetching events for businessDate:', businessDate);
-        const response = await axios.get('http://127.0.0.1:5000/api/chart_data', {
-          params: { businessDate }
-        });
-        console.log('Fetched events response:', response.data);
-        setEvents(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, [businessDate]);
 
   const transformDataForChart = (events) => {
     const currentTime = new Date();
@@ -45,6 +26,7 @@ const EventFetcher = ({ businessDate }) => {
       } else if (event.type === 'EXP') {
         color = currentTime < eventTime ? 'grey' : 'red';
       }
+
 
       return {
         type: event.type,
