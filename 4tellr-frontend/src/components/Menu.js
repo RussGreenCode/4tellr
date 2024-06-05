@@ -1,8 +1,9 @@
-// src/components/Menu.js
-import React from 'react';
-import { List, ListItem, ListItemText, Box } from '@mui/material';
+import React, { useContext } from 'react';
+import { List, ListItem, ListItemText, Box, ListSubheader } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { EventsContext } from '../contexts/EventsContext';
 import '../styles/App.css';
+import { exportToCSV } from '../utils/exportUtils';
 
 const menuItems = [
   { name: 'Overview', link: '/' },
@@ -11,16 +12,35 @@ const menuItems = [
   { name: 'Admin', link: '/admin' },
 ];
 
-const Menu = () => (
-  <Box>
-    <List>
-      {menuItems.map((item, index) => (
-        <ListItem button component={Link} to={item.link} key={index}>
-          <ListItemText primary={item.name} />
+const Menu = () => {
+  const { events, filteredEvents } = useContext(EventsContext);
+
+  const handleExportFull = () => {
+    exportToCSV(events, 'full_dataset.csv');
+  };
+
+  const handleExportFiltered = () => {
+    exportToCSV(filteredEvents, 'filtered_dataset.csv');
+  };
+
+  return (
+    <Box>
+      <List>
+        {menuItems.map((item, index) => (
+          <ListItem button component={Link} to={item.link} key={index}>
+            <ListItemText primary={item.name} />
+          </ListItem>
+        ))}
+        <ListSubheader>Export</ListSubheader>
+        <ListItem button onClick={handleExportFull}>
+          <ListItemText primary="Export Full Dataset" />
         </ListItem>
-      ))}
-    </List>
-  </Box>
-);
+        <ListItem button onClick={handleExportFiltered}>
+          <ListItemText primary="Export Filtered Dataset" />
+        </ListItem>
+      </List>
+    </Box>
+  );
+};
 
 export default Menu;

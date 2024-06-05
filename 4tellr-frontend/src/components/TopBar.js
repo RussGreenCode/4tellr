@@ -17,7 +17,7 @@ const TopBar = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { mode, toggleTheme } = useThemeContext();
-  const { businessDate, setBusinessDate } = useContext(EventsContext);
+  const { businessDate, setBusinessDate, setSearchCriteria } = useContext(EventsContext);
 
   const handleLoginClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -57,7 +57,7 @@ const TopBar = () => {
     <AppBar position="static" color="default">
       <Toolbar style={{ display: 'flex', alignItems: 'center' }}>
         <DateSelect selectedDate={businessDate} setSelectedDate={setBusinessDate} />
-        <SearchBar />
+        <SearchBar setSearchEntry={setSearchCriteria}/>
         <Box ml="auto" display="flex" alignItems="center">
           <IconButton onClick={toggleTheme} color="inherit">
             {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}

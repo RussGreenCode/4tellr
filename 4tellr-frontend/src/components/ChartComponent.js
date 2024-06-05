@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis, ReferenceLine } from 'recharts';
 import '../styles/Chart.css';
+import {EventsContext} from "../contexts/EventsContext";
+
 
 const formatTime = (tick) => {
   const date = new Date(tick);
@@ -53,6 +55,7 @@ const CustomShape = (props) => {
 
 const ChartComponent = ({ data, sortCriterion }) => {
   const [currentTime, setCurrentTime] = useState(Date.now());
+
 
   useEffect(() => {
     const interval = setInterval(() => {

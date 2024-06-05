@@ -5,8 +5,29 @@ export const EventsContext = createContext();
 
 export const EventsProvider = ({ children }) => {
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [businessDate, setBusinessDate] = useState('2024-05-27'); // Default date
+  const [searchCriteria, setSearchCriteria] = useState({}); // Initialize search criteria
+  const [selectedEvent, setSelectedEvent] = useState({}); // Initialize search criteria
+
+  const filterEvents = (events, criteria) => {
+    // Example filtering logic based on search criteria
+    return events.filter(event => {
+      let matches = true;
+      if (criteria.eventType) {
+        matches = matches && event.type === criteria.eventType;
+      }
+      if (criteria.eventStatus) {
+        matches = matches && event.outcomeStatus === criteria.eventStatus;
+      }
+      if (criteria.eventKey) {
+        matches = matches && event.eventKey.toLowerCase().includes(criteria.eventKey.toLowerCase());
+      }
+      // Add more filtering conditions here as needed
+      return matches;
+    });
+  };
 
   const fetchEvents = async (date) => {
     try {
@@ -31,8 +52,14 @@ export const EventsProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [businessDate]);
 
+  useEffect(() => {
+    // Filter events whenever events or search criteria change
+    setFilteredEvents(filterEvents(events, searchCriteria));
+    console.log('Filtered events:', filteredEvents);
+  }, [events, searchCriteria]);
+
   return (
-    <EventsContext.Provider value={{ events, fetchEvents, loading, setBusinessDate, businessDate }}>
+    <EventsContext.Provider value={{ filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,  setSearchCriteria, selectedEvent, setSelectedEvent}}>
       {children}
     </EventsContext.Provider>
   );

@@ -8,12 +8,12 @@ import { Box, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/
 
 
 const EventFetcher = ({ businessDate }) => {
-  const { events, loading } = useContext(EventsContext);
+  const { filteredEvents, loading } = useContext(EventsContext);
   const [sortCriterion, setSortCriterion] = useState('EXP'); // Default sorting criterion
 
-  const transformDataForChart = (events) => {
+  const transformDataForChart = (filteredEvents) => {
     const currentTime = new Date();
-    return events.map(event => {
+    return filteredEvents.map(event => {
       const eventTime = moment(event.TimeValue).toDate();
 
       let color;
@@ -44,7 +44,7 @@ const EventFetcher = ({ businessDate }) => {
     return <div>Loading...</div>;
   }
 
-  const data = transformDataForChart(events);
+  const data = transformDataForChart(filteredEvents);
 
   console.log('Transformed data for chart:', data);
 
