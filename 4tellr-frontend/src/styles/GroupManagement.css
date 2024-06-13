@@ -1,0 +1,29 @@
+/* src/styles/Group.css */
+.multi-select {
+  width: 100%;
+}
+
+.multi-select__control {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.multi-select__menu {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.multi-select__option--is-selected {
+  background-color: #1976d2;
+  color: white;
+}
+
+.multi-select__option--is-focused {
+  background-color: #bbdefb;
+  color: black;
+}
+
+.scrollable-list {
+  height: 300px; /* Set the desired fixed height */
+  overflow-y: auto; /* Enable vertical scrolling */
+}

@@ -10,6 +10,7 @@ export const EventsProvider = ({ children }) => {
   const [businessDate, setBusinessDate] = useState('2024-05-27'); // Default date
   const [searchCriteria, setSearchCriteria] = useState({}); // Initialize search criteria
   const [selectedEvent, setSelectedEvent] = useState({}); // Initialize search criteria
+  const [tabIndex, setTabIndex] = useState(0);
 
   const filterEvents = (events, criteria) => {
     // Example filtering logic based on search criteria
@@ -59,7 +60,7 @@ export const EventsProvider = ({ children }) => {
   }, [events, searchCriteria]);
 
   return (
-    <EventsContext.Provider value={{ filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,  setSearchCriteria, selectedEvent, setSelectedEvent}}>
+    <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,  setSearchCriteria, selectedEvent, setSelectedEvent, tabIndex, setTabIndex}}>
       {children}
     </EventsContext.Provider>
   );

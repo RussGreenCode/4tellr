@@ -37,6 +37,23 @@ def get_events_by_date_for_chart():
         return jsonify({'error': str(e)}), 500
 
 
+
+@app.route('/api/event_details', methods=['GET'])
+def get_event_details():
+    event_name = request.args.get('eventName')
+    event_status = request.args.get('eventStatus')
+
+    if not event_name or not event_status:
+        return jsonify({"error": "Missing required parameters"}), 400
+
+    try:
+        data = db_helper.get_monthly_events(event_name, event_status)
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
 @app.route('/api/events', methods=['POST'])
 def create_event():
     data = request.json
@@ -168,6 +185,77 @@ def get_expected_time(event_name, event_status):
         if not expected_time:
             return jsonify({'error': 'Expected time not found'}), 404
         return jsonify(expected_time), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/get_expectation_list', methods=['GET'])
+def get_expectation_list():
+    try:
+        items = db_helper.get_expectation_list()
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/get_groups', methods=['GET'])
+def get_groups():
+    try:
+
+        groups = db_helper.get_all_groups()
+        return jsonify(groups)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/save_group', methods=['POST'])
+def save_group():
+    try:
+        data = request.get_json()
+        group_name = data.get('name')
+        description = data.get('description')
+        events = data.get('events', [])
+
+        if not group_name or not events:
+            return jsonify({'error': 'Group name and events are required'}), 400
+
+        items = db_helper.save_group(group_name, events, description)
+        return jsonify({'message': 'Group saved successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/delete_group', methods=['POST'])
+def delete_group():
+    try:
+        data = request.get_json()
+        group_name = data.get('name')
+
+        if not group_name:
+            return jsonify({'error': 'Group name is required'}), 400
+
+        db_helper.delete_group(group_name)
+
+        return jsonify({'message': 'Group deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/get_group_details', methods=['POST'])
+def get_group_details():
+    try:
+        data = request.get_json()
+        group_name = data.get('name')
+
+        if not group_name:
+            return jsonify({'error': 'Group name is required'}), 400
+
+        group = db_helper.get_group_details(group_name)
+
+        if not group:
+            return jsonify({'error': 'Group not found'}), 404
+
+        return jsonify(group), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

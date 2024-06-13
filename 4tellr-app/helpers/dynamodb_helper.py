@@ -28,6 +28,7 @@ class DynamoDBHelper:
             )
         self.event_table = self.dynamodb.Table(config['EVENT_TABLE'])
         self.stats_table = self.dynamodb.Table(config['STATS_TABLE'])
+        self.monitoring_groups_table = self.dynamodb.Table(config['MONITORING_GROUPS_TABLE'])
 
         # Set up logging
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -427,6 +428,142 @@ class DynamoDBHelper:
                 self.logger.error(f'Error scanning items for business date {business_date} - {str(e)}')
                 raise
 
+
+    def get_monthly_events(self, event_name, event_status):
+
+        # Calculate the start date (one month ago from today)
+        end_date = datetime.utcnow()
+        start_date = end_date - timedelta(days=30)
+
+        # Convert dates to string format if required
+        start_date_str = start_date.strftime('%Y-%m-%d')
+        end_date_str = end_date.strftime('%Y-%m-%d')
+
+        # Query parameters
+        sk_prefix = f'EVT#{event_name}#{event_status}'
+
+        # Perform the query for each day in the date range
+        all_events = []
+        current_date = start_date
+        while current_date <= end_date:
+            current_date_str = current_date.strftime('%Y-%m-%d')
+            response = self.event_table.query(
+                KeyConditionExpression=Key('businessDate').eq(current_date_str) & Key('eventId').begins_with(sk_prefix)
+            )
+            all_events.extend(response.get('Items', []))
+            current_date += timedelta(days=1)
+
+
+        return {
+            "events": all_events
+        }
+
+    def get_expectation_list(self):
+        # Perform a scan to get all items
+        response = self.stats_table.scan()
+        items = response['Items']
+
+        # Dictionary to keep track of the latest item for each eventNameAndStatus
+        latest_metrics = {}
+        for item in items:
+            key = item['event_name_and_status']
+            if key not in latest_metrics or item['last_updated'] > latest_metrics[key]['last_updated']:
+                latest_metrics[key] = item
+
+        # Return the latest metrics as a list
+        return list(latest_metrics.values())
+
+    def save_group(self, group_name, events, description):
+        if group_name and events is not None:
+            try:
+                response = self.monitoring_groups_table.put_item(
+                    Item={
+                        'group_name': group_name,
+                        'description': description,
+                        'events': events
+                    }
+                )
+                print(f"[INFO] Group '{group_name}' saved successfully.")
+                return response
+            except Exception as e:
+                print(f"[ERROR] Error saving group '{group_name}': {str(e)}")
+                return None
+        else:
+            print("[ERROR] 'group_name' and 'events' must not be None.")
+            return None
+
+    def update_group(self, group_name, new_events):
+        if group_name and new_events is not None:
+            try:
+                response = self.monitoring_groups_table.update_item(
+                    Key={
+                        'group_name': group_name
+                    },
+                    UpdateExpression="SET event_key = :e",
+                    ExpressionAttributeValues={
+                        ':e': new_events
+                    },
+                    ReturnValues="UPDATED_NEW"
+                )
+                print(f"[INFO] Group '{group_name}' updated successfully.")
+                return response
+            except Exception as e:
+                print(f"[ERROR] Error updating group '{group_name}': {str(e)}")
+                return None
+        else:
+            print("[ERROR] 'group_name' and 'new_events' must not be None.")
+            return None
+
+
+    def delete_group(self, group_name):
+        if group_name:
+            try:
+                response = self.monitoring_groups_table.delete_item(
+                    Key={'group_name': group_name}
+                )
+                print(f"[INFO] Group '{group_name}' deleted successfully.")
+                return response
+            except Exception as e:
+                print(f"[ERROR] Error deleting group '{group_name}': {str(e)}")
+                return None
+        else:
+            print("[ERROR] 'group_name' must not be None.")
+            return None
+
+    def get_all_groups(self):
+        try:
+            response = self.monitoring_groups_table.scan(
+                ProjectionExpression="group_name, description"
+            )
+            groups = [{'group_name': item['group_name'], 'description': item.get('description', '')} for item in
+                      response.get('Items', [])]
+            print(f"[INFO] Retrieved {len(groups)} groups.")
+            return groups
+        except Exception as e:
+            print(f"[ERROR] Error retrieving groups: {str(e)}")
+            return None
+
+    def get_group_details(self, group_name):
+        if group_name is not None:
+            try:
+                response = self.monitoring_groups_table.get_item(
+                    Key={
+                        'group_name': group_name
+                    }
+                )
+                if 'Item' in response:
+                    group = response['Item']
+                    print(f"[INFO] group '{group_name}' retrieved successfully.")
+                    return group
+                else:
+                    print(f"[INFO] No group found for group '{group_name}'.")
+                    return None
+            except Exception as e:
+                print(f"[ERROR] Error retrieving group '{group_name}': {str(e)}")
+                return None
+        else:
+            print("[ERROR] 'group_name' must not be None.")
+            return None
 
 def load_config(config_file):
     config = {}

@@ -32,6 +32,7 @@ const EventFetcher = ({ businessDate }) => {
         type: event.type,
         time: eventTime.getTime(),
         event: event.eventName,
+        status: event.eventStatus,
         size: 5,
         color,
         yCoordinate: event.eventKey,

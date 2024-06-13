@@ -1,8 +1,7 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ZAxis, ReferenceLine } from 'recharts';
+import { EventsContext } from '../contexts/EventsContext';
 import '../styles/Chart.css';
-import {EventsContext} from "../contexts/EventsContext";
-
 
 const formatTime = (tick) => {
   const date = new Date(tick);
@@ -55,7 +54,7 @@ const CustomShape = (props) => {
 
 const ChartComponent = ({ data, sortCriterion }) => {
   const [currentTime, setCurrentTime] = useState(Date.now());
-
+  const { setSelectedEvent, setTabIndex } = useContext(EventsContext);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -127,7 +126,7 @@ const ChartComponent = ({ data, sortCriterion }) => {
   return (
     <ResponsiveContainer width="100%" height={500}>
       <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 100 }}>
-        <CartesianGrid />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           type="number"
           dataKey="time"
@@ -165,6 +164,12 @@ const ChartComponent = ({ data, sortCriterion }) => {
             data={transformedData.filter(d => d.type === type)}
             fill={({ payload }) => payload.color}
             shape={<CustomShape />}
+            onClick={(event) => {
+              if (event && event.payload) {
+                setSelectedEvent(event.payload);
+                setTabIndex(1);
+              }
+            }}
           />
         ))}
         <ReferenceLine x={currentTime} stroke="red" label="Current Time" />
