@@ -1,197 +1,245 @@
-{
-  "ModelName": "4tellr",
-  "ModelMetadata": {
-    "Author": "Russell Green",
-    "DateCreated": "May 24, 2024, 12:25 PM",
-    "DateLastModified": "Jun 12, 2024, 02:08 PM",
-    "Description": "",
-    "AWSService": "Amazon DynamoDB",
-    "Version": "3.0"
-  },
-  "DataModel": [
-    {
-      "TableName": "event_details",
-      "KeyAttributes": {
-        "PartitionKey": {
-          "AttributeName": "businessDate",
-          "AttributeType": "S"
+  {
+    "ModelName": "4tellr",
+    "ModelMetadata": {
+      "Author": "Russell Green",
+      "DateCreated": "May 24, 2024, 12:25 PM",
+      "DateLastModified": "Jun 13, 2024, 01:17 PM",
+      "Description": "",
+      "AWSService": "Amazon DynamoDB",
+      "Version": "3.0"
+    },
+    "DataModel": [
+      {
+        "TableName": "event_details",
+        "KeyAttributes": {
+          "PartitionKey": {
+            "AttributeName": "businessDate",
+            "AttributeType": "S"
+          },
+          "SortKey": {
+            "AttributeName": "eventId",
+            "AttributeType": "S"
+          }
         },
-        "SortKey": {
-          "AttributeName": "eventId",
-          "AttributeType": "S"
-        }
-      },
-      "NonKeyAttributes": [
-        {
-          "AttributeName": "eventStatus",
-          "AttributeType": "S"
-        },
-        {
-          "AttributeName": "eventName",
-          "AttributeType": "S"
-        },
-        {
-          "AttributeName": "eventType",
-          "AttributeType": "S"
-        },
-        {
-          "AttributeName": "timestamp",
-          "AttributeType": "S"
-        }
-      ],
-      "TableFacets": [],
-      "GlobalSecondaryIndexes": [
-        {
-          "IndexName": "eventNameAndBusinessDate",
-          "KeyAttributes": {
-            "PartitionKey": {
-              "AttributeName": "eventName",
-              "AttributeType": "S"
+        "NonKeyAttributes": [
+          {
+            "AttributeName": "eventStatus",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "eventName",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "eventType",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "timestamp",
+            "AttributeType": "S"
+          }
+        ],
+        "TableFacets": [],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "eventNameAndBusinessDate",
+            "KeyAttributes": {
+              "PartitionKey": {
+                "AttributeName": "eventName",
+                "AttributeType": "S"
+              },
+              "SortKey": {
+                "AttributeName": "businessDate",
+                "AttributeType": "S"
+              }
             },
-            "SortKey": {
-              "AttributeName": "businessDate",
-              "AttributeType": "S"
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "TableData": [],
+        "DataAccess": {
+          "MySql": {}
+        },
+        "SampleDataFormats": {},
+        "BillingMode": "PROVISIONED",
+        "ProvisionedCapacitySettings": {
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+          },
+          "AutoScalingRead": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
             }
           },
-          "Projection": {
-            "ProjectionType": "ALL"
+          "AutoScalingWrite": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
+            }
           }
         }
-      ],
-      "TableData": [],
-      "DataAccess": {
-        "MySql": {}
       },
-      "SampleDataFormats": {},
-      "BillingMode": "PROVISIONED",
-      "ProvisionedCapacitySettings": {
-        "ProvisionedThroughput": {
-          "ReadCapacityUnits": 5,
-          "WriteCapacityUnits": 5
-        },
-        "AutoScalingRead": {
-          "ScalableTargetRequest": {
-            "MinCapacity": 1,
-            "MaxCapacity": 10,
-            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+      {
+        "TableName": "event_statistics",
+        "KeyAttributes": {
+          "PartitionKey": {
+            "AttributeName": "event_name_and_status",
+            "AttributeType": "S"
           },
-          "ScalingPolicyConfiguration": {
-            "TargetValue": 70
+          "SortKey": {
+            "AttributeName": "last_updated",
+            "AttributeType": "S"
           }
         },
-        "AutoScalingWrite": {
-          "ScalableTargetRequest": {
-            "MinCapacity": 1,
-            "MaxCapacity": 10,
-            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+        "NonKeyAttributes": [
+          {
+            "AttributeName": "expected_time",
+            "AttributeType": "S"
+          }
+        ],
+        "TableFacets": [],
+        "GlobalSecondaryIndexes": [],
+        "TableData": [],
+        "DataAccess": {
+          "MySql": {}
+        },
+        "SampleDataFormats": {},
+        "BillingMode": "PROVISIONED",
+        "ProvisionedCapacitySettings": {
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
           },
-          "ScalingPolicyConfiguration": {
-            "TargetValue": 70
+          "AutoScalingRead": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
+            }
+          },
+          "AutoScalingWrite": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
+            }
+          }
+        }
+      },
+      {
+        "TableName": "monitoring_groups",
+        "KeyAttributes": {
+          "PartitionKey": {
+            "AttributeName": "group_name",
+            "AttributeType": "S"
+          }
+        },
+        "NonKeyAttributes": [
+          {
+            "AttributeName": "events",
+            "AttributeType": "S"
+          }
+        ],
+        "TableFacets": [],
+        "GlobalSecondaryIndexes": [],
+        "TableData": [],
+        "DataAccess": {
+          "MySql": {}
+        },
+        "SampleDataFormats": {},
+        "BillingMode": "PROVISIONED",
+        "ProvisionedCapacitySettings": {
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+          },
+          "AutoScalingRead": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
+            }
+          },
+          "AutoScalingWrite": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
+            }
+          }
+        }
+      },
+      {
+        "TableName": "user",
+        "KeyAttributes": {
+          "PartitionKey": {
+            "AttributeName": "user_id",
+            "AttributeType": "S"
+          },
+          "SortKey": {
+            "AttributeName": "email",
+            "AttributeType": "S"
+          }
+        },
+        "NonKeyAttributes": [],
+        "TableFacets": [],
+        "GlobalSecondaryIndexes": [],
+        "TableData": [],
+        "DataAccess": {
+          "MySql": {}
+        },
+        "SampleDataFormats": {},
+        "BillingMode": "PROVISIONED",
+        "ProvisionedCapacitySettings": {
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": 5,
+            "WriteCapacityUnits": 5
+          },
+          "AutoScalingRead": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
+            }
+          },
+          "AutoScalingWrite": {
+            "ScalableTargetRequest": {
+              "MinCapacity": 1,
+              "MaxCapacity": 10,
+              "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
+            },
+            "ScalingPolicyConfiguration": {
+              "TargetValue": 70
+            }
           }
         }
       }
-    },
-    {
-      "TableName": "event_statistics",
-      "KeyAttributes": {
-        "PartitionKey": {
-          "AttributeName": "event_name_and_status",
-          "AttributeType": "S"
-        },
-        "SortKey": {
-          "AttributeName": "last_updated",
-          "AttributeType": "S"
-        }
-      },
-      "NonKeyAttributes": [
-        {
-          "AttributeName": "expected_time",
-          "AttributeType": "S"
-        }
-      ],
-      "TableFacets": [],
-      "GlobalSecondaryIndexes": [],
-      "TableData": [],
-      "DataAccess": {
-        "MySql": {}
-      },
-      "SampleDataFormats": {},
-      "BillingMode": "PROVISIONED",
-      "ProvisionedCapacitySettings": {
-        "ProvisionedThroughput": {
-          "ReadCapacityUnits": 5,
-          "WriteCapacityUnits": 5
-        },
-        "AutoScalingRead": {
-          "ScalableTargetRequest": {
-            "MinCapacity": 1,
-            "MaxCapacity": 10,
-            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
-          },
-          "ScalingPolicyConfiguration": {
-            "TargetValue": 70
-          }
-        },
-        "AutoScalingWrite": {
-          "ScalableTargetRequest": {
-            "MinCapacity": 1,
-            "MaxCapacity": 10,
-            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
-          },
-          "ScalingPolicyConfiguration": {
-            "TargetValue": 70
-          }
-        }
-      }
-    },
-    {
-      "TableName": "monitoring_groups",
-      "KeyAttributes": {
-        "PartitionKey": {
-          "AttributeName": "group_name",
-          "AttributeType": "S"
-        }
-      },
-      "NonKeyAttributes": [
-        {
-          "AttributeName": "event_key",
-          "AttributeType": "S"
-        }
-      ],
-      "TableFacets": [],
-      "GlobalSecondaryIndexes": [],
-      "TableData": [],
-      "DataAccess": {
-        "MySql": {}
-      },
-      "SampleDataFormats": {},
-      "BillingMode": "PROVISIONED",
-      "ProvisionedCapacitySettings": {
-        "ProvisionedThroughput": {
-          "ReadCapacityUnits": 5,
-          "WriteCapacityUnits": 5
-        },
-        "AutoScalingRead": {
-          "ScalableTargetRequest": {
-            "MinCapacity": 1,
-            "MaxCapacity": 10,
-            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
-          },
-          "ScalingPolicyConfiguration": {
-            "TargetValue": 70
-          }
-        },
-        "AutoScalingWrite": {
-          "ScalableTargetRequest": {
-            "MinCapacity": 1,
-            "MaxCapacity": 10,
-            "ServiceRole": "AWSServiceRoleForApplicationAutoScaling_DynamoDBTable"
-          },
-          "ScalingPolicyConfiguration": {
-            "TargetValue": 70
-          }
-        }
-      }
-    }
-  ]
-}
+    ]
+  }
