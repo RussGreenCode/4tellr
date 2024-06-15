@@ -2,7 +2,7 @@
 import React from 'react';
 import { TextField, IconButton, Box } from '@mui/material';
 import { ArrowLeft, ArrowRight } from '@mui/icons-material';
-import '../styles/App.css';
+import '../styles/DateSelect.css';
 
 const DateSelect = ({ selectedDate, setSelectedDate }) => {
   const handleDateChange = (event) => {

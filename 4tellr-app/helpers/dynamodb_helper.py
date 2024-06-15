@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 import statistics
 import logging
 from dateutil import parser
+import bcrypt
 
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 
@@ -608,7 +609,25 @@ class DynamoDBHelper:
             print(f"[ERROR] Error retrieving users: {str(e)}")
             return None
 
+    def get_user_by_email(self, email):
+        try:
+            response = self.user_table.get_item(Key={'email': email})
+            return response.get('Item', None)
+        except NoCredentialsError:
+            print("Credentials not available.")
+            return None
+        except PartialCredentialsError:
+            print("Incomplete credentials provided.")
+            return None
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None
 
+    def validate_user(self, email, password):
+        user = self.get_user_by_email(email)
+        if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+            return user
+        return None
 
 def load_config(config_file):
     config = {}

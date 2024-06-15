@@ -17,7 +17,7 @@ import './styles/App.css';
 function App() {
   const [businessDate, setBusinessDate] = useState('2024-05-24'); // Example date
   const [email, setEmail] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogin = (email) => {
     setIsAuthenticated(true);

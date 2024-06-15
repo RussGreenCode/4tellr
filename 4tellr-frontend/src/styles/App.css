@@ -31,12 +31,6 @@ body {
   color: var(--text-color);
 }
 
-.date-select {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
 .date-input {
   margin: 0 10px;
 }
@@ -99,10 +93,6 @@ button {
 
 /* src/styles/App.css */
 
-.date-select {
-  margin-bottom: 1rem;
-}
-
 .date-input {
   margin: 0 10px;
 }
@@ -133,10 +123,6 @@ button {
   height: calc(100vh - 200px); /* Adjust as necessary to fit your layout */
 }
 
-.date-select {
-  display: flex;
-  align-items: center;
-}
 
 .date-input {
   margin: 0 10px;

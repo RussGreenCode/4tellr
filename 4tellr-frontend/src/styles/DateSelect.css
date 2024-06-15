@@ -1,9 +1,11 @@
-/* src/styles/DateSelect.css */
-.date-select {
-  display: flex;
-  align-items: end;
-}
+
 
 .date-input {
   margin: 0 10px;
+}
+
+
+.date-select {
+  display: flex;
+  align-items: center;
 }

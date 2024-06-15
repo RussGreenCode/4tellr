@@ -6,7 +6,7 @@ import axios from "axios";
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const navigate = useNavigate(); // Get the navigate function from react-router-dom
 
   const handleLogin = async () => {
