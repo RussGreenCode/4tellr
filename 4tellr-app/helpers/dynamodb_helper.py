@@ -29,6 +29,7 @@ class DynamoDBHelper:
         self.event_table = self.dynamodb.Table(config['EVENT_TABLE'])
         self.stats_table = self.dynamodb.Table(config['STATS_TABLE'])
         self.monitoring_groups_table = self.dynamodb.Table(config['MONITORING_GROUPS_TABLE'])
+        self.user_table = self.dynamodb.Table(config['USER_TABLE'])
 
         # Set up logging
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -564,6 +565,50 @@ class DynamoDBHelper:
         else:
             print("[ERROR] 'group_name' must not be None.")
             return None
+
+    def add_user(self, user):
+        email = user.get('email')
+
+        if not email:
+            return {'error': 'Email is required'}
+
+        try:
+            # Check if the user already exists
+            response = self.user_table.get_item(Key={'email': email})
+
+            if 'Item' in response:
+                return {'email': email,'success': False, 'message': 'User with this email already exists'}
+
+            # Add the new user
+            self.user_table.put_item(Item=user)
+            return {'email': email, 'success': True, 'message': 'User added successfully'}
+
+        except Exception as e:
+            return {'email': email, 'success': False, 'error': str(e)}
+
+    def delete_user_by_email(self, email):
+
+        try:
+            self.user_table.delete_item(Key={'email': email})
+        except Exception as e:
+            return False
+
+        return True
+
+    def get_all_users(self):
+        try:
+            response = self.user_table.scan(
+                ProjectionExpression="email"
+            )
+            users = [{'email': item['email']} for item in
+                      response.get('Items', [])]
+            print(f"[INFO] Retrieved {len(users)} users.")
+            return users
+        except Exception as e:
+            print(f"[ERROR] Error retrieving users: {str(e)}")
+            return None
+
+
 
 def load_config(config_file):
     config = {}

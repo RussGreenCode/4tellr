@@ -4,6 +4,6 @@ AWS_REGION=us-east-1
 EVENT_TABLE=event_details
 STATS_TABLE=event_statistics
 MONITORING_GROUPS_TABLE=monitoring_groups
-USER_TABLE=users
+USER_TABLE=user
 ENVIRONMENT=local
 LOCAL_DYNAMODB_ENDPOINT=http://localhost:8000

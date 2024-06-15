@@ -1,0 +1,66 @@
+/* src/styles/UserManagement.css */
+
+.user-management-container {
+  padding: 20px;
+}
+
+.user-management-container .MuiTypography-h4 {
+  margin-bottom: 20px;
+}
+
+.user-management-container .MuiTextField-root {
+  margin-bottom: 20px;
+}
+
+.user-management-container .MuiButton-root {
+  margin-top: 20px;
+}
+
+.user-management-container .MuiPaper-root {
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.user-management-container .MuiList-root {
+  margin-top: 20px;
+}
+
+.user-management-container .MuiListItem-root {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.user-management-container .MuiListItem-root .MuiListItemText-root {
+  flex: 1;
+}
+
+.user-management-container .MuiListItem-root .MuiButton-root {
+  margin-left: 10px;
+}
+
+.dual-listbox-container {
+  margin-bottom: 20px;
+}
+
+.dual-listbox-container .dual-listbox {
+  width: 100%;
+}
+
+.dual-listbox-container .dual-listbox .dlb-header {
+  font-weight: bold;
+}
+
+.dual-listbox-container .dual-listbox .dlb-filter {
+  margin-bottom: 10px;
+}
+
+.dual-listbox-container .dual-listbox .dlb-list {
+  height: 200px;
+  overflow-y: auto;
+}
+
+.dual-listbox-container .dual-listbox .dlb-buttons {
+  margin-top: 10px;
+}

@@ -1,0 +1,9 @@
+/* src/styles/UserProfile.css */
+
+.profile-paper {
+  padding: 1rem;
+}
+
+.profile-paper .MuiTypography-h5 {
+  margin-bottom: 1rem;
+}
