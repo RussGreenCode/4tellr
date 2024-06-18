@@ -1,0 +1,12 @@
+[INFO] Generating command to create table: event_details
+aws dynamodb create-table --table-name "event_details" --attribute-definitions AttributeName=businessDate,AttributeType=S AttributeName=eventId,AttributeType=S AttributeName=eventName,AttributeType=S AttributeName=businessDate,AttributeType=S --key-schema AttributeName=businessDate,KeyType=HASH AttributeName=eventId,KeyType=RANGE --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 --global-secondary-indexes IndexName=eventNameAndBusinessDate,KeySchema=[{AttributeName=eventName,KeyType=HASH},{AttributeName=businessDate,KeyType=RANGE}],Projection={ProjectionType=ALL} --endpoint-url http://localhost:8000
+[INFO] Command to create table event_details generated successfully.
+[INFO] Generating command to create table: event_statistics
+aws dynamodb create-table --table-name "event_statistics" --attribute-definitions AttributeName=event_name_and_status,AttributeType=S AttributeName=last_updated,AttributeType=S --key-schema AttributeName=event_name_and_status,KeyType=HASH AttributeName=last_updated,KeyType=RANGE --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 --endpoint-url http://localhost:8000
+[INFO] Command to create table event_statistics generated successfully.
+[INFO] Generating command to create table: monitoring_groups
+aws dynamodb create-table --table-name "monitoring_groups" --attribute-definitions AttributeName=group_name,AttributeType=S --key-schema AttributeName=group_name,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 --endpoint-url http://localhost:8000
+[INFO] Command to create table monitoring_groups generated successfully.
+[INFO] Generating command to create table: user
+aws dynamodb create-table --table-name "user" --attribute-definitions AttributeName=user_id,AttributeType=S AttributeName=email,AttributeType=S --key-schema AttributeName=user_id,KeyType=HASH AttributeName=email,KeyType=RANGE --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 --endpoint-url http://localhost:8000
+[INFO] Command to create table user generated successfully.

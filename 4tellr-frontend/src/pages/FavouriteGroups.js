@@ -6,7 +6,7 @@ import { EventsContext } from '../contexts/EventsContext';
 import '../styles/GroupManagement.css';
 
 const FavouriteGroups = () => {
-  const { currentUser, fetchUser } = useContext(EventsContext);
+  const { currentUser, fetchUser, groupList, setGroupList } = useContext(EventsContext);
   const [availableGroups, setAvailableGroups] = useState([]);
   const [favouriteGroups, setFavouriteGroups] = useState([]);
   const [selectedAvailable, setSelectedAvailable] = useState([]);
@@ -26,8 +26,8 @@ const FavouriteGroups = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
-      const allGroups = response.data.map(group => group.group_name);
+      //const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
+      const allGroups = groupList.map(group => group.group_name);
       const filteredGroups = allGroups.filter(group => !currentUser.favourite_groups.includes(group));
       setAvailableGroups(filteredGroups);
     } catch (error) {
@@ -72,8 +72,6 @@ const FavouriteGroups = () => {
     } catch (error) {
       console.error('Error saving favourite groups:', error);
     }
-
-    fetchUser();
 
   };
 

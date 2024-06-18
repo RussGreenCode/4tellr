@@ -126,9 +126,12 @@ const ChartComponent = ({ data }) => {
   // Convert selectedTypes object to an array of types that are true
   const activeTypes = Object.keys(selectedTypes).filter(type => selectedTypes[type]);
 
+  // Manually set Y-axis ticks
+  const yTicks = Array.from(new Set(transformedData.map(item => item.yValue)));
+
   return (
     <ResponsiveContainer width="100%" height={600}>
-      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 100 }}>
+      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 200 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           type="number"
@@ -143,7 +146,8 @@ const ChartComponent = ({ data }) => {
           dataKey="yValue"
           name="Event"
           tickFormatter={formatYAxis}
-          tick={{ fontSize: 12, angle: -30, textAnchor: 'end' }}
+          ticks={yTicks} // Manually set Y-axis ticks
+          tick={{ fontSize: 12, textAnchor: 'end' }}
         />
         <ZAxis
           type="number"

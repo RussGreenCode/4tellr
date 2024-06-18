@@ -8,7 +8,7 @@ export const EventsProvider = ({ children }) => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [businessDate, setBusinessDate] = useState('2024-05-27'); // Default date
-
+  const [groupList, setGroupList] = useState({});
   const [searchEventCriteria, setSearchEventCriteria] = useState({}); // Initialize search criteria
   const [searchStatusCriteria, setSearchStatusCriteria] = useState({}); // Initialize search criteria
   const [searchApplicationCriteria, setSearchApplicationCriteria] = useState({}); // Initialize search criteria
@@ -69,6 +69,16 @@ export const EventsProvider = ({ children }) => {
     }
   };
 
+  const fetchGroupList = async (date) => {
+    try {
+      console.log('Refreshing Group List:');
+      const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
+      setGroupList(response.data);
+    } catch (error) {
+      console.error('Error refreshing group list:', error)
+    }
+  };
+
   useEffect(() => {
 
     fetchEvents(businessDate);
@@ -88,10 +98,15 @@ export const EventsProvider = ({ children }) => {
     console.log('Filtered events:', filteredEvents);
   }, [events, searchEventCriteria]);
 
+  useEffect(() => {
+    fetchGroupList()
+  }, []);
+
   return (
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
       setSearchStatusCriteria, setSearchApplicationCriteria, setSearchEventCriteria, selectedEvent, setSelectedEvent,
-      tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes}}>
+      tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
+      groupList, fetchGroupList}}>
       {children}
     </EventsContext.Provider>
   );

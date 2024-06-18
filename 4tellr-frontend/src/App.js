@@ -47,7 +47,7 @@ function App() {
                   <Grid item xs={10} className="chart-container">
                     <Routes>
                       <Route path="/" element={<Overview />} />
-                      <Route path="/metrics" element={<Metrics />} />
+                      <Route path="/details" element={<Overview />} />
                       <Route path="/groups" element={<GroupManagement />} />
                       <Route path="/admin" element={<Admin />} />
                       <Route path="/changePassword" element={<ChangePassword email={email}/>} />

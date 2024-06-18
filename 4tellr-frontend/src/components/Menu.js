@@ -49,7 +49,7 @@ const Menu = ({ setIsAuthenticated }) => {
     <Box>
       <List>
         <ListItem button component={Link} to="/">
-          <ListItemText primary="Overview" />
+          <ListItemText primary="Dashboard" />
         </ListItem>
         <ListItem button component={Link} to="/details">
           <ListItemText primary="Details" />

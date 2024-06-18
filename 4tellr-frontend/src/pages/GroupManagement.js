@@ -8,7 +8,7 @@ import { EventsContext } from '../contexts/EventsContext';
 import '../styles/GroupManagement.css';
 
 const GroupManagement = () => {
-  const { setFilteredEvents } = useContext(EventsContext);
+  const { setFilteredEvents, groupList, fetchGroupList } = useContext(EventsContext);
   const [availableOptions, setAvailableOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [groupName, setGroupName] = useState('');
@@ -18,6 +18,7 @@ const GroupManagement = () => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [favoriteGroup, setFavoriteGroup] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
 
   useEffect(() => {
     fetchAvailableOptions();
@@ -33,11 +34,11 @@ const GroupManagement = () => {
     }
   };
 
-  const fetchGroups = async () => {
+  const fetchGroups = () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
-      setGroups(response.data);
-      setFilteredGroups(response.data);
+      fetchGroupList()
+      setGroups(groupList);
+      setFilteredGroups(groupList);
     } catch (error) {
       console.error('Error fetching groups:', error);
     }
