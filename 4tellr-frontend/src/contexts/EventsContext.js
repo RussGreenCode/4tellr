@@ -8,9 +8,21 @@ export const EventsProvider = ({ children }) => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [businessDate, setBusinessDate] = useState('2024-05-27'); // Default date
-  const [searchCriteria, setSearchCriteria] = useState({}); // Initialize search criteria
+
+  const [searchEventCriteria, setSearchEventCriteria] = useState({}); // Initialize search criteria
+  const [searchStatusCriteria, setSearchStatusCriteria] = useState({}); // Initialize search criteria
+  const [searchApplicationCriteria, setSearchApplicationCriteria] = useState({}); // Initialize search criteria
+  const [sortCriterion, setSortCriterion] = useState('EXP'); // Initialize search criteria
   const [selectedEvent, setSelectedEvent] = useState({}); // Initialize search criteria
   const [tabIndex, setTabIndex] = useState(0);
+  const [currentUser, setCurrentUser] = useState({}); // Initialize search criteria
+  const [selectedTypes, setSelectedTypes] = useState({
+    EVT: true,
+    EXP: true,
+    SLO: false,
+    SLA: false
+  });
+
 
   const filterEvents = (events, criteria) => {
     // Example filtering logic based on search criteria
@@ -45,22 +57,41 @@ export const EventsProvider = ({ children }) => {
     }
   };
 
+  const fetchUser = async (date) => {
+    try {
+      console.log('Refreshing User:', currentUser.email);
+      const response = await axios.get('http://127.0.0.1:5000/api/get_user', {
+        params: { email: currentUser.email }
+      });
+      setCurrentUser(response.data);
+    } catch (error) {
+      console.error('Error refreshing user:', error)
+    }
+  };
+
   useEffect(() => {
+
     fetchEvents(businessDate);
+
+
     const interval = setInterval(() => {
       fetchEvents(businessDate);
+
+
     }, 60000); // Update every minute
     return () => clearInterval(interval);
   }, [businessDate]);
 
   useEffect(() => {
     // Filter events whenever events or search criteria change
-    setFilteredEvents(filterEvents(events, searchCriteria));
+    setFilteredEvents(filterEvents(events, searchEventCriteria));
     console.log('Filtered events:', filteredEvents);
-  }, [events, searchCriteria]);
+  }, [events, searchEventCriteria]);
 
   return (
-    <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,  setSearchCriteria, selectedEvent, setSelectedEvent, tabIndex, setTabIndex}}>
+    <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
+      setSearchStatusCriteria, setSearchApplicationCriteria, setSearchEventCriteria, selectedEvent, setSelectedEvent,
+      tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes}}>
       {children}
     </EventsContext.Provider>
   );

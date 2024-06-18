@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import { Box, Button, TextField, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import {EventsContext} from "../contexts/EventsContext";
 import axios from "axios";
 
 const Login = ({ onLogin }) => {
+  const {setCurrentUser} = useContext(EventsContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -17,6 +19,7 @@ const Login = ({ onLogin }) => {
       if(response.data.isAuthenticated) {
         setIsAuthenticated(response.data.isAuthenticated);
         onLogin(email);
+        setCurrentUser(response.data.user)
         navigate('/'); // Navigate to the dashboard upon successful login
       } else {
         alert('Please enter both username and password');

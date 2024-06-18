@@ -629,6 +629,29 @@ class DynamoDBHelper:
             return user
         return None
 
+    def change_password(self, email, old_password, new_password):
+        user = self.get_user_by_email(email)
+        if user and bcrypt.checkpw(old_password.encode('utf-8'), user['password'].encode('utf-8')):
+            new_hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            try:
+                self.user_table.update_item(
+                    Key={'email': email},
+                    UpdateExpression="SET password = :p",
+                    ExpressionAttributeValues={':p': new_hashed_password}
+                )
+                return {'success': True, 'message': 'Password updated successfully'}
+            except Exception as e:
+                return {'success': False, 'message': str(e)}
+        return {'success': False, 'message': 'Old password is incorrect'}
+
+    def save_user_favourite_groups(self, email, favourite_groups):
+        self.user_table.update_item(
+            Key={'email': email},
+            UpdateExpression="SET favourite_groups = :g",
+            ExpressionAttributeValues={':g': favourite_groups}
+        )
+
+
 def load_config(config_file):
     config = {}
     with open(config_file, 'r') as file:

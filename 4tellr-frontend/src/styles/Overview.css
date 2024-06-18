@@ -1,0 +1,24 @@
+/* src/styles/Overview.css */
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+}
+
+.drawer-paper {
+  width: 300px;
+}
+
+.mainContent {
+  transition: margin-right 0.3s;
+  margin-right: 0;
+}
+
+.mainContentShift {
+  margin-right: 300px;
+}
+
+.MuiDrawer-paper {
+  border-left: 1px solid #ccc; /* Light grey border */
+}

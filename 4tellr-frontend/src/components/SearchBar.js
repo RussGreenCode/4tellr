@@ -1,21 +1,21 @@
 // src/components/SearchBar.js
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import { TextField, Box } from '@mui/material';
 import '../styles/SearchBar.css';
 
-const SearchBar = ({ setSearchEntry }) => {
+const SearchBar = ({ setSearchEntry, label }) => {
   const [searchText, setSearchText] = useState('');
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchText(value);
-    setSearchEntry({ eventKey: value }); // Update search criteria with the eventKey
+    setSearchEntry({ eventKey: value });
   };
 
   return (
-    <Box display="flex" justifyContent="center" mt={2} mb={2}>
+    <Box display="flex" justifyContent="center" className="search-bar">
       <TextField
-        label="Search"
+        label={label}
         variant="outlined"
         size="small"
         value={searchText}

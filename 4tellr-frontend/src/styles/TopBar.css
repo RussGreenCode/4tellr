@@ -1,0 +1,19 @@
+/* src/styles/TopBar.css */
+.topbar {
+  background-color: #f5f5f5; /* Change as needed */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Change as needed */
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-bar {
+  margin: 0 1rem;
+}
+
+.search-bar .MuiTextField-root {
+  width: 200px; /* Adjust width as needed */
+}

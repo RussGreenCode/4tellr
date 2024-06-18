@@ -9,26 +9,12 @@ const UserProfile = ({ email }) => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [groups, setGroups] = useState([]);
-  const [favoriteGroups, setFavoriteGroups] = useState([]);
   const [message, setMessage] = useState('');
 
-  const { events } = useContext(EventsContext);
 
   useEffect(() => {
-    // Fetch existing groups and favorite groups
-    const fetchGroups = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:5000/api/groups');
-        setGroups(response.data.groups);
-        const favoriteResponse = await axios.get(`http://127.0.0.1:5000/api/user_favorite_groups?email=${email}`);
-        setFavoriteGroups(favoriteResponse.data.favoriteGroups);
-      } catch (error) {
-        console.error('Error fetching groups:', error);
-      }
-    };
-    fetchGroups();
-  }, [email]);
+
+  }, []);
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
@@ -47,28 +33,12 @@ const UserProfile = ({ email }) => {
       setMessage('Error changing password.');
       console.error('Error changing password:', error);
     }
+
+    setCurrentPassword('');
+    setConfirmPassword('');
+    setNewPassword('');
   };
 
-  const handleFavoriteGroupChange = (groupId) => {
-    setFavoriteGroups((prevFavorites) =>
-      prevFavorites.includes(groupId)
-        ? prevFavorites.filter((id) => id !== groupId)
-        : [...prevFavorites, groupId]
-    );
-  };
-
-  const saveFavoriteGroups = async () => {
-    try {
-      await axios.post('http://127.0.0.1:5000/api/user_favorite_groups', {
-        email,
-        favoriteGroups,
-      });
-      setMessage('Favorite groups updated successfully.');
-    } catch (error) {
-      setMessage('Error updating favorite groups.');
-      console.error('Error updating favorite groups:', error);
-    }
-  };
 
   return (
     <Box p={2}>

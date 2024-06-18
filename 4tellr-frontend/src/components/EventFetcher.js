@@ -7,9 +7,8 @@ import { Box, TextField, MenuItem, Select, FormControl, InputLabel } from '@mui/
 
 
 
-const EventFetcher = ({ businessDate }) => {
+const EventFetcher = () => {
   const { filteredEvents, loading } = useContext(EventsContext);
-  const [sortCriterion, setSortCriterion] = useState('EXP'); // Default sorting criterion
 
   const transformDataForChart = (filteredEvents) => {
     const currentTime = new Date();
@@ -51,19 +50,7 @@ const EventFetcher = ({ businessDate }) => {
 
   return (
     <Box>
-      <FormControl>
-        <InputLabel id="sort-criterion-label">Sort By</InputLabel>
-        <Select
-          labelId="sort-criterion-label"
-          id="sort-criterion"
-          value={sortCriterion}
-          onChange={(e) => setSortCriterion(e.target.value)}
-        >
-          <MenuItem value="EXP">Expectation Time</MenuItem>
-          <MenuItem value="EVT">Event Time</MenuItem>
-        </Select>
-      </FormControl>
-      <ChartComponent data={[{ label: 'Events', data }]} sortCriterion={sortCriterion} />
+      <ChartComponent data={[{ label: 'Events', data }]} />
     </Box>
   );
 };

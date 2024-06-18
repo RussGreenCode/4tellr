@@ -9,6 +9,8 @@ import Overview from './pages/Overview';
 import Metrics from './pages/Metrics';
 import GroupManagement from './pages/GroupManagement';
 import UserManagement from './pages/UserManagement';
+import ChangePassword from './pages/ChangePassword';
+import FavouriteGroups from './pages/FavouriteGroups';
 import Admin from './pages/Admin';
 import { EventsProvider } from './contexts/EventsContext';
 import { ThemeContextProvider } from './contexts/ThemeContext';
@@ -30,7 +32,7 @@ function App() {
   };
 
   return (
-    <EventsProvider>
+    <EventsProvider email={email}>
       <ThemeContextProvider>
         <CssBaseline />
         <Router>
@@ -44,11 +46,13 @@ function App() {
                   </Grid>
                   <Grid item xs={10} className="chart-container">
                     <Routes>
-                      <Route path="/" element={<Overview businessDate={businessDate} />} />
+                      <Route path="/" element={<Overview />} />
                       <Route path="/metrics" element={<Metrics />} />
                       <Route path="/groups" element={<GroupManagement />} />
                       <Route path="/admin" element={<Admin />} />
+                      <Route path="/changePassword" element={<ChangePassword email={email}/>} />
                       <Route path="/userManagement" element={<UserManagement />} />
+                      <Route path="/favouriteGroups" element={<FavouriteGroups />} />
                     </Routes>
                   </Grid>
                 </Grid>

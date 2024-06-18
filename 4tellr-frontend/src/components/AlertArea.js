@@ -132,7 +132,7 @@ const AlertArea = () => {
         <Grid container spacing={1}>
           <Grid item xs={12} md={6}>
             <Paper className="alert-paper" elevation={1}>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={barData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <XAxis dataKey="name" />
                   <YAxis />
@@ -148,7 +148,7 @@ const AlertArea = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             <Paper className="alert-paper" elevation={1}>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie data={barData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                     {barData.map((entry, index) => (
@@ -182,7 +182,7 @@ const AlertArea = () => {
                   {loading ? (
                     <Typography>Loading...</Typography>
                   ) : (
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={250}>
                       <ScatterChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid />
                         <YAxis

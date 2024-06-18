@@ -6,7 +6,7 @@ import '../styles/App.css';
 const MainContent = ({businessDate}) => {
   return (
     <div className="main-content">
-            <EventFetcher businessDate={businessDate} />
+            <EventFetcher />
     </div>
   );
 };

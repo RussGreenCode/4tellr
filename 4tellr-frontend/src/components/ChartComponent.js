@@ -52,9 +52,9 @@ const CustomShape = (props) => {
   return shape;
 };
 
-const ChartComponent = ({ data, sortCriterion }) => {
+const ChartComponent = ({ data }) => {
+  const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex } = useContext(EventsContext);
   const [currentTime, setCurrentTime] = useState(Date.now());
-  const { setSelectedEvent, setTabIndex } = useContext(EventsContext);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -123,8 +123,11 @@ const ChartComponent = ({ data, sortCriterion }) => {
     ticks.push(tick);
   }
 
+  // Convert selectedTypes object to an array of types that are true
+  const activeTypes = Object.keys(selectedTypes).filter(type => selectedTypes[type]);
+
   return (
-    <ResponsiveContainer width="100%" height={500}>
+    <ResponsiveContainer width="100%" height={600}>
       <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 100 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
@@ -157,7 +160,7 @@ const ChartComponent = ({ data, sortCriterion }) => {
             { value: 'SLA', type: 'diamond', color: 'red' }
           ]}
         />
-        {['EVT', 'EXP', 'SLO', 'SLA'].map(type => (
+        {activeTypes.map(type => (
           <Scatter
             key={type}
             name={type}

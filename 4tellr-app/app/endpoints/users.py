@@ -62,3 +62,49 @@ def get_users():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@users_bp.route('/api/change_password', methods=['POST'])
+def change_password():
+    data = request.get_json()
+    email = data.get('email')
+    old_password = data.get('currentPassword')
+    new_password = data.get('newPassword')
+
+    if not email or not old_password or not new_password:
+        return jsonify({'error': 'Email, old password, and new password are required'}), 400
+
+    try:
+        result = db_helper.change_password(email, old_password, new_password)
+        if result['success']:
+            return jsonify({'success': True, 'message': result['message']}), 200
+        else:
+            return jsonify({'success': False, 'message': result['message']}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@users_bp.route('/api/get_user', methods=['GET'])
+def get_user_favorite_groups():
+    email = request.args.get('email')
+    if not email:
+        return jsonify({'error': 'Email parameter is required'}), 400
+
+    try:
+        user = db_helper.get_user_by_email(email)
+        return jsonify({'user': user}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@users_bp.route('/api/save_user_favourite_groups', methods=['POST'])
+def save_user_favourite_groups():
+    data = request.get_json()
+    email = data.get('email')
+    favourite_groups = data.get('favourite_groups')
+
+    if not email or favourite_groups is None:
+        return jsonify({'error': 'Email and favourite groups are required'}), 400
+
+    try:
+        db_helper.save_user_favourite_groups(email, favourite_groups)
+        return jsonify({'message': 'Favourite groups updated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
