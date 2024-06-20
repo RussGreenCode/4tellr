@@ -1,5 +1,5 @@
 // src/pages/Overview.js
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect} from 'react';
 import { Box, Drawer, List, ListItem, ListItemText, IconButton, CssBaseline, Toolbar, TextField, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Checkbox, FormGroup } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import AlertArea from "../components/AlertArea";
@@ -7,6 +7,8 @@ import EventFetcher from "../components/EventFetcher";
 import { EventsContext } from '../contexts/EventsContext';
 import '../styles/Overview.css';
 import SearchBar from "../components/SearchBar";
+import FilteredSearchBar from "../components/FilteredSearchBar";
+
 
 const drawerWidth = 300; // Fixed width for the expanded drawer
 const collapsedWidth = 60; // Fixed width for the collapsed drawer
@@ -14,9 +16,16 @@ const collapsedWidth = 60; // Fixed width for the collapsed drawer
 const Overview = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sortCriterion, setSortCriterion] = useState('EXP');
+  const { setSearchEventCriteria, setSearchApplicationCriteria, setSearchStatusCriteria, setSelectedTypes, selectedTypes, groupList, setSearchGroupCriteria, setShowLabels, showLabels} = useContext(EventsContext);
+  const [transformedGroupList, setTransformedGroupList] = useState([]);
 
 
-  const { setSearchEventCriteria, setSearchApplicationCriteria, setSearchStatusCriteria,setSelectedTypes, selectedTypes } = useContext(EventsContext);
+  useEffect(() => {
+    if (groupList && Array.isArray(groupList)) {
+      const transformedList = groupList.map(group => group.group_name);
+      setTransformedGroupList(transformedList);
+    }
+  }, [groupList]);
 
   const toggleDrawer = () => {
     setIsDrawerOpen(!isDrawerOpen);
@@ -33,15 +42,21 @@ const Overview = () => {
     });
   };
 
+  const handleShowLabelsChange = (event) => {
+    setShowLabels(event.target.checked);
+  };
+
   const drawer = (
     <div>
-      <Toolbar />
-      <div className="drawerHeader" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 8px' }}>
+      <div className="drawerHeader" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '8px' }}>
         <IconButton onClick={toggleDrawer}>
           {isDrawerOpen ? <ChevronRight /> : <ChevronLeft />}
         </IconButton>
       </div>
       <Box p={2} display={isDrawerOpen ? 'block' : 'none'}>
+        <Box mb={2}>
+          <FilteredSearchBar label="Search Group" setSearchEntry={setSearchGroupCriteria}  options={transformedGroupList}/>
+        </Box>
         <Box mb={2}>
           <SearchBar label="Search Application" setSearchEntry={setSearchApplicationCriteria} />
         </Box>
@@ -83,6 +98,13 @@ const Overview = () => {
             </FormGroup>
           </FormControl>
         </Box>
+        <Box mt={4}>
+          <FormLabel component="legend">Labels</FormLabel>
+          <FormControlLabel
+            control={<Checkbox checked={showLabels} onChange={handleShowLabelsChange} name="showLabels" />}
+            label="Show Labels"
+          />
+        </Box>
       </Box>
     </div>
   );
@@ -95,7 +117,7 @@ const Overview = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          marginRight: isDrawerOpen ? `${collapsedWidth}px` : `${collapsedWidth}px`,
+          marginRight: isDrawerOpen ? `${drawerWidth}px` : `${collapsedWidth}px`,
           transition: 'margin 0.3s',
         }}
       >
