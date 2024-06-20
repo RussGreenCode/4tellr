@@ -18,9 +18,8 @@ function create_table() {
     local table=$1
 
     local table_name=$(echo "$table" | jq -r '.TableName')
-    log_info "Generating command to create table: $table_name"
-
     local key_attributes=$(echo "$table" | jq -r '.KeyAttributes')
+    local non_key_attributes=$(echo "$table" | jq -r '.NonKeyAttributes')
     local provisioned_capacity=$(echo "$table" | jq -r '.ProvisionedCapacitySettings.ProvisionedThroughput')
     local gsi=$(echo "$table" | jq -r '.GlobalSecondaryIndexes')
 
@@ -28,17 +27,11 @@ function create_table() {
     local sort_key=$(echo "$key_attributes" | jq -r '.SortKey')
 
     local attribute_definitions=""
-    attribute_definitions+="AttributeName=$(echo "$partition_key" | jq -r '.AttributeName'),AttributeType=$(echo "$partition_key" | jq -r '.AttributeType')"
+    attribute_definitions+=$(echo "$partition_key" | jq -r '"AttributeName=\(.AttributeName),AttributeType=\(.AttributeType)"')
+    attribute_definitions+=" "
+    attribute_definitions+=$(echo "$sort_key" | jq -r '"AttributeName=\(.AttributeName),AttributeType=\(.AttributeType)"')
 
-    if [ "$(echo "$sort_key" | jq -r '.AttributeName')" != "null" ]; then
-        attribute_definitions+=" AttributeName=$(echo "$sort_key" | jq -r '.AttributeName'),AttributeType=$(echo "$sort_key" | jq -r '.AttributeType')"
-    fi
-
-    local key_schema="AttributeName=$(echo "$partition_key" | jq -r '.AttributeName'),KeyType=HASH"
-    
-    if [ "$(echo "$sort_key" | jq -r '.AttributeName')" != "null" ]; then
-        key_schema+=" AttributeName=$(echo "$sort_key" | jq -r '.AttributeName'),KeyType=RANGE"
-    fi
+    local key_schema="AttributeName=$(echo "$partition_key" | jq -r '.AttributeName'),KeyType=HASH AttributeName=$(echo "$sort_key" | jq -r '.AttributeName'),KeyType=RANGE"
 
     local throughput="ReadCapacityUnits=$(echo "$provisioned_capacity" | jq -r '.ReadCapacityUnits'),WriteCapacityUnits=$(echo "$provisioned_capacity" | jq -r '.WriteCapacityUnits')"
 
@@ -49,8 +42,6 @@ function create_table() {
             _jq() {
                 echo "${index}" | base64 --decode | jq -r "${1}"
             }
-            attribute_definitions+=" AttributeName=$(_jq '.KeyAttributes.PartitionKey.AttributeName'),AttributeType=$(_jq '.KeyAttributes.PartitionKey.AttributeType')"
-            attribute_definitions+=" AttributeName=$(_jq '.KeyAttributes.SortKey.AttributeName'),AttributeType=$(_jq '.KeyAttributes.SortKey.AttributeType')"
             gsi_definitions+=" IndexName=$(_jq '.IndexName'),KeySchema=[{AttributeName=$(_jq '.KeyAttributes.PartitionKey.AttributeName'),KeyType=HASH},{AttributeName=$(_jq '.KeyAttributes.SortKey.AttributeName'),KeyType=RANGE}],Projection={ProjectionType=$(_jq '.Projection.ProjectionType')}"
         done
     fi
@@ -60,11 +51,9 @@ function create_table() {
         --attribute-definitions $attribute_definitions \
         --key-schema $key_schema \
         --provisioned-throughput $throughput \
-        $gsi_definitions \
-	--endpoint-url http://localhost:8000"
+        $gsi_definitions"
 
     echo $create_table_command
-    log_info "Command to create table $table_name generated successfully."
 }
 
 function delete_table() {
