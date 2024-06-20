@@ -53,7 +53,7 @@ const CustomShape = (props) => {
 };
 
 const ChartComponent = ({ data }) => {
-  const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex } = useContext(EventsContext);
+  const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, showLabels } = useContext(EventsContext);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
@@ -131,7 +131,7 @@ const ChartComponent = ({ data }) => {
 
   return (
     <ResponsiveContainer width="100%" height={600}>
-      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 200 }}>
+      <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: showLabels ? 200 : 0 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           type="number"
@@ -145,9 +145,9 @@ const ChartComponent = ({ data }) => {
           type="number"
           dataKey="yValue"
           name="Event"
-          tickFormatter={formatYAxis}
+          tickFormatter={showLabels ? formatYAxis : null}
           ticks={yTicks} // Manually set Y-axis ticks
-          tick={{ fontSize: 12, textAnchor: 'end' }}
+          tick={showLabels ? { fontSize: 12, textAnchor: 'end' } : null}
         />
         <ZAxis
           type="number"

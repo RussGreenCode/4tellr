@@ -117,7 +117,7 @@ const Overview = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          marginRight: isDrawerOpen ? `${drawerWidth}px` : `${collapsedWidth}px`,
+          marginRight: isDrawerOpen ? `${collapsedWidth}px` : `${collapsedWidth}px`,
           transition: 'margin 0.3s',
         }}
       >
