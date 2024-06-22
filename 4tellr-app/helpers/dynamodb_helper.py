@@ -214,12 +214,12 @@ class DynamoDBHelper:
                     result.append({
                         'eventId': event_id,
                         'eventType': event_type,
-                        'type': 'EVT',
+                        'type': 'NEW_EVT',
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
                         'TimeValue': time_value,
-                        'outcomeStatus': 'N/A'
+                        'outcomeStatus': 'NEW_EVENT'
                     })
 
             elif event_id.startswith('EXP#') and event_key not in processed_event_keys:
@@ -228,12 +228,12 @@ class DynamoDBHelper:
                     result.append({
                         'eventId': event_id,
                         'eventType': event_type,
-                        'type': 'EXP',
+                        'type': 'NOT_MET_EXP',
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
                         'TimeValue': time_value,
-                        'outcomeStatus': 'N/A'
+                        'outcomeStatus': 'NOT_MET_EXP'
                     })
 
         return result

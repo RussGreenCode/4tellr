@@ -6,7 +6,6 @@ import Menu from './components/Menu';
 import Login from './pages/Login';
 import TopBar from './components/TopBar';
 import Overview from './pages/Overview';
-import Metrics from './pages/Metrics';
 import GroupManagement from './pages/GroupManagement';
 import UserManagement from './pages/UserManagement';
 import ChangePassword from './pages/ChangePassword';
@@ -15,6 +14,7 @@ import Admin from './pages/Admin';
 import { EventsProvider } from './contexts/EventsContext';
 import { ThemeContextProvider } from './contexts/ThemeContext';
 import './styles/App.css';
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   const [businessDate, setBusinessDate] = useState('2024-05-24'); // Example date
@@ -46,7 +46,7 @@ function App() {
                   </Grid>
                   <Grid item xs={10} className="chart-container">
                     <Routes>
-                      <Route path="/" element={<Overview />} />
+                      <Route path="/" element={<Dashboard />} />
                       <Route path="/details" element={<Overview />} />
                       <Route path="/groups" element={<GroupManagement />} />
                       <Route path="/admin" element={<Admin />} />

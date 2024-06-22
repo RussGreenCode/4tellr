@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import CalculateMettics from '../metrics/CalculateMetrics'
 
 export const EventsContext = createContext();
 
@@ -18,6 +19,8 @@ export const EventsProvider = ({ children }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [searchGroupCriteria, setSearchGroupCriteria] = useState({})
   const [currentUser, setCurrentUser] = useState({}); // Initialize search criteria
+  const [metrics, setMetrics] = useState({ summary: {}, eventStatus: {} });
+  const [filteredMetrics, setFilteredMetrics] = useState({ summary: {}, eventStatus: {} });
   const [selectedTypes, setSelectedTypes] = useState({
     EVT: true,
     EXP: true,
@@ -52,6 +55,8 @@ export const EventsProvider = ({ children }) => {
       });
       console.log('Fetched events response:', response.data);
       setEvents(response.data);
+      const calculatedMetrics = CalculateMettics(response.data);
+      setMetrics(calculatedMetrics);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -96,19 +101,25 @@ export const EventsProvider = ({ children }) => {
 
   useEffect(() => {
     // Filter events whenever events or search criteria change
-    setFilteredEvents(filterEvents(events, searchEventCriteria));
+    const updatedFilteredEvents = filterEvents(events, searchEventCriteria);
+    setFilteredEvents(updatedFilteredEvents);
+    const calculatedMetrics = CalculateMettics(updatedFilteredEvents);
+    setFilteredMetrics(calculatedMetrics);
     console.log('Filtered events:', filteredEvents);
+
   }, [events, searchEventCriteria]);
 
   useEffect(() => {
     fetchGroupList()
   }, []);
 
+
+
   return (
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
       setSearchStatusCriteria, setSearchApplicationCriteria, setSearchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
-      groupList, fetchGroupList, setSearchGroupCriteria, setShowLabels, showLabels}}>
+      groupList, fetchGroupList, setSearchGroupCriteria, setShowLabels, showLabels, metrics, filteredMetrics}}>
       {children}
     </EventsContext.Provider>
   );
