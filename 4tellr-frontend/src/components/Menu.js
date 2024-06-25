@@ -83,6 +83,9 @@ const Menu = ({ setIsAuthenticated }) => {
             <ListItem button component={Link} to="/admin" sx={{ pl: 4 }}>
               <ListItemText primary="Tasks" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
+            <ListItem button component={Link} to="/userDetails" sx={{ pl: 4 }}>
+              <ListItemText primary="User Details" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
           </List>
         </Collapse>
         <ListItem button onClick={handleExportClick}>

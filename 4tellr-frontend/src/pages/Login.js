@@ -5,7 +5,7 @@ import {EventsContext} from "../contexts/EventsContext";
 import axios from "axios";
 
 const Login = ({ onLogin }) => {
-  const {setCurrentUser} = useContext(EventsContext);
+  const {setCurrentUser, fetchUser} = useContext(EventsContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -20,6 +20,9 @@ const Login = ({ onLogin }) => {
         setIsAuthenticated(response.data.isAuthenticated);
         onLogin(email);
         setCurrentUser(response.data.user)
+
+        fetchUser()
+
         navigate('/'); // Navigate to the dashboard upon successful login
       } else {
         alert('Please enter both username and password');

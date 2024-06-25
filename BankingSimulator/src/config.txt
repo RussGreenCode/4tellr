@@ -1,0 +1,6 @@
+mode=accelerated
+start_time=2024-06-25T16:00:00
+multiplier=60
+directory_path=./configs/
+output_mode=endpoint
+endpoint_url=http://127.0.0.1:5000/api/events

@@ -8,6 +8,7 @@ import TopBar from './components/TopBar';
 import Overview from './pages/Overview';
 import GroupManagement from './pages/GroupManagement';
 import UserManagement from './pages/UserManagement';
+import UserDetails from './pages/UserDetails';
 import ChangePassword from './pages/ChangePassword';
 import FavouriteGroups from './pages/FavouriteGroups';
 import Admin from './pages/Admin';
@@ -53,6 +54,7 @@ function App() {
                       <Route path="/changePassword" element={<ChangePassword email={email}/>} />
                       <Route path="/userManagement" element={<UserManagement />} />
                       <Route path="/favouriteGroups" element={<FavouriteGroups />} />
+                      <Route path="/userDetails" element={<UserDetails />} />
                     </Routes>
                   </Grid>
                 </Grid>

@@ -7,6 +7,7 @@ export const EventsContext = createContext();
 export const EventsProvider = ({ children }) => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
+  const [favouriteFilteredEvents, setFavouriteFilteredEvents] = useState([])
   const [loading, setLoading] = useState(true);
   const [businessDate, setBusinessDate] = useState('2024-05-27'); // Default date
   const [groupList, setGroupList] = useState({});
@@ -20,7 +21,9 @@ export const EventsProvider = ({ children }) => {
   const [searchGroupCriteria, setSearchGroupCriteria] = useState({})
   const [currentUser, setCurrentUser] = useState({}); // Initialize search criteria
   const [metrics, setMetrics] = useState({ summary: {}, eventStatus: {} });
+  const [favouriteMetrics, setFavouriteMetrics] = useState({ summary: {}, eventStatus: {} });
   const [filteredMetrics, setFilteredMetrics] = useState({ summary: {}, eventStatus: {} });
+  const [favouriteGroups, setFavouriteGroups] = useState([])
   const [selectedTypes, setSelectedTypes] = useState({
     EVT: true,
     EXP: true,
@@ -66,11 +69,12 @@ export const EventsProvider = ({ children }) => {
 
   const fetchUser = async (date) => {
     try {
-      console.log('Refreshing User:', currentUser.email);
+      console.log('Retrieving User:', currentUser.email);
       const response = await axios.get('http://127.0.0.1:5000/api/get_user', {
         params: { email: currentUser.email }
       });
-      setCurrentUser(response.data);
+      setCurrentUser(response.data.user);
+      setFavouriteGroups(response.data.groups)
     } catch (error) {
       console.error('Error refreshing user:', error)
     }
@@ -86,6 +90,7 @@ export const EventsProvider = ({ children }) => {
     }
   };
 
+
   useEffect(() => {
 
     fetchEvents(businessDate);
@@ -95,19 +100,52 @@ export const EventsProvider = ({ children }) => {
       fetchEvents(businessDate);
 
 
-    }, 60000); // Update every minute
+    }, 600000); // Update every minute
     return () => clearInterval(interval);
   }, [businessDate]);
+
+  function filterFavouriteEvents(events) {
+    // Ensure favoriteGroups is an array
+    if (!Array.isArray(favouriteGroups)) {
+      console.error('favoriteGroups should be an array.');
+      return events;
+    }
+
+    const favouriteEventList = [];
+
+     // Extract favourite events from favouriteGroups
+    favouriteGroups.forEach(group => {
+      if (Array.isArray(group.events)) {
+        favouriteEventList.push(...group.events);
+      } else {
+        favouriteEventList.push(group.events);
+      }
+    });
+
+    // Filter the events by eventKey where it matches the favouriteEventList
+    const filteredEvents = events.filter(event => favouriteEventList.includes(event.eventKey));
+
+
+    return filteredEvents;
+
+  }
 
   useEffect(() => {
     // Filter events whenever events or search criteria change
     const updatedFilteredEvents = filterEvents(events, searchEventCriteria);
     setFilteredEvents(updatedFilteredEvents);
+
+    const updatedFavouriteFilteredEvents = filterFavouriteEvents(events)
+    setFavouriteFilteredEvents(updatedFavouriteFilteredEvents)
+
     const calculatedMetrics = CalculateMettics(updatedFilteredEvents);
     setFilteredMetrics(calculatedMetrics);
+    
+    const favouriteCalculatedMetrics = CalculateMettics(updatedFavouriteFilteredEvents)
+    setFavouriteMetrics(favouriteCalculatedMetrics)
     console.log('Filtered events:', filteredEvents);
 
-  }, [events, searchEventCriteria]);
+  }, [events, searchEventCriteria, favouriteGroups]);
 
   useEffect(() => {
     fetchGroupList()
@@ -119,7 +157,7 @@ export const EventsProvider = ({ children }) => {
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
       setSearchStatusCriteria, setSearchApplicationCriteria, setSearchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
-      groupList, fetchGroupList, setSearchGroupCriteria, setShowLabels, showLabels, metrics, filteredMetrics}}>
+      groupList, fetchGroupList, setSearchGroupCriteria, setShowLabels, showLabels, metrics, filteredMetrics, favouriteMetrics}}>
       {children}
     </EventsContext.Provider>
   );

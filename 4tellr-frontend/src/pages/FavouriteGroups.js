@@ -69,6 +69,9 @@ const FavouriteGroups = () => {
         email: currentUser.email,
         favourite_groups: favouriteGroups
       });
+
+      fetchUser()
+
     } catch (error) {
       console.error('Error saving favourite groups:', error);
     }

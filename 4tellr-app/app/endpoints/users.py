@@ -82,15 +82,32 @@ def change_password():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @users_bp.route('/api/get_user', methods=['GET'])
-def get_user_favorite_groups():
+def get_user():
     email = request.args.get('email')
     if not email:
         return jsonify({'error': 'Email parameter is required'}), 400
 
     try:
         user = db_helper.get_user_by_email(email)
-        return jsonify({'user': user}), 200
+
+        groups = []
+
+        favourite_groups = user.get('favourite_groups')
+
+        if favourite_groups:
+
+            for group_name in favourite_groups:
+                group = db_helper.get_group_details(group_name)
+                groups.append(group)
+
+        response = {
+            'user': user,
+            'groups': groups
+        }
+
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
