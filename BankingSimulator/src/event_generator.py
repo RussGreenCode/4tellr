@@ -6,6 +6,9 @@ import logging
 import random
 import requests
 
+from helpers.event_helper import EventHelper
+from processing_calendar import ProcessingCalendar
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -28,64 +31,8 @@ class EventGenerator:
         self.processing_time_variance = processing_time_variance  # Maximum processing time variance (e.g., 1.0 for 100%)
         self.process_status = {}  # Track the status of all processes
         self.virtual_time = self.start_time  # Initialize virtual time for accelerated mode
-
-    def generate_event(self, process, status, current_time):
-        event = {
-            "businessDate": process.get("businessDate", self.start_time.strftime("%Y-%m-%d")),
-            "eventName": process["process_id"],
-            "eventType": process["type"],
-            "batchOrRealtime": "Batch",
-            "eventTime": current_time.isoformat(),
-            "eventStatus": status,
-            "resource": "Machine_1",
-            "message": "",
-            "details": self.generate_event_details(process["type"])
-        }
-        self.events.append(event)
-        self.process_status[process["process_id"]] = status
-        self.output_event(event)
-        logging.info(f"Generated event: {event['eventName']} with status: {status} at time: {current_time}")
-
-    def generate_event_details(self, event_type):
-        if event_type == 'PROCESS':
-            return {
-                "processId": "proc-12345",
-                "processName": "SampleProcess"
-            }
-        elif event_type == 'FILE':
-            return {
-                "fileName": "sample.csv",
-                "fileLocation": "/data/files",
-                "fileSize": 1024,
-                "numberOfRows": 100
-            }
-        elif event_type == 'MESSAGE':
-            return {
-                "messageId": "msg-12345",
-                "messageQueue": "queue-01"
-            }
-        elif event_type == 'DATABASE':
-            return {
-                "databaseName": "test_db",
-                "tableName": "test_table",
-                "operation": "INSERT"
-            }
-        else:
-            return {}
-
-    def output_event(self, event):
-        if self.output_mode == 'console':
-            print(json.dumps(event, indent=2))
-        elif self.output_mode == 'endpoint' and self.endpoint_url:
-            try:
-                response = requests.post(self.endpoint_url, json=event)
-                response.raise_for_status()
-                logging.info(f"Event sent to {self.endpoint_url}: {response.status_code}")
-            except requests.RequestException as e:
-                logging.error(f"Failed to send event to {self.endpoint_url}: {e}")
-
-    def process_time_to_minutes(self, process_time):
-        return int(process_time.split()[0])
+        self.event_helper = EventHelper(output_mode=output_mode, endpoint_url=endpoint_url)
+        self.calendar = ProcessingCalendar()  # Initialize the calendar
 
     def randomize_start_time(self, schedule_time, has_dependencies):
         if has_dependencies:
@@ -98,16 +45,20 @@ class EventGenerator:
         variance = random.uniform(0, self.processing_time_variance)
         return processing_time * (1 + variance)
 
+    def process_time_to_minutes(self, process_time):
+        return int(process_time.split()[0])
+
     def dependencies_met(self, process):
         for dependency in process["dependencies"]:
             if self.process_status.get(dependency) != "SUCCESS":
                 return False
         return True
 
-    def schedule_initial_processes(self):
+    def schedule_initial_processes(self, business_date):
         process_queue = []
         for config in self.configs:
             for process in config["processes"]:
+                process["businessDate"] = business_date  # Assign business date to each process
                 self.process_status[process["process_id"]] = "PENDING"
                 if not process["dependencies"]:
                     schedule_time = datetime.strptime(f"{self.start_time.date()} {process['schedule_time']}",
@@ -142,7 +93,9 @@ class EventGenerator:
                     process_queue.append((next_time, next_process, status))
                     continue
 
-                self.generate_event(next_process, status, current_time)
+                event = self.event_helper.generate_event(next_process, status, current_time)
+                self.event_helper.output_event(event)
+                self.process_status[next_process["process_id"]] = status
 
                 if status == "STARTED":
                     processing_time = self.process_time_to_minutes(next_process["processing_time"])
@@ -174,9 +127,36 @@ class EventGenerator:
                     logging.info(f"Sleeping for: {time_to_wait} seconds")
                     time.sleep(time_to_wait)
 
-    def run(self):
-        process_queue = self.schedule_initial_processes()
+    def run_for_business_date(self, business_date):
+        logging.info(f"Processing configurations for business date: {business_date}")
+        self.start_time = datetime.combine(datetime.strptime(business_date, "%Y-%m-%d"), self.start_time.time())
+        self.program_start_time = datetime.now()  # Reset the program start time
+        self.virtual_time = self.start_time  # Reset the virtual time
+        process_queue = self.schedule_initial_processes(business_date)
         self.process_events(process_queue)
+
+    def run_real_time(self):
+        while True:
+            current_date = datetime.now().date()
+            if self.calendar.is_business_day(current_date):
+                self.run_for_business_date(current_date.strftime("%Y-%m-%d"))
+                while datetime.now().date() == current_date:
+                    time.sleep(60)  # Sleep for a minute before checking the date again
+            else:
+                time.sleep(3600)  # Sleep for an hour if it's not a business day
+
+    def run(self, start_business_date=None, number_of_days=None):
+        if self.mode == 'real_time':
+            self.run_real_time()
+        else:
+            current_date = start_business_date
+            days_processed = 0
+
+            while days_processed < number_of_days:
+                if self.calendar.is_business_day(current_date):
+                    self.run_for_business_date(current_date.strftime("%Y-%m-%d"))
+                    days_processed += 1
+                current_date += timedelta(days=1)
 
 
 def load_configs(directory):
@@ -213,15 +193,11 @@ if __name__ == "__main__":
     dependency_variance_min = int(config_params.get('dependency_variance_min', 1))
     dependency_variance_max = int(config_params.get('dependency_variance_max', 2))
     processing_time_variance = float(config_params.get('processing_time_variance', 1.0))
+    start_business_date = datetime.strptime(config_params.get('start_business_date'), "%Y-%m-%d")
+    number_of_days = int(config_params.get('number_of_days', 1))
 
     configs = load_configs(directory_path)
 
-    business_date = datetime.now().strftime("%Y-%m-%d")
-    for config in configs:
-        for process in config["processes"]:
-            process["businessDate"] = business_date  # Assign business date to each process
-
-    print(f"Processing configurations for business date: {business_date}")
     event_generator = EventGenerator(
         configs,
         mode=mode,
@@ -234,4 +210,4 @@ if __name__ == "__main__":
         dependency_variance_max=dependency_variance_max,
         processing_time_variance=processing_time_variance
     )
-    event_generator.run()
+    event_generator.run(start_business_date, number_of_days)
