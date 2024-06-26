@@ -34,9 +34,9 @@ class EventHelper:
         else:
             return {}
 
-    def generate_event(self, process, status, current_time):
+    def generate_event(self, process, status, current_time, business_date):
         event = {
-            "businessDate": process.get("businessDate"),
+            "businessDate": business_date,
             "eventName": process["process_id"],
             "eventType": process["type"],
             "batchOrRealtime": "Batch",

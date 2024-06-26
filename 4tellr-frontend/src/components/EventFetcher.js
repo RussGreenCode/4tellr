@@ -17,7 +17,7 @@ const EventFetcher = () => {
 
       let color;
       if (event.outcomeStatus !== 'N/A') {
-        color = event.outcomeStatus === 'NEW' ? 'white'
+        color = event.outcomeStatus === 'NEW' ? 'blue'
               : event.outcomeStatus === 'ON_TIME' ? 'lightgreen'
               : event.outcomeStatus === 'MEETS_SLO' ? 'darkgreen'
               : event.outcomeStatus === 'MEETS_SLA' ? 'orange'

@@ -1,0 +1,106 @@
+{
+  "application": "Colossus",
+  "processes": [
+    {
+      "process_id": "Colossus_MarketData_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_MarketData_Standardisation"]
+    },
+    {
+      "process_id": "Colossus_TradeData_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_Trades_Standardisation"]
+    },
+    {
+      "process_id": "Colossus_Positions_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_Positions_Standardisation"]
+    },
+    {
+      "process_id": "Colossus_Cash_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_Cash_Standardisation"]
+    },
+    {
+      "process_id": "Colossus_ReferenceData_Load",
+      "type": "FILE",
+      "processing_time": "30 minutes",
+      "dependencies": [
+        "Fortress_Account_Standardisation",
+        "Fortress_Client_Standardisation",
+        "Fortress_Securities_Standardisation",
+        "Fortress_Product_Standardisation"
+      ]
+    },
+    {
+      "process_id": "Colossus_Data_Integration",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": [
+        "Colossus_MarketData_Load",
+        "Colossus_TradeData_Load",
+        "Colossus_Positions_Load",
+        "Colossus_Cash_Load",
+        "Colossus_ReferenceData_Load"
+      ]
+    },
+    {
+      "process_id": "Colossus_VaR_Calculation",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_Data_Integration"]
+    },
+    {
+      "process_id": "Colossus_Sensitivity_Analysis",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_VaR_Calculation"]
+    },
+    {
+      "process_id": "Colossus_Stress_Testing",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_VaR_Calculation"]
+    },
+    {
+      "process_id": "Colossus_Risk_Factor_Analysis",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_VaR_Calculation"]
+    },
+    {
+      "process_id": "Colossus_Scenario_Analysis",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_VaR_Calculation"]
+    },
+    {
+      "process_id": "Colossus_Reporting",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": [
+        "Colossus_VaR_Calculation",
+        "Colossus_Sensitivity_Analysis",
+        "Colossus_Stress_Testing",
+        "Colossus_Risk_Factor_Analysis",
+        "Colossus_Scenario_Analysis"
+      ]
+    },
+    {
+      "process_id": "Colossus_Review_Validation",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_Reporting"]
+    },
+    {
+      "process_id": "Colossus_Compliance_Documentation",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_Review_Validation"]
+    }
+  ]
+}

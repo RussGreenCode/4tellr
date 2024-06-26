@@ -1,0 +1,140 @@
+{
+  "application": "ClearWater",
+  "processes": [
+    {
+      "process_id": "ClearWater_Call_Report",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_FR_Y-9C",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_FR_Y-14M_Q",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_Form_10-K",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_Form_10-Q",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_DFAST",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "Flash_Stress_Testing",
+        "Flash_Scenario_Analysis"
+      ]
+    },
+    {
+      "process_id": "ClearWater_FSA_Reports",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_PRA_Reports",
+      "type": "PROCESS",
+      "schedule_time": "15:00",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_COREP",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_FINREP",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_BoE_Stress_Testing",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "Flash_Stress_Testing",
+        "Flash_Scenario_Analysis"
+      ]
+    },
+    {
+      "process_id": "ClearWater_CFO_Financial_Performance_Report",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_CRO_Risk_Exposure_Report",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_CEO_Executive_Summary_Report",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting",
+        "Colossus_Reporting",
+        "Flash_Reporting"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "application": "Fortress",
+  "processes": [
+    {
+      "process_id": "Fortress_Account_Receipt",
+      "type": "FILE",
+      "schedule_time": "21:00",
+      "processing_time": "20 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "Fortress_Account_Validation",
+      "type": "FILE",
+      "processing_time": "25 minutes",
+      "dependencies": ["Fortress_Account_Receipt"]
+    },
+    {
+      "process_id": "Fortress_Account_Standardisation",
+      "type": "FILE",
+      "processing_time": "30 minutes",
+      "dependencies": ["Fortress_Account_Validation"]
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "application": "Flash",
+  "processes": [
+    {
+      "process_id": "Flash_MarketData_Load",
+      "type": "FILE",
+      "schedule_time": "01:00",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_MarketData_Standardisation"]
+    },
+    {
+      "process_id": "Flash_TradeData_Load",
+      "type": "FILE",
+      "schedule_time": "01:20",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_Trades_Standardisation"]
+    },
+    {
+      "process_id": "Flash_Positions_Load",
+      "type": "FILE",
+      "schedule_time": "01:40",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_Positions_Standardisation"]
+    },
+    {
+      "process_id": "Flash_Cash_Load",
+      "type": "FILE",
+      "schedule_time": "02:00",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_Cash_Standardisation"]
+    },
+    {
+      "process_id": "Flash_ReferenceData_Load",
+      "type": "FILE",
+      "schedule_time": "02:20",
+      "processing_time": "30 minutes",
+      "dependencies": [
+        "Fortress_Account_Standardisation",
+        "Fortress_Client_Standardisation",
+        "Fortress_Securities_Standardisation",
+        "Fortress_Product_Standardisation"
+      ]
+    },
+    {
+      "process_id": "Flash_CreditRisk_Data_Integration",
+      "type": "PROCESS",
+      "schedule_time": "02:50",
+      "processing_time": "30 minutes",
+      "dependencies": [
+        "Flash_MarketData_Load",
+        "Flash_TradeData_Load",
+        "Flash_Positions_Load",
+        "Flash_Cash_Load",
+        "Flash_ReferenceData_Load"
+      ]
+    },
+    {
+      "process_id": "Flash_Exposure_Calculation",
+      "type": "PROCESS",
+      "schedule_time": "03:20",
+      "processing_time": "30 minutes",
+      "dependencies": ["Flash_CreditRisk_Data_Integration"]
+    },
+    {
+      "process_id": "Flash_Probability_of_Default_Calculation",
+      "type": "PROCESS",
+      "schedule_time": "03:50",
+      "processing_time": "20 minutes",
+      "dependencies": ["Flash_CreditRisk_Data_Integration"]
+    },
+    {
+      "process_id": "Flash_Loss_Given_Default_Calculation",
+      "type": "PROCESS",
+      "schedule_time": "04:10",
+      "processing_time": "20 minutes",
+      "dependencies": ["Flash_CreditRisk_Data_Integration"]
+    },
+    {
+      "process_id": "Flash_Exposure_at_Default_Calculation",
+      "type": "PROCESS",
+      "schedule_time": "04:30",
+      "processing_time": "20 minutes",
+      "dependencies": ["Flash_CreditRisk_Data_Integration"]
+    },
+    {
+      "process_id": "Flash_Credit_VaR_Calculation",
+      "type": "PROCESS",
+      "schedule_time": "04:50",
+      "processing_time": "30 minutes",
+      "dependencies": [
+        "Flash_Exposure_Calculation",
+        "Flash_Probability_of_Default_Calculation",
+        "Flash_Loss_Given_Default_Calculation",
+        "Flash_Exposure_at_Default_Calculation"
+      ]
+    },
+    {
+      "process_id": "Flash_Stress_Testing",
+      "type": "PROCESS",
+      "schedule_time": "05:20",
+      "processing_time": "30 minutes",
+      "dependencies": ["Flash_CreditRisk_Data_Integration"]
+    },
+    {
+      "process_id": "Flash_Scenario_Analysis",
+      "type": "PROCESS",
+      "schedule_time": "05:50",
+      "processing_time": "30 minutes",
+      "dependencies": ["Flash_CreditRisk_Data_Integration"]
+    },
+    {
+      "process_id": "Flash_Reporting",
+      "type": "PROCESS",
+      "schedule_time": "06:20",
+      "processing_time": "30 minutes",
+      "dependencies": [
+        "Flash_Credit_VaR_Calculation",
+        "Flash_Stress_Testing",
+        "Flash_Scenario_Analysis"
+      ]
+    },
+    {
+      "process_id": "Flash_Review_Validation",
+      "type": "PROCESS",
+      "schedule_time": "06:50",
+      "processing_time": "30 minutes",
+      "dependencies": ["Flash_Reporting"]
+    },
+    {
+      "process_id": "Flash_Compliance_Documentation",
+      "type": "PROCESS",
+      "schedule_time": "07:20",
+      "processing_time": "30 minutes",
+      "dependencies": ["Flash_Review_Validation"]
+    }
+  ]
+}

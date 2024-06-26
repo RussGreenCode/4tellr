@@ -1,0 +1,24 @@
+{
+  "application": "Fortress",
+  "processes": [
+    {
+      "process_id": "Fortress_Cash_Receipt",
+      "type": "FILE",
+      "schedule_time": "19:00",
+      "processing_time": "20 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "Fortress_Cash_Validation",
+      "type": "FILE",
+      "processing_time": "25 minutes",
+      "dependencies": ["Fortress_Cash_Receipt"]
+    },
+    {
+      "process_id": "Fortress_Cash_Standardisation",
+      "type": "FILE",
+      "processing_time": "30 minutes",
+      "dependencies": ["Fortress_Cash_Validation"]
+    }
+  ]
+}

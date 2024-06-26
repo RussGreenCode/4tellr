@@ -1,0 +1,107 @@
+{
+  "application": "SubLedger",
+  "processes": [
+    {
+      "process_id": "SubLedger_Account_Load",
+      "type": "FILE",
+      "processing_time": "15 minutes",
+      "dependencies": ["Fortress_Account_Standardisation"]
+    },
+    {
+      "process_id": "SubLedger_Client_Load",
+      "type": "FILE",
+      "processing_time": "15 minutes",
+      "dependencies": ["Fortress_Client_Standardisation"]
+    },
+    {
+      "process_id": "SubLedger_Securities_Load",
+      "type": "FILE",
+      "processing_time": "15 minutes",
+      "dependencies": ["Fortress_Securities_Standardisation"]
+    },
+    {
+      "process_id": "SubLedger_Product_Load",
+      "type": "FILE",
+      "schedule_time": "01:45",
+      "processing_time": "15 minutes",
+      "dependencies": ["Fortress_Product_Standardisation"]
+    },
+    {
+      "process_id": "SubLedger_Positions_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": [
+        "SubLedger_Account_Load",
+        "SubLedger_Client_Load",
+        "SubLedger_Securities_Load",
+        "SubLedger_Product_Load",
+        "Fortress_Positions_Standardisation"
+      ]
+    },
+    {
+      "process_id": "SubLedger_Cash_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": [
+        "SubLedger_Account_Load",
+        "SubLedger_Client_Load",
+        "SubLedger_Securities_Load",
+        "SubLedger_Product_Load",
+        "Fortress_Cash_Standardisation"
+      ]
+    },
+    {
+      "process_id": "SubLedger_Trades_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": [
+        "SubLedger_Account_Load",
+        "SubLedger_Client_Load",
+        "SubLedger_Securities_Load",
+        "SubLedger_Product_Load",
+        "Fortress_Trades_Standardisation"
+      ]
+    },
+    {
+      "process_id": "SubLedger_MarketData_Load",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": [
+        "SubLedger_Account_Load",
+        "SubLedger_Client_Load",
+        "SubLedger_Securities_Load",
+        "SubLedger_Product_Load",
+        "Fortress_MarketData_Standardisation"
+      ]
+    },
+    {
+      "process_id": "SubLedger_Reconciliation",
+      "type": "PROCESS",
+      "processing_time": "50 minutes",
+      "dependencies": [
+        "SubLedger_Positions_Load",
+        "SubLedger_Cash_Load",
+        "SubLedger_Trades_Load",
+        "SubLedger_MarketData_Load"
+      ]
+    },
+    {
+      "process_id": "SubLedger_FX_Revaluation",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["SubLedger_Reconciliation"]
+    },
+    {
+      "process_id": "SubLedger_Tax_Allocation",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["SubLedger_FX_Revaluation"]
+    },
+    {
+      "process_id": "SubLedger_Financial_Reporting",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["SubLedger_Tax_Allocation"]
+    }
+  ]
+}

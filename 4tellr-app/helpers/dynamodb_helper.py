@@ -214,12 +214,12 @@ class DynamoDBHelper:
                     result.append({
                         'eventId': event_id,
                         'eventType': event_type,
-                        'type': 'NEW_EVT',
+                        'type': 'EVT',
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
                         'TimeValue': time_value,
-                        'outcomeStatus': 'NEW_EVENT'
+                        'outcomeStatus': 'NEW_EVT'
                     })
 
             elif event_id.startswith('EXP#') and event_key not in processed_event_keys:
@@ -228,12 +228,12 @@ class DynamoDBHelper:
                     result.append({
                         'eventId': event_id,
                         'eventType': event_type,
-                        'type': 'NOT_MET_EXP',
+                        'type': 'EXP',
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
                         'TimeValue': time_value,
-                        'outcomeStatus': 'NOT_MET_EXP'
+                        'outcomeStatus': 'NO_ASSO_EVT'
                     })
 
         return result
@@ -262,23 +262,52 @@ class DynamoDBHelper:
     def calculate_expected_time(self, events):
         utc = pytz.UTC
 
-        # Extract times and convert to datetime objects in UTC
-        times = [datetime.fromisoformat(event['eventTime']).astimezone(utc).time() for event in events]
+        debug = False
+
+        times_in_seconds = []
+        for event in events:
+            event_time = datetime.fromisoformat(event['eventTime']).astimezone(utc)
+            business_date_utc = datetime.strptime(event['businessDate'], "%Y-%m-%d").replace(tzinfo=utc)
+
+            if event['eventName'] == 'Fortress_MarketData_Receipt':
+                self.logger.info(f"event_time: {event_time}  business_date_utc: {business_date_utc}")
+                debug = True
+
+            # Calculate the total seconds from the start of the business date to the event time
+            time_difference = (event_time - business_date_utc).total_seconds()
+            times_in_seconds.append(time_difference)
+
 
         # Calculate average time excluding outliers
-        times_in_seconds = [t.hour * 3600 + t.minute * 60 + t.second for t in times]
         mean = statistics.mean(times_in_seconds)
         stdev = statistics.stdev(times_in_seconds)
+
+        if debug:
+            self.logger.info(f"Mean time in seconds: {mean}")
+            self.logger.info(f"Standard deviation: {stdev}")
 
         filtered_times = [t for t in times_in_seconds if abs(t - mean) < 2 * stdev]
         if filtered_times and len(filtered_times) > 1:
             avg_seconds = int(statistics.mean(filtered_times))
         else:
-            avg_seconds = mean
+            avg_seconds = int(mean)
 
-        avg_time = datetime.min + timedelta(seconds=avg_seconds)
-        avg_time_utc = avg_time.time().replace(tzinfo=utc)  # Ensure the time is in UTC
-        return avg_time_utc
+        if debug:
+            self.logger.info(f"Average time in seconds after filtering: {avg_seconds}")
+
+        avg_time_delta = timedelta(seconds=avg_seconds)
+
+        # Calculate days, hours, minutes, and seconds from the avg_time_delta
+        total_hours = avg_time_delta.days * 24 + avg_time_delta.seconds // 3600
+        minutes, seconds = divmod(avg_time_delta.seconds % 3600, 60)
+
+        # Format the time as total hours, minutes, and seconds
+        avg_time_elapsed = f"{total_hours:02}:{minutes:02}:{seconds:02}"
+
+        if debug:
+            self.logger.info(f"Average time elapsed: {avg_time_elapsed}")
+
+        return avg_time_elapsed
 
     def update_expected_times(self):
         events = self.scan_events_last_month()
@@ -295,14 +324,14 @@ class DynamoDBHelper:
 
         for (event_name, event_status), group in grouped_events.items():
             try:
-                expected_time = self.calculate_expected_time(group)
-                self.logger.info(f'Storing {event_name}#{event_status} for expected_time: {expected_time.isoformat()}')
-                if expected_time:
+                avg_time_elapsed = self.calculate_expected_time(group)
+                self.logger.info(f'Storing {event_name}#{event_status} for time after T +: {avg_time_elapsed}')
+                if avg_time_elapsed:
 
                     self.stats_table.put_item(
                         Item={
                             'event_name_and_status': event_name + '#' + event_status,
-                            'expected_time': expected_time.isoformat(),
+                            'expected_time': avg_time_elapsed,
                             'last_updated': datetime.now().isoformat()
                         }
                     )
@@ -341,18 +370,20 @@ class DynamoDBHelper:
 
         for metric in latest_metrics:
             event_name, event_status = metric['event_name_and_status'].split('#')
-            expected_time_str = metric['expected_time']
+            delay_str = metric['expected_time']  # Now the delay in HH:MM:SS format
+
             try:
-                # Parse the time string with timezone
-                expected_time_full = parser.parse(expected_time_str)
-                # Extract only the time component, ignoring the timezone
-                expected_time = expected_time_full.time()
+                # Parse the delay string to a timedelta
+                hours, minutes, seconds = map(int, delay_str.split(':'))
+                delay_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
             except ValueError as e:
                 # Log the error and the problematic string
-                print(f"Error parsing time from '{expected_time_str}': {e}")
+                print(f"Error parsing delay from '{delay_str}': {e}")
                 continue  # Skip this iteration and proceed with the next metric
 
-            expected_datetime = datetime.combine(datetime.strptime(business_date, "%Y-%m-%d"), expected_time)
+            # Combine the business_date and delay_timedelta to get the expected datetime in UTC
+            business_date_dt = datetime.strptime(business_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            expected_datetime = business_date_dt + delay_timedelta
 
             expectation_id = f'EXP#{event_name}#{event_status}#{str(uuid.uuid4())}'
             expectation_data = {

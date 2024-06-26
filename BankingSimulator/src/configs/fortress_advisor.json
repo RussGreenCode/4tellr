@@ -1,0 +1,24 @@
+{
+  "application": "Fortress",
+  "processes": [
+    {
+      "process_id": "Fortress_Advisor_Receipt",
+      "type": "FILE",
+      "schedule_time": "20:00",
+      "processing_time": "20 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "Fortress_Advisor_Validation",
+      "type": "FILE",
+      "processing_time": "20 minutes",
+      "dependencies": ["Fortress_Advisor_Receipt"]
+    },
+    {
+      "process_id": "Fortress_Advisor_Standardisation",
+      "type": "FILE",
+      "processing_time": "30 minutes",
+      "dependencies": ["Fortress_Advisor_Validation"]
+    }
+  ]
+}
