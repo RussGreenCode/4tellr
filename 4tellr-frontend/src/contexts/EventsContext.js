@@ -32,19 +32,19 @@ export const EventsProvider = ({ children }) => {
   });
 
 
-  const filterEvents = (events, criteria) => {
+  const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria) => {
     // Example filtering logic based on search criteria
     return events.filter(event => {
       let matches = true;
-      if (criteria.eventType) {
-        matches = matches && event.type === criteria.eventType;
+
+      if (eventCriteria.eventName) {
+        matches = matches && event.eventName.toLowerCase().includes(eventCriteria.eventName.toLowerCase());
       }
-      if (criteria.eventStatus) {
-        matches = matches && event.outcomeStatus === criteria.eventStatus;
+
+      if (statusCriteria.eventStatus) {
+        matches = matches && event.eventStatus.toLowerCase().includes(statusCriteria.eventStatus.toLowerCase());
       }
-      if (criteria.eventKey) {
-        matches = matches && event.eventKey.toLowerCase().includes(criteria.eventKey.toLowerCase());
-      }
+
       // Add more filtering conditions here as needed
       return matches;
     });
@@ -132,7 +132,7 @@ export const EventsProvider = ({ children }) => {
 
   useEffect(() => {
     // Filter events whenever events or search criteria change
-    const updatedFilteredEvents = filterEvents(events, searchEventCriteria);
+    const updatedFilteredEvents = filterEvents(events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria );
     setFilteredEvents(updatedFilteredEvents);
 
     const updatedFavouriteFilteredEvents = filterFavouriteEvents(events)
@@ -145,7 +145,7 @@ export const EventsProvider = ({ children }) => {
     setFavouriteMetrics(favouriteCalculatedMetrics)
     console.log('Filtered events:', filteredEvents);
 
-  }, [events, searchEventCriteria, favouriteGroups]);
+  }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, favouriteGroups]);
 
   useEffect(() => {
     fetchGroupList()
@@ -155,9 +155,9 @@ export const EventsProvider = ({ children }) => {
 
   return (
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
-      setSearchStatusCriteria, setSearchApplicationCriteria, setSearchEventCriteria, selectedEvent, setSelectedEvent,
+      setSearchStatusCriteria, searchStatusCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchEventCriteria, searchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
-      groupList, fetchGroupList, setSearchGroupCriteria, setShowLabels, showLabels, metrics, filteredMetrics, favouriteMetrics}}>
+      groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics, filteredMetrics, favouriteMetrics}}>
       {children}
     </EventsContext.Provider>
   );

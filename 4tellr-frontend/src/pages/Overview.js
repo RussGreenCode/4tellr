@@ -16,7 +16,7 @@ const collapsedWidth = 60; // Fixed width for the collapsed drawer
 const Overview = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sortCriterion, setSortCriterion] = useState('EXP');
-  const { setSearchEventCriteria, setSearchApplicationCriteria, setSearchStatusCriteria, setSelectedTypes, selectedTypes, groupList, setSearchGroupCriteria, setShowLabels, showLabels} = useContext(EventsContext);
+  const { setSearchEventCriteria, searchEventCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchStatusCriteria, searchStatusCriteria, setSelectedTypes, selectedTypes, groupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels} = useContext(EventsContext);
   const [transformedGroupList, setTransformedGroupList] = useState([]);
 
 
@@ -58,13 +58,13 @@ const Overview = () => {
           <FilteredSearchBar label="Search Group" setSearchEntry={setSearchGroupCriteria}  options={transformedGroupList}/>
         </Box>
         <Box mb={2}>
-          <SearchBar label="Search Application" setSearchEntry={setSearchApplicationCriteria} />
+          <SearchBar label="Search Application" setSearchEntry={setSearchApplicationCriteria} keyName={'appName'} initialValue={searchApplicationCriteria['appName']} />
         </Box>
         <Box mb={2}>
-          <SearchBar label="Search Event" setSearchEntry={setSearchEventCriteria} />
+          <SearchBar label="Search Event" setSearchEntry={setSearchEventCriteria} keyName={'eventName'} initialValue={searchEventCriteria['eventName']} />
         </Box>
         <Box mb={2}>
-          <SearchBar label="Search Status" setSearchEntry={setSearchStatusCriteria} />
+          <SearchBar label="Search Status" setSearchEntry={setSearchStatusCriteria} keyName={'eventStatus'} initialValue={searchStatusCriteria['eventStatus']} />
         </Box>
         <Box mt={4}>
           <FormControl component="fieldset">

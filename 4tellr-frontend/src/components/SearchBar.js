@@ -3,13 +3,13 @@ import React, {useState} from 'react';
 import { TextField, Box } from '@mui/material';
 import '../styles/SearchBar.css';
 
-const SearchBar = ({ setSearchEntry, label }) => {
-  const [searchText, setSearchText] = useState('');
+const SearchBar = ({ setSearchEntry, label, keyName, initialValue }) => {
+  const [searchText, setSearchText] = useState(initialValue || '');
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchText(value);
-    setSearchEntry({ eventKey: value });
+    setSearchEntry({ [keyName]: value });
   };
 
   return (

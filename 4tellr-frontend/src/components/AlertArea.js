@@ -105,8 +105,6 @@ const AlertArea = () => {
 
   const monthlyData = useMemo(() => transformMonthlyEvents(monthlyEvents), [monthlyEvents]);
 
-
-
   const generate15MinuteTicks = (min, max) => {
     const ticks = [];
     const start = min
@@ -170,8 +168,9 @@ const AlertArea = () => {
               <Grid item xs={12} md={6}>
                 <Paper className="alert-paper" elevation={1}>
                   <Typography variant="h6">Event Details</Typography>
-                  <Typography>Type: {selectedEvent.type}</Typography>
                   <Typography>Name: {selectedEvent.event}</Typography>
+                  <Typography>Status: {selectedEvent.eventStatus}</Typography>
+                  <Typography>Type: {selectedEvent.type}</Typography>
                   <Typography>Status: {selectedEvent.status}</Typography>
                   <Typography>Time: {new Date(selectedEvent.time).toISOString()}</Typography>
                   <Typography>Y-Coordinate: {selectedEvent.yCoordinate}</Typography>

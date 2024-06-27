@@ -63,8 +63,8 @@ const SummaryMetrics = () => {
         </Grid>
         <Grid item>
           <Paper className="status-block not-met-exp">
-            <Typography variant="h6">Not Met Exp</Typography>
-            <Typography variant="h4">{metrics.eventStatus.NOT_MET_EXP}</Typography>
+            <Typography variant="h6">No Event Yet</Typography>
+            <Typography variant="h4">{metrics.eventStatus.NO_ASSO_EVT}</Typography>
           </Paper>
         </Grid>
         <Grid item>
@@ -94,7 +94,7 @@ const SummaryMetrics = () => {
         <Grid item>
           <Paper className="status-block new-event">
             <Typography variant="h6">New Event</Typography>
-            <Typography variant="h4">{metrics.eventStatus.NEW_EVENT}</Typography>
+            <Typography variant="h4">{metrics.eventStatus.NEW_EVT}</Typography>
           </Paper>
         </Grid>
       </Grid>
