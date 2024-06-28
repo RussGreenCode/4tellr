@@ -8,5 +8,5 @@ start_time_variance=20
 dependency_variance_min=1
 dependency_variance_max=2
 processing_time_variance=1.0
-start_business_date=2024-06-26
-number_of_days=3
+start_business_date=2024-07-01
+number_of_days=1

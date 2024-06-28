@@ -27,7 +27,7 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 const AlertArea = () => {
-  const { filteredEvents, selectedEvent, setSearchCriteria, tabIndex, setTabIndex } = useContext(EventsContext);
+  const { filteredEvents, selectedEvent, setSearchCriteria, tabIndex, setTabIndex, filteredMetrics } = useContext(EventsContext);
   const [monthlyEvents, setMonthlyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,33 +55,13 @@ const AlertArea = () => {
     }
   }, [selectedEvent]);
 
-  // Calculate metrics
-  const metrics = useMemo(() => {
-    const totalEvents = filteredEvents.length;
-    const expectations = filteredEvents.filter(event => event.type === 'EXP');
-    const completed = expectations.filter(event => event.outcomeStatus === 'ON_TIME' || event.outcomeStatus === 'MEETS_SLO' || event.outcomeStatus === 'MEETS_SLA').length;
-    const onTime = expectations.filter(event => event.outcomeStatus === 'ON_TIME').length;
-    const missedExpectations = expectations.filter(event => event.outcomeStatus === 'MEETS_SLO').length;
-    const missedSLOs = expectations.filter(event => event.outcomeStatus === 'MEETS_SLA').length;
-    const errors = expectations.filter(event => event.outcomeStatus === 'ERROR').length;
-
-    return {
-      totalEvents,
-      expectations: expectations.length,
-      completed,
-      errors,
-      missedExpectations,
-      missedSLOs,
-      onTime
-    };
-  }, [filteredEvents]);
 
   // Data for bar chart
   const barData = [
-    { name: 'On Time', value: metrics.onTime, color: 'lightgreen', eventType: 'ON_TIME' },
-    { name: 'Missed Expectations', value: metrics.missedExpectations, color: 'darkgreen', eventType: 'MEETS_SLO' },
-    { name: 'Missed SLO', value: metrics.missedSLOs, color: 'orange', eventType: 'MEETS_SLA' },
-    { name: 'Errors', value: metrics.errors, color: 'red', eventType: 'ERROR' }
+    { name: 'On Time', value: filteredMetrics.eventStatus.ON_TIME, color: 'lightgreen', eventType: 'ON_TIME' },
+    { name: 'Missed EXP', value: filteredMetrics.eventStatus.MEETS_SLO, color: 'darkgreen', eventType: 'MEETS_SLO' },
+    { name: 'Missed SLO', value: filteredMetrics.eventStatus.MEETS_SLA, color: 'orange', eventType: 'MEETS_SLA' },
+    { name: 'Missed SLA', value: filteredMetrics.eventStatus.LATE, color: 'red', eventType: 'LATE' }
   ];
 
   // Handle bar click to set search criteria
@@ -163,13 +143,13 @@ const AlertArea = () => {
 
       {tabIndex === 1 && (
         <Box>
-          {selectedEvent ? (
+          {(selectedEvent && Object.keys(selectedEvent).length > 0) ? (
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <Paper className="alert-paper" elevation={1}>
                   <Typography variant="h6">Event Details</Typography>
                   <Typography>Name: {selectedEvent.event}</Typography>
-                  <Typography>Status: {selectedEvent.eventStatus}</Typography>
+                  <Typography>Result: {selectedEvent.result}</Typography>
                   <Typography>Type: {selectedEvent.type}</Typography>
                   <Typography>Status: {selectedEvent.status}</Typography>
                   <Typography>Time: {new Date(selectedEvent.time).toISOString()}</Typography>

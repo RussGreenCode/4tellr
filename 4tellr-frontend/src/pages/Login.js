@@ -19,9 +19,9 @@ const Login = ({ onLogin }) => {
       if(response.data.isAuthenticated) {
         setIsAuthenticated(response.data.isAuthenticated);
         onLogin(email);
-        setCurrentUser(response.data.user)
+        setCurrentUser(response.data.user);
 
-        fetchUser()
+        fetchUser(email)
 
         navigate('/'); // Navigate to the dashboard upon successful login
       } else {

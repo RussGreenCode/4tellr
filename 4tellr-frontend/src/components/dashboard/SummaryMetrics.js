@@ -18,7 +18,7 @@ const SummaryMetrics = () => {
   ];
 
   const totalStatus = data.reduce((acc, item) => acc + item.value, 0);
-  const remaining = metrics.summary.expectationCount - totalStatus;
+  const remaining = metrics.summary.totalExpectation - totalStatus;
   if (remaining > 0) {
     data.push({ name: 'Remaining', value: remaining, color: '#E0E0E0' }); // Adjust color for light/dark mode
   }
@@ -64,30 +64,30 @@ const SummaryMetrics = () => {
         <Grid item>
           <Paper className="status-block not-met-exp">
             <Typography variant="h6">No Event Yet</Typography>
-            <Typography variant="h4">{metrics.eventStatus.NO_ASSO_EVT}</Typography>
+            <Typography variant="h4">{metrics.eventStatus.BREACHED_EXP}</Typography>
           </Paper>
         </Grid>
         <Grid item>
           <Paper className="status-block late">
-            <Typography variant="h6">Late</Typography>
+            <Typography variant="h6">Arrived Late</Typography>
             <Typography variant="h4">{metrics.eventStatus.LATE}</Typography>
           </Paper>
         </Grid>
         <Grid item>
           <Paper className="status-block meets-sla">
-            <Typography variant="h6">Meets SLA</Typography>
+            <Typography variant="h6">Met SLA</Typography>
             <Typography variant="h4">{metrics.eventStatus.MEETS_SLA}</Typography>
           </Paper>
         </Grid>
         <Grid item>
           <Paper className="status-block meets-slo">
-            <Typography variant="h6">Meets SLO</Typography>
+            <Typography variant="h6">Met SLO</Typography>
             <Typography variant="h4">{metrics.eventStatus.MEETS_SLO}</Typography>
           </Paper>
         </Grid>
         <Grid item>
           <Paper className="status-block on-time">
-            <Typography variant="h6">On Time</Typography>
+            <Typography variant="h6">Met EXP</Typography>
             <Typography variant="h4">{metrics.eventStatus.ON_TIME}</Typography>
           </Paper>
         </Grid>

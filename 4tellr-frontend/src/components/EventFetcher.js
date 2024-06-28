@@ -17,13 +17,19 @@ const EventFetcher = () => {
 
       let color;
       if (event.outcomeStatus !== 'N/A') {
-        color = event.outcomeStatus === 'NEW' ? 'blue'
-              : event.outcomeStatus === 'ON_TIME' ? 'lightgreen'
-              : event.outcomeStatus === 'MEETS_SLO' ? 'darkgreen'
-              : event.outcomeStatus === 'MEETS_SLA' ? 'orange'
-              : 'red';
+        color = event.plotStatus === 'NEW' ? 'blue'
+              : event.plotStatus === 'ON_TIME' ? 'darkgreen'
+              : event.plotStatus === 'MEETS_SLO' ? 'lightgreen'
+              : event.plotStatus === 'MEETS_SLA' ? 'orange'
+              : event.plotStatus === 'MET_THRESHOLD' ? 'darkgreen'
+              : event.plotStatus === 'BREACHED' ? 'red'
+              : event.plotStatus === 'NOT_REACHED' ? 'grey'
+              : event.plotStatus === 'LATE' ? 'red'
+              : 'darkred';
       } else if (event.type === 'EXP') {
-        color = currentTime < eventTime ? 'grey' : 'red';
+        color = event.plotStatus === 'NOT_REACHED' ? 'grey'
+              : event.plotStatus === 'BREACHED' ? 'red'
+              : 'darkred';
       }
 
 
@@ -32,6 +38,7 @@ const EventFetcher = () => {
         time: eventTime.getTime(),
         event: event.eventName,
         status: event.eventStatus,
+        result: event.plotStatus,
         size: 5,
         color,
         yCoordinate: event.eventKey,

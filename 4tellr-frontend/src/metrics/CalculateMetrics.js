@@ -9,27 +9,32 @@ const CalculateMetrics = (events) => {
     LATE: [],
     ERROR: [],
     NEW_EVT: [],
-    NO_ASSO_EVT: [],
-    EXP: [],
+    NOT_REACHED_EXP: [],
+    BREACHED_EXP: [],
   };
 
   events.forEach(event => {
-    if (categorizedEvents[event.outcomeStatus]) {
+    if (event.type === 'EVT' && categorizedEvents[event.outcomeStatus]) {
       categorizedEvents[event.outcomeStatus].push(event);
     }
 
     if (event.type === 'EXP') {
-      categorizedEvents.EXP.push(event);
+      if (event.plotStatus === 'NOT_REACHED') {
+        categorizedEvents.NOT_REACHED_EXP.push(event)
+      }
+      else if (event.plotStatus === 'BREACHED_EXP') {
+        categorizedEvents.BREACHED_EXP.push(event)
+      }
     }
 
   });
 
-  let expectationCount = totalEvents + categorizedEvents.NO_ASSO_EVT.length;
+  let expectationCount = totalEvents + categorizedEvents.NOT_REACHED_EXP.length + categorizedEvents.BREACHED_EXP.length ;
 
   return {
     summary: {
-      totalEvents,
-      expectationCount,
+      totalEvents: totalEvents,
+      totalExpectation: expectationCount,
       percentageComplete: expectationCount !== 0 ? (totalEvents / expectationCount) * 100 : 0,
     },
     eventStatus: {
@@ -39,7 +44,8 @@ const CalculateMetrics = (events) => {
       LATE: categorizedEvents.LATE.length,
       ERROR: categorizedEvents.ERROR.length,
       NEW_EVT: categorizedEvents.NEW_EVT.length,
-      NO_ASSO_EVT: categorizedEvents.NO_ASSO_EVT.length,
+      NOT_REACHED_EXP: categorizedEvents.NOT_REACHED_EXP.length,
+      BREACHED_EXP: categorizedEvents.BREACHED_EXP.length,
     }
   };
 };

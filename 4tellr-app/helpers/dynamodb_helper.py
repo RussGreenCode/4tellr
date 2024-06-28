@@ -43,6 +43,24 @@ class DynamoDBHelper:
             'sla': timedelta(minutes=60)
         }
 
+    def get_plot_status(self, plot_type, outcome_status):
+
+        if outcome_status == 'ON_TIME':
+            return 'MET_THRESHOLD'
+        elif outcome_status == 'MEETS_SLO':
+            if plot_type == 'EXP':
+                return 'BREACHED'
+            else:
+                return 'MET_THRESHOLD'
+        elif outcome_status == 'MEETS_SLA':
+            if plot_type == 'SLA':
+                return 'MET_THRESHOLD'
+            else:
+                return 'BREACHED'
+        else:
+            return 'BREACHED'
+
+
     def insert_event(self, event_data):
         event_id = 'EVT#' + event_data['eventName'] + '#' + event_data['eventStatus'] + '#' + str(uuid.uuid4())
         event_data['eventId'] = event_id
@@ -130,21 +148,25 @@ class DynamoDBHelper:
 
         items = response['Items']
         result = []
+        utc = pytz.UTC
 
         # Sort the items to process outcomes first
         items.sort(key=lambda x: x['eventId'].startswith('OUT#'), reverse=True)
 
         processed_event_keys = set()
 
+        current_time = datetime.now(timezone.utc)
+
         for item in items:
             event_id = item.get('eventId')
+            type_of_event = item.get('type')
             event_type = item.get('eventType')
             event_name = item.get('eventName')
             event_status = item.get('eventStatus')
             event_key = event_name + '#' + event_status
             outcome_status = item.get('outcomeStatus', 'N/A')
 
-            if event_id.startswith('OUT#'):
+            if type_of_event == 'outcome':
                 slo_time = item.get('sloTime')
                 sla_time = item.get('slaTime')
                 event_time = item.get('eventTime')
@@ -159,7 +181,8 @@ class DynamoDBHelper:
                         'eventKey': event_key,
                         'eventStatus': event_status,
                         'TimeValue': slo_time,
-                        'outcomeStatus': outcome_status
+                        'outcomeStatus': outcome_status,
+                        'plotStatus': self.get_plot_status("SLO", outcome_status)
                     })
 
                 if sla_time:
@@ -171,7 +194,8 @@ class DynamoDBHelper:
                         'eventKey': event_key,
                         'eventStatus': event_status,
                         'TimeValue': sla_time,
-                        'outcomeStatus': outcome_status
+                        'outcomeStatus': outcome_status,
+                        'plotStatus': self.get_plot_status("SLA", outcome_status)
                     })
 
                 if event_time:
@@ -183,7 +207,8 @@ class DynamoDBHelper:
                         'eventName': event_name,
                         'eventStatus': event_status,
                         'TimeValue': event_time,
-                        'outcomeStatus': outcome_status
+                        'outcomeStatus': outcome_status,
+                        'plotStatus': outcome_status
                     })
 
                 if expected_arrival:
@@ -195,7 +220,8 @@ class DynamoDBHelper:
                         'eventName': event_name,
                         'eventStatus': event_status,
                         'TimeValue': expected_arrival,
-                        'outcomeStatus': outcome_status
+                        'outcomeStatus': outcome_status,
+                        'plotStatus': outcome_status
                     })
 
                 processed_event_keys.add(event_key)
@@ -208,7 +234,32 @@ class DynamoDBHelper:
             event_status = item.get('eventStatus')
             event_key = event_name + '#' + event_status
 
-            if event_id.startswith('EVT#') and event_key not in processed_event_keys:
+
+
+            if event_id.startswith('EXP#') and event_key not in processed_event_keys:
+
+                time_value = item.get('expectedArrival')
+                expected_time=datetime.fromisoformat(time_value).astimezone(utc)
+                thresholds = self.get_sla_slo_thresholds(event_name, event_status)
+
+                if current_time < (expected_time + thresholds['on_time']):
+                    expectation_outcome = 'NOT_REACHED'
+                else:
+                    expectation_outcome = 'BREACHED'
+
+                if time_value:
+                    result.append({
+                        'eventId': event_id,
+                        'eventType': event_type,
+                        'type': 'EXP',
+                        'eventKey': event_key,
+                        'eventName': event_name,
+                        'eventStatus': event_status,
+                        'TimeValue': time_value,
+                        'outcomeStatus': 'NO_EVT_YET',
+                        'plotStatus': expectation_outcome
+                    })
+            elif event_id.startswith('EVT#') and event_key not in processed_event_keys:
                 time_value = item.get('eventTime')
                 if time_value:
                     result.append({
@@ -219,22 +270,10 @@ class DynamoDBHelper:
                         'eventName': event_name,
                         'eventStatus': event_status,
                         'TimeValue': time_value,
-                        'outcomeStatus': 'NEW_EVT'
+                        'outcomeStatus': 'NEW_EVT',
+                        'plotStatus': 'NEW_EVT'
                     })
 
-            elif event_id.startswith('EXP#') and event_key not in processed_event_keys:
-                time_value = item.get('expectedArrival')
-                if time_value:
-                    result.append({
-                        'eventId': event_id,
-                        'eventType': event_type,
-                        'type': 'EXP',
-                        'eventKey': event_key,
-                        'eventName': event_name,
-                        'eventStatus': event_status,
-                        'TimeValue': time_value,
-                        'outcomeStatus': 'NO_ASSO_EVT'
-                    })
 
         return result
 

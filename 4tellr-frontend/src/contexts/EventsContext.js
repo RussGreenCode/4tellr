@@ -67,11 +67,11 @@ export const EventsProvider = ({ children }) => {
     }
   };
 
-  const fetchUser = async (date) => {
+  const fetchUser = async (userEmail) => {
     try {
       console.log('Retrieving User:', currentUser.email);
       const response = await axios.get('http://127.0.0.1:5000/api/get_user', {
-        params: { email: currentUser.email }
+        params: { email: userEmail }
       });
       setCurrentUser(response.data.user);
       setFavouriteGroups(response.data.groups)
