@@ -23,20 +23,6 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const getColor = (type, outcomeStatus) => {
-  if (type === 'EVT') {
-    switch (outcomeStatus) {
-      case 'NEW': return 'blue';
-      case 'ON_TIME': return 'lightgreen';
-      case 'MEETS_SLO': return 'darkgreen';
-      case 'MEETS_SLA': return 'orange';
-      default: return 'red';
-    }
-  } else {
-    return type === 'EXP' ? 'green' : (type === 'SLO' ? 'amber' : 'red');
-  }
-};
-
 const CustomShape = (props) => {
   const { cx, cy, payload } = props;
   let shape;
@@ -53,7 +39,7 @@ const CustomShape = (props) => {
 };
 
 const ChartComponent = ({ data }) => {
-  const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, showLabels } = useContext(EventsContext);
+  const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels } = useContext(EventsContext);
   const [currentTime, setCurrentTime] = useState(Date.now());
 
   useEffect(() => {
@@ -174,7 +160,7 @@ const ChartComponent = ({ data }) => {
             onClick={(event) => {
               if (event && event.payload) {
                 setSelectedEvent(event.payload);
-                setTabIndex(1);
+                if (tabIndex === 0) setTabIndex(1);
               }
             }}
           />

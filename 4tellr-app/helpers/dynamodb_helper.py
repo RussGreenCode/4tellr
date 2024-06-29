@@ -512,7 +512,7 @@ class DynamoDBHelper:
         end_date_str = end_date.strftime('%Y-%m-%d')
 
         # Query parameters
-        sk_prefix = f'EVT#{event_name}#{event_status}'
+        sk_prefix = f'OUT#{event_name}#{event_status}'
 
         # Perform the query for each day in the date range
         all_events = []
