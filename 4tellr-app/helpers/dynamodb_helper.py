@@ -507,9 +507,6 @@ class DynamoDBHelper:
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=30)
 
-        # Convert dates to string format if required
-        start_date_str = start_date.strftime('%Y-%m-%d')
-        end_date_str = end_date.strftime('%Y-%m-%d')
 
         # Query parameters
         sk_prefix = f'OUT#{event_name}#{event_status}'

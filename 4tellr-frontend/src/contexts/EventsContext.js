@@ -17,6 +17,7 @@ export const EventsProvider = ({ children }) => {
   const [sortCriterion, setSortCriterion] = useState('EXP'); // Initialize search criteria
   const [selectedEvent, setSelectedEvent] = useState({}); // Initialize search criteria
   const [showLabels, setShowLabels] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
   const [searchGroupCriteria, setSearchGroupCriteria] = useState({})
   const [currentUser, setCurrentUser] = useState({}); // Initialize search criteria
@@ -157,7 +158,8 @@ export const EventsProvider = ({ children }) => {
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
       setSearchStatusCriteria, searchStatusCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchEventCriteria, searchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
-      groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics, filteredMetrics, favouriteMetrics}}>
+      groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
+      isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics}}>
       {children}
     </EventsContext.Provider>
   );

@@ -14,9 +14,11 @@ const drawerWidth = 300; // Fixed width for the expanded drawer
 const collapsedWidth = 60; // Fixed width for the collapsed drawer
 
 const Overview = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [sortCriterion, setSortCriterion] = useState('EXP');
-  const { setSearchEventCriteria, searchEventCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchStatusCriteria, searchStatusCriteria, setSelectedTypes, selectedTypes, groupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels} = useContext(EventsContext);
+  const { setSearchEventCriteria, searchEventCriteria, setSearchApplicationCriteria, searchApplicationCriteria,
+    setSearchStatusCriteria, searchStatusCriteria, setSelectedTypes, selectedTypes,
+    groupList, setSearchGroupCriteria, searchGroupCriteria,
+    isDrawerOpen, setIsDrawerOpen, setShowLabels, showLabels} = useContext(EventsContext);
   const [transformedGroupList, setTransformedGroupList] = useState([]);
 
 
