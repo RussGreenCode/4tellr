@@ -159,7 +159,7 @@ export const EventsProvider = ({ children }) => {
       setSearchStatusCriteria, searchStatusCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchEventCriteria, searchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
       groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
-      isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics}}>
+      isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics, favouriteGroups}}>
       {children}
     </EventsContext.Provider>
   );

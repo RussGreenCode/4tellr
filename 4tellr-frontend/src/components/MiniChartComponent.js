@@ -1,42 +1,11 @@
-// src/components/ChartComponent.js
+// src/components/MiniChartComponent.js
 import React, { useMemo, useState, useEffect, useContext, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { EventsContext } from '../contexts/EventsContext';
 import { transformEventsForChart } from '../utils/transformEvents';
 import '../styles/Chart.css';
-import { ResponsiveContainer } from "recharts";
 
-const formatTime = (tick) => {
-  const date = new Date(tick);
-  return `${date.getUTCHours()}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
-};
-
-const CustomTooltip = ({ pointData }) => {
-  if (pointData) {
-    const { time, event, type, yCoordinate } = pointData;
-    return (
-      <div className="custom-tooltip">
-        <p className="label">{`Type: ${type}`}</p>
-        <p className="intro">{`Event: ${event}`}</p>
-        <p className="intro">{`Y-Coordinate: ${yCoordinate}`}</p>
-        <p className="intro">{`Time: ${formatTime(time)}`}</p>
-      </div>
-    );
-  }
-  return null;
-};
-
-const getMarkerSymbol = (type) => {
-  switch (type) {
-    case 'EVT': return 'circle';
-    case 'EXP': return 'square';
-    case 'SLO': return 'triangle-up';
-    case 'SLA': return 'diamond';
-    default: return 'circle';
-  }
-};
-
-const MiniChartComponent = ({ rawData }) => {
+const MiniChartComponent = ({ rawData, width, height }) => {
   const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen } = useContext(EventsContext);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const hoveredPointRef = useRef(null);
@@ -136,7 +105,7 @@ const MiniChartComponent = ({ rawData }) => {
   };
 
   return (
-    <ResponsiveContainer width="100%" height={600}>
+    <div style={{ width, height }}>
       <Plot
         key={isDrawerOpen}
         data={activeTypes.map(type => ({
@@ -184,9 +153,9 @@ const MiniChartComponent = ({ rawData }) => {
         config={{ displayModeBar: true }}
         onClick={handlePointClick}
         onHover={handleHover}
-        style={{ width: '100%', height: '600px' }}
+        style={{ width: '100%', height: '100%' }}
       />
-    </ResponsiveContainer>
+    </div>
   );
 };
 

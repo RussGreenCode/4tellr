@@ -9,7 +9,7 @@ import EventDetailsComponent from './EventDetailsComponent';
 import '../styles/AlertArea.css';
 
 const AlertArea = () => {
-  const { filteredEvents, selectedEvent, setSearchCriteria, tabIndex, setTabIndex, filteredMetrics } = useContext(EventsContext);
+  const { selectedEvent, setSearchCriteria, tabIndex, setTabIndex, filteredMetrics } = useContext(EventsContext);
   const [monthlyEvents, setMonthlyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,12 +51,28 @@ const AlertArea = () => {
   };
 
   const transformMonthlyEvents = (events) => {
-    return events.map(event => ({
-      ...event,
-      businessDate: new Date(event.businessDate).getTime(),
-      eventTime: new Date(event.eventTime).getUTCHours() * 3600 + new Date(event.eventTime).getUTCMinutes() * 60 + new Date(event.eventTime).getUTCSeconds()
-    }));
+    return events.map(event => {
+      const businessDate = new Date(event.businessDate);
+      const eventTime = new Date(event.eventTime);
+
+      // Ensure both dates are in UTC
+      const businessDateUTC = Date.UTC(businessDate.getUTCFullYear(), businessDate.getUTCMonth(), businessDate.getUTCDate());
+      const eventTimeUTC = Date.UTC(eventTime.getUTCFullYear(), eventTime.getUTCMonth(), eventTime.getUTCDate(), eventTime.getUTCHours(), eventTime.getUTCMinutes(), eventTime.getUTCSeconds());
+
+      // Calculate the difference in milliseconds
+      const timeDifferenceInMillis = eventTimeUTC - businessDateUTC;
+
+      // Convert milliseconds to seconds
+      const timeDifferenceInSeconds = timeDifferenceInMillis / 1000;
+
+      return {
+        ...event,
+        businessDate: businessDateUTC,
+        eventTime: timeDifferenceInSeconds
+      };
+    });
   };
+
 
   const monthlyData = useMemo(() => transformMonthlyEvents(monthlyEvents), [monthlyEvents]);
 
