@@ -1,6 +1,6 @@
 // src/metrics/CalculateMetrics.js
 const CalculateMetrics = (events) => {
-  let totalEvents = events.length;
+  let totalEvents = 0
 
   let categorizedEvents = {
     ON_TIME: [],
@@ -16,6 +16,7 @@ const CalculateMetrics = (events) => {
   events.forEach(event => {
     if (event.type === 'EVT' && categorizedEvents[event.outcomeStatus]) {
       categorizedEvents[event.outcomeStatus].push(event);
+      totalEvents += 1
     }
 
     if (event.type === 'EXP') {

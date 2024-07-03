@@ -9,21 +9,6 @@ const formatTime = (tick) => {
   return `${date.getUTCHours()}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
 };
 
-const CustomTooltip = ({ pointData }) => {
-  if (pointData) {
-    const { time, event, type, yCoordinate } = pointData;
-    return (
-      <div className="custom-tooltip">
-        <p className="label">{`Type: ${type}`}</p>
-        <p className="intro">{`Event: ${event}`}</p>
-        <p className="intro">{`Y-Coordinate: ${yCoordinate}`}</p>
-        <p className="intro">{`Time: ${formatTime(time)}`}</p>
-      </div>
-    );
-  }
-  return null;
-};
-
 // Define marker symbols based on the type
 const getMarkerSymbol = (type) => {
   switch (type) {
@@ -34,6 +19,7 @@ const getMarkerSymbol = (type) => {
     default: return 'circle';
   }
 };
+
 
 const ChartComponent = ({ data }) => {
   const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen } = useContext(EventsContext);
@@ -101,6 +87,20 @@ const ChartComponent = ({ data }) => {
     Math.max(...transformedData.map(d => d.time)),
   ];
 
+  const adjustedDomain = (() => {
+    const times = transformedData.map(d => d.time);
+    const minTime = Math.min(...times);
+    const maxTime = Math.max(...times);
+    const timeDifference = maxTime - minTime;
+    const adjustment = timeDifference * 0.02;
+    return [
+      minTime - adjustment, // Reduce min time by 5% of the time difference
+      maxTime + adjustment  // Increase max time by 5% of the time difference
+    ];
+  })();
+
+
+
   const domain = [
     Math.floor(rawDomain[0] / (60 * 60 * 1000)) * (60 * 60 * 1000),
     Math.ceil(rawDomain[1] / (60 * 60 * 1000)) * (60 * 60 * 1000),
@@ -158,7 +158,7 @@ const ChartComponent = ({ data }) => {
         layout={{
           margin: { t: 10, l: showLabels ? 200 : 0, r: 30, b: 50 },
           xaxis: {
-            range: rawDomain, // Include one day on both sides
+            range: adjustedDomain, // Include one day on both sides
             tickformat: '%Y-%m-%d',
             tickvals: ticks,
             ticktext: ticks.map(t => formatTime(t))

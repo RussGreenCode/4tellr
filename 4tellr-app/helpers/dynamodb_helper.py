@@ -146,6 +146,7 @@ class DynamoDBHelper:
             KeyConditionExpression=boto3.dynamodb.conditions.Key('businessDate').eq(business_date)
         )
 
+
         items = response['Items']
         result = []
         utc = pytz.UTC

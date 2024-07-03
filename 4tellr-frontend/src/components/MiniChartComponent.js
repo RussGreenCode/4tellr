@@ -5,6 +5,25 @@ import { EventsContext } from '../contexts/EventsContext';
 import { transformEventsForChart } from '../utils/transformEvents';
 import '../styles/Chart.css';
 
+
+
+const formatTime = (tick) => {
+  const date = new Date(tick);
+  return `${date.getUTCHours()}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
+};
+
+// Define marker symbols based on the type
+const getMarkerSymbol = (type) => {
+  switch (type) {
+    case 'EVT': return 'circle';
+    case 'EXP': return 'square';
+    case 'SLO': return 'triangle-up';
+    case 'SLA': return 'diamond';
+    default: return 'circle';
+  }
+};
+
+
 const MiniChartComponent = ({ rawData, width, height }) => {
   const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen } = useContext(EventsContext);
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -107,7 +126,6 @@ const MiniChartComponent = ({ rawData, width, height }) => {
   return (
     <div style={{ width, height }}>
       <Plot
-        key={isDrawerOpen}
         data={activeTypes.map(type => ({
           x: transformedData.filter(d => d.type === type).map(d => d.time),
           y: transformedData.filter(d => d.type === type).map(d => d.yValue),
@@ -150,7 +168,7 @@ const MiniChartComponent = ({ rawData, width, height }) => {
             }
           ]
         }}
-        config={{ displayModeBar: true }}
+        config={{ displayModeBar: false }}
         onClick={handlePointClick}
         onHover={handleHover}
         style={{ width: '100%', height: '100%' }}

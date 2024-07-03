@@ -18,6 +18,7 @@ const Overview = () => {
   const { setSearchEventCriteria, searchEventCriteria, setSearchApplicationCriteria, searchApplicationCriteria,
     setSearchStatusCriteria, searchStatusCriteria, setSelectedTypes, selectedTypes,
     groupList, setSearchGroupCriteria, searchGroupCriteria,
+    searchOutcomeCriteria, setSearchOutcomeCriteria,
     isDrawerOpen, setIsDrawerOpen, setShowLabels, showLabels} = useContext(EventsContext);
   const [transformedGroupList, setTransformedGroupList] = useState([]);
 
@@ -67,6 +68,9 @@ const Overview = () => {
         </Box>
         <Box mb={2}>
           <SearchBar label="Search Status" setSearchEntry={setSearchStatusCriteria} keyName={'eventStatus'} initialValue={searchStatusCriteria['eventStatus']} />
+        </Box>
+        <Box mb={2}>
+          <SearchBar label="Search Outcome" setSearchEntry={setSearchOutcomeCriteria} keyName={'eventOutcome'} initialValue={searchOutcomeCriteria['eventOutcome']} />
         </Box>
         <Box mt={4}>
           <FormControl component="fieldset">

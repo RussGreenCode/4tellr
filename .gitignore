@@ -21,6 +21,10 @@ system-sim/api_helper/__pycache__/
 4tellr-app/helpers/__pycache__/
 4tellr-app/app/__pycache__/
 4tellr-app/app/endpoints/__pycache__/
+BankingSimulator/src/__pycache__/
+BankingSimulator/src/helpers/__pycache__/
+
+
 
 
 # testing

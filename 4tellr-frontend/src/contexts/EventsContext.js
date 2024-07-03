@@ -20,6 +20,7 @@ export const EventsProvider = ({ children }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
   const [searchGroupCriteria, setSearchGroupCriteria] = useState({})
+  const [searchOutcomeCriteria, setSearchOutcomeCriteria] = useState({})
   const [currentUser, setCurrentUser] = useState({}); // Initialize search criteria
   const [metrics, setMetrics] = useState({ summary: {}, eventStatus: {} });
   const [favouriteMetrics, setFavouriteMetrics] = useState({ summary: {}, eventStatus: {} });
@@ -33,7 +34,7 @@ export const EventsProvider = ({ children }) => {
   });
 
 
-  const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria) => {
+  const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria, outcomeCriteria) => {
     // Example filtering logic based on search criteria
     return events.filter(event => {
       let matches = true;
@@ -44,6 +45,10 @@ export const EventsProvider = ({ children }) => {
 
       if (statusCriteria.eventStatus) {
         matches = matches && event.eventStatus.toLowerCase().includes(statusCriteria.eventStatus.toLowerCase());
+      }
+
+      if (outcomeCriteria.eventOutcome) {
+        matches = matches && event.plotStatus.toLowerCase().includes(outcomeCriteria.eventOutcome.toLowerCase());
       }
 
       // Add more filtering conditions here as needed
@@ -133,7 +138,7 @@ export const EventsProvider = ({ children }) => {
 
   useEffect(() => {
     // Filter events whenever events or search criteria change
-    const updatedFilteredEvents = filterEvents(events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria );
+    const updatedFilteredEvents = filterEvents(events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria );
     setFilteredEvents(updatedFilteredEvents);
 
     const updatedFavouriteFilteredEvents = filterFavouriteEvents(events)
@@ -146,7 +151,7 @@ export const EventsProvider = ({ children }) => {
     setFavouriteMetrics(favouriteCalculatedMetrics)
     console.log('Filtered events:', filteredEvents);
 
-  }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, favouriteGroups]);
+  }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, favouriteGroups]);
 
   useEffect(() => {
     fetchGroupList()
@@ -159,6 +164,7 @@ export const EventsProvider = ({ children }) => {
       setSearchStatusCriteria, searchStatusCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchEventCriteria, searchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
       groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
+      setSearchOutcomeCriteria, searchOutcomeCriteria,
       isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics, favouriteGroups}}>
       {children}
     </EventsContext.Provider>

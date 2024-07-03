@@ -2,7 +2,7 @@
 .status-block {
   padding: 0rem;
   text-align: center;
-  height: 110px;
+  height: 100px;
   width: 150px;
   display: flex;
   flex-direction: column;
@@ -35,4 +35,8 @@
 
 .status-block.new-event {
   background-color: #1E90FF; /* Dodger Blue */
+}
+
+.status-block.waiting {
+  background-color: #aaafff; /* Dodger Blue */
 }

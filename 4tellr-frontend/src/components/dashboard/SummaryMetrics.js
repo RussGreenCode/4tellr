@@ -15,18 +15,14 @@ const SummaryMetrics = () => {
     { name: 'Meets SLA', value: metrics.eventStatus.MEETS_SLA, color: '#FFD700' },
     { name: 'Meets SLO', value: metrics.eventStatus.MEETS_SLO, color: '#90EE90' },
     { name: 'On Time', value: metrics.eventStatus.ON_TIME, color: '#008000' },
+    { name: 'On Waiting', value: metrics.eventStatus.NOT_REACHED_EXP, color: '#aaafff' },
   ];
 
-  const totalStatus = data.reduce((acc, item) => acc + item.value, 0);
-  const remaining = metrics.summary.totalExpectation - totalStatus;
-  if (remaining > 0) {
-    data.push({ name: 'Remaining', value: remaining, color: '#E0E0E0' }); // Adjust color for light/dark mode
-  }
 
   const renderCustomizedLabel = ({ cx, cy }) => {
     return (
       <text x={cx} y={cy} fill="black" textAnchor="middle" dominantBaseline="central">
-        {`${metrics.summary.percentageComplete.toFixed(2)}%`}
+        {`${metrics.summary.percentageComplete.toFixed(0)}%`}
       </text>
     );
   };
@@ -63,8 +59,14 @@ const SummaryMetrics = () => {
         </Grid>
         <Grid item>
           <Paper className="status-block not-met-exp">
-            <Typography variant="h6">No Event Yet</Typography>
+            <Typography variant="h6">Running Late</Typography>
             <Typography variant="h4">{metrics.eventStatus.BREACHED_EXP}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item>
+          <Paper className="status-block waiting">
+            <Typography variant="h6">Waiting</Typography>
+            <Typography variant="h4">{metrics.eventStatus.NOT_REACHED_EXP}</Typography>
           </Paper>
         </Grid>
         <Grid item>

@@ -15,7 +15,7 @@ const Dashboard = () => {
       return favouriteGroups.map((group, index) => {
         const groupEvents = filterFavouriteEvents(events, [group]);
         return (
-          <Box key={index} mb={2} style={{ flex: '0 0 auto', width: '6cm', height: '3cm' }}>
+          <Box key={index} mb={2} style={{ flex: '0 0 auto', width: '12cm', height: '6cm' }}>
             <Paper style={{ width: '100%', height: '100%' }}>
               <Typography variant="h6" gutterBottom>{group.group_name}</Typography>
               <MiniChartComponent rawData={groupEvents} width="100%" height="100%" />
@@ -25,7 +25,7 @@ const Dashboard = () => {
       });
     } else {
       return (
-        <Box mb={2} style={{ flex: '0 0 auto', width: '6cm', height: '3cm' }}>
+        <Box mb={2} style={{ flex: '0 0 auto', width: '12cm', height: '6cm' }}>
           <Paper style={{ width: '100%', height: '100%' }}>
             <Typography variant="h6" gutterBottom>NO GROUPS</Typography>
           </Paper>
@@ -35,8 +35,8 @@ const Dashboard = () => {
   };
 
   return (
-    <Box>
-      <Grid container spacing={3}>
+    <Box marginTop={3}>
+      <Grid container spacing={3} >
         <Grid item xs={12}>
           <SummaryMetrics />
         </Grid>

@@ -9,7 +9,7 @@ import EventDetailsComponent from './EventDetailsComponent';
 import '../styles/AlertArea.css';
 
 const AlertArea = () => {
-  const { selectedEvent, setSearchCriteria, tabIndex, setTabIndex, filteredMetrics } = useContext(EventsContext);
+  const { selectedEvent, setSearchOutcomeCriteria, tabIndex, setTabIndex, filteredMetrics,  } = useContext(EventsContext);
   const [monthlyEvents, setMonthlyEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,14 +36,17 @@ const AlertArea = () => {
   }, [selectedEvent]);
 
   const barData = [
-    { name: 'On Time', value: filteredMetrics.eventStatus.ON_TIME, color: 'lightgreen', eventType: 'ON_TIME' },
-    { name: 'Missed EXP', value: filteredMetrics.eventStatus.MEETS_SLO, color: 'darkgreen', eventType: 'MEETS_SLO' },
+    { name: 'Error', value: filteredMetrics.eventStatus.ERROR, color: 'darkred', eventType: 'ERROR' },
+    { name: 'Running Late', value: filteredMetrics.eventStatus.BREACHED_EXP, color: 'orange', eventType: 'BREACHED_EXP' },
+    { name: 'Waiting', value: filteredMetrics.eventStatus.NOT_REACHED_EXP, color: 'purple', eventType: 'NOT_REACHED_EXP' },
+    { name: 'Missed SLA', value: filteredMetrics.eventStatus.LATE, color: 'red', eventType: 'LATE' },
     { name: 'Missed SLO', value: filteredMetrics.eventStatus.MEETS_SLA, color: 'orange', eventType: 'MEETS_SLA' },
-    { name: 'Missed SLA', value: filteredMetrics.eventStatus.LATE, color: 'red', eventType: 'LATE' }
+    { name: 'Missed EXP', value: filteredMetrics.eventStatus.MEETS_SLO, color: 'darkgreen', eventType: 'MEETS_SLO' },
+    { name: 'On Time', value: filteredMetrics.eventStatus.ON_TIME, color: 'lightgreen', eventType: 'ON_TIME' },
   ];
 
   const handleBarClick = (data) => {
-    setSearchCriteria({ eventStatus: data.eventType });
+    setSearchOutcomeCriteria(data);
   };
 
   const handleTabChange = (event, newValue) => {
@@ -115,7 +118,11 @@ const AlertArea = () => {
         <Box>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <EventDetailsComponent event={selectedEvent} loading={loading} />
+              {selectedEvent && Object.keys(selectedEvent).length > 0 ? (
+                <EventDetailsComponent event={selectedEvent} loading={loading} />
+              ) : (
+                  <Typography>No event selected</Typography>
+              )}
             </Grid>
           </Grid>
         </Box>
