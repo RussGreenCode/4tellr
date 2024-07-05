@@ -23,11 +23,10 @@ const CalculateMetrics = (events) => {
       if (event.plotStatus === 'NOT_REACHED') {
         categorizedEvents.NOT_REACHED_EXP.push(event)
       }
-      else if (event.plotStatus === 'BREACHED_EXP') {
+      else if (event.plotStatus === 'BREACHED') {
         categorizedEvents.BREACHED_EXP.push(event)
       }
     }
-
   });
 
   let expectationCount = totalEvents + categorizedEvents.NOT_REACHED_EXP.length + categorizedEvents.BREACHED_EXP.length ;
