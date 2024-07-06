@@ -18,7 +18,9 @@ import './styles/App.css';
 import Dashboard from "./pages/Dashboard";
 
 function App() {
-  const [businessDate, setBusinessDate] = useState('2024-05-24'); // Example date
+
+
+
   const [email, setEmail] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -40,7 +42,7 @@ function App() {
           <Box>
             {isAuthenticated ? (
               <>
-                <TopBar businessDate={businessDate} setBusinessDate={setBusinessDate} email={email} />
+                <TopBar email={email} />
                 <Grid container>
                   <Grid item xs={2}>
                     <Menu setIsAuthenticated={setIsAuthenticated} />

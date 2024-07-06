@@ -9,7 +9,8 @@ export const EventsProvider = ({ children }) => {
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [favouriteFilteredEvents, setFavouriteFilteredEvents] = useState([])
   const [loading, setLoading] = useState(true);
-  const [businessDate, setBusinessDate] = useState('2024-05-27'); // Default date
+  const today = new Date().toISOString().split('T')[0];
+  const [businessDate, setBusinessDate] = useState(today); // Default date
   const [groupList, setGroupList] = useState({});
   const [searchEventCriteria, setSearchEventCriteria] = useState({}); // Initialize search criteria
   const [searchStatusCriteria, setSearchStatusCriteria] = useState({}); // Initialize search criteria

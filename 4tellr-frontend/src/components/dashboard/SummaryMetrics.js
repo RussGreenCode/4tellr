@@ -1,22 +1,15 @@
 // src/components/SummaryMetrics.js
-import React, { useContext } from 'react';
-import { Grid, Paper, Typography, Box } from '@mui/material';
+import React, { useMemo } from 'react';
+import { Grid, Box, Paper} from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
-import { EventsContext } from '../../contexts/EventsContext';
+import CurrentStatusBlock from './CurrentStatusBlock';
+import { generateBarData } from '../../utils/metricsHelper';
 import '../../styles/SummaryMetrics.css'; // Import the CSS file
 
-const SummaryMetrics = ( {metrics} ) => {
-
-
+const SummaryMetrics = ({ metrics }) => {
   const COLORS = ['#FF0000', '#FFD700', '#90EE90', '#008000']; // Colors for LATE, MEETS_SLA, MEETS_SLO, ON_TIME
 
-  const data = [
-    { name: 'Late', value: metrics.eventStatus.LATE, color: '#FF0000' },
-    { name: 'Meets SLA', value: metrics.eventStatus.MEETS_SLA, color: '#FFD700' },
-    { name: 'Meets SLO', value: metrics.eventStatus.MEETS_SLO, color: '#90EE90' },
-    { name: 'On Time', value: metrics.eventStatus.ON_TIME, color: '#008000' },
-    { name: 'On Waiting', value: metrics.eventStatus.NOT_REACHED_EXP, color: '#aaafff' },
-  ];
+  const data = useMemo(() => generateBarData(metrics), [metrics]);
 
 
   const renderCustomizedLabel = ({ cx, cy }) => {
@@ -52,52 +45,68 @@ const SummaryMetrics = ( {metrics} ) => {
           </Paper>
         </Grid>
         <Grid item>
-          <Paper className="status-block error">
-            <Typography variant="h6">Error</Typography>
-            <Typography variant="h4">{metrics.eventStatus.ERROR}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="Error"
+            value={metrics.eventStatus.ERROR}
+            plotStatus="ERROR"
+            className="error"
+          />
         </Grid>
         <Grid item>
-          <Paper className="status-block not-met-exp">
-            <Typography variant="h6">Running Late</Typography>
-            <Typography variant="h4">{metrics.eventStatus.BREACHED_EXP}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="Running Late"
+            value={metrics.eventStatus.BREACHED_EXP}
+            plotStatus="BREACHED"
+            className="not-met-exp"
+          />
         </Grid>
         <Grid item>
-          <Paper className="status-block waiting">
-            <Typography variant="h6">Waiting</Typography>
-            <Typography variant="h4">{metrics.eventStatus.NOT_REACHED_EXP}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="Waiting"
+            value={metrics.eventStatus.NOT_REACHED_EXP}
+            plotStatus="NOT_REACHED_EXP"
+            className="waiting"
+          />
         </Grid>
         <Grid item>
-          <Paper className="status-block late">
-            <Typography variant="h6">Arrived Late</Typography>
-            <Typography variant="h4">{metrics.eventStatus.LATE}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="Arrived Late"
+            value={metrics.eventStatus.LATE}
+            plotStatus="LATE"
+            className="late"
+          />
         </Grid>
         <Grid item>
-          <Paper className="status-block meets-sla">
-            <Typography variant="h6">Met SLA</Typography>
-            <Typography variant="h4">{metrics.eventStatus.MEETS_SLA}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="Met SLA"
+            value={metrics.eventStatus.MEETS_SLA}
+            plotStatus="MEETS_SLA"
+            className="meets-sla"
+          />
         </Grid>
         <Grid item>
-          <Paper className="status-block meets-slo">
-            <Typography variant="h6">Met SLO</Typography>
-            <Typography variant="h4">{metrics.eventStatus.MEETS_SLO}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="Met SLO"
+            value={metrics.eventStatus.MEETS_SLO}
+            plotStatus="MEETS_SLO"
+            className="meets-slo"
+          />
         </Grid>
         <Grid item>
-          <Paper className="status-block on-time">
-            <Typography variant="h6">Met EXP</Typography>
-            <Typography variant="h4">{metrics.eventStatus.ON_TIME}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="Met EXP"
+            value={metrics.eventStatus.ON_TIME}
+            plotStatus="ON_TIME"
+            className="on-time"
+          />
         </Grid>
         <Grid item>
-          <Paper className="status-block new-event">
-            <Typography variant="h6">New Event</Typography>
-            <Typography variant="h4">{metrics.eventStatus.NEW_EVT}</Typography>
-          </Paper>
+          <CurrentStatusBlock
+            label="New Event"
+            value={metrics.eventStatus.NEW_EVT}
+            plotStatus="NEW_EVT"
+            className="new-event"
+          />
         </Grid>
       </Grid>
     </Box>
