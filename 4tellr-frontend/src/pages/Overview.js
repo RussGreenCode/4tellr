@@ -1,6 +1,6 @@
 // src/pages/Overview.js
 import React, { useContext, useState, useEffect} from 'react';
-import { Box, Drawer, List, ListItem, ListItemText, IconButton, CssBaseline, Toolbar, TextField, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Checkbox, FormGroup } from '@mui/material';
+import { Box, Drawer, Button, IconButton, CssBaseline, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, Checkbox, FormGroup } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import AlertArea from "../components/AlertArea";
 import EventFetcher from "../components/EventFetcher";
@@ -49,6 +49,14 @@ const Overview = () => {
     setShowLabels(event.target.checked);
   };
 
+  const resetSearchCriteria = () => {
+    setSearchEventCriteria({'eventName': ''});
+    setSearchApplicationCriteria({'appName': ''});
+    setSearchStatusCriteria({'eventStatus': ''});
+    setSearchGroupCriteria({'groupName': ''});
+    setSearchOutcomeCriteria({'eventOutcome': ''});
+  };
+
   const drawer = (
     <div>
       <div className="drawerHeader" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', padding: '8px' }}>
@@ -71,6 +79,9 @@ const Overview = () => {
         </Box>
         <Box mb={2}>
           <SearchBar label="Search Outcome" setSearchEntry={setSearchOutcomeCriteria} keyName={'eventOutcome'} initialValue={searchOutcomeCriteria['eventOutcome']} />
+        </Box>
+        <Box mt={4} display="flex" justifyContent="center">
+          <Button variant="outlined" onClick={resetSearchCriteria}>Reset Filters</Button>
         </Box>
         <Box mt={4}>
           <FormControl component="fieldset">

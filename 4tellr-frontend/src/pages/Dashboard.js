@@ -2,13 +2,12 @@
 import React, { useContext } from 'react';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import SummaryMetrics from '../components/dashboard/SummaryMetrics';
-import GroupMetrics from '../components/dashboard/GroupMetrics';
 import MiniChartComponent from '../components/MiniChartComponent';
 import { EventsContext } from '../contexts/EventsContext';
 import { filterFavouriteEvents } from '../utils/filterFavouriteEvents';
 
 const Dashboard = () => {
-  const { events, favouriteGroups } = useContext(EventsContext);
+  const { events, favouriteGroups, metrics, favouriteMetrics } = useContext(EventsContext);
 
   const renderGroupCharts = () => {
     if (Array.isArray(favouriteGroups) && favouriteGroups.length > 0) {
@@ -38,13 +37,13 @@ const Dashboard = () => {
     <Box marginTop={3}>
       <Grid container spacing={3} >
         <Grid item xs={12}>
-          <SummaryMetrics />
+          <SummaryMetrics metrics={metrics} />
         </Grid>
         <Grid item xs={12}>
           <Typography variant="h5" gutterBottom>
             Favourite Groups
           </Typography>
-          <GroupMetrics />
+          <SummaryMetrics metrics={favouriteMetrics} />
         </Grid>
       </Grid>
       <Grid mt={4} display="flex" overflow="auto" flexDirection="row">

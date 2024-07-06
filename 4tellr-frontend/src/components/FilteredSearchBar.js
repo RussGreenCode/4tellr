@@ -1,6 +1,7 @@
 // src/components/FilteredSearchBar.js
 import React, { useState, useEffect } from 'react';
 import { TextField, List, ListItem, ListItemText, Box, Paper } from '@mui/material';
+import '../styles/FilteredSearchBar.css';
 
 const FilteredSearchBar = ({ label, setSearchEntry, options }) => {
   const [searchText, setSearchText] = useState('');

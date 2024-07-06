@@ -1,0 +1,26 @@
+/* src/styles/FIlteredSearchBar.css */
+#sidebar-wrapper {
+  background: #f8f9fa;
+  padding: 15px;
+  border-right: 1px solid #ddd;
+}
+
+#page-content-wrapper {
+  padding: 15px;
+}
+
+.alert-area {
+  background: #f0f0f0;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.date-select {
+  display: flex;
+  align-items: center;
+}
+
+.date-input {
+  margin: 0 10px;
+}

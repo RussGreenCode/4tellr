@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect, useContext, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { EventsContext } from '../contexts/EventsContext';
+import { useTheme } from '@mui/material/styles';
 import '../styles/Chart.css';
-import {ResponsiveContainer} from "recharts";
+import { ResponsiveContainer } from "recharts";
 
 const formatTime = (tick) => {
   const date = new Date(tick);
@@ -20,8 +21,8 @@ const getMarkerSymbol = (type) => {
   }
 };
 
-
 const ChartComponent = ({ data }) => {
+  const theme = useTheme(); // Use the theme context
   const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen } = useContext(EventsContext);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const hoveredPointRef = useRef(null);
@@ -33,8 +34,6 @@ const ChartComponent = ({ data }) => {
     }, 60000); // Update every minute
     return () => clearInterval(interval);
   }, []);
-
-
 
   const transformedData = useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) {
@@ -99,8 +98,6 @@ const ChartComponent = ({ data }) => {
     ];
   })();
 
-
-
   const domain = [
     Math.floor(rawDomain[0] / (60 * 60 * 1000)) * (60 * 60 * 1000),
     Math.ceil(rawDomain[1] / (60 * 60 * 1000)) * (60 * 60 * 1000),
@@ -119,7 +116,6 @@ const ChartComponent = ({ data }) => {
     const interval = Math.ceil(yTicks.length / 20);
     yTicks = yTicks.filter((_, index) => index % interval === 0);
   }
-
 
   const handlePointClick = (event) => {
     if (event.points.length > 0) {
@@ -161,12 +157,29 @@ const ChartComponent = ({ data }) => {
             range: adjustedDomain, // Include one day on both sides
             tickformat: '%Y-%m-%d',
             tickvals: ticks,
-            ticktext: ticks.map(t => formatTime(t))
+            ticktext: ticks.map(t => formatTime(t)),
+            title: 'Time',
+            titlefont: {
+              color: theme.palette.text.primary
+            },
+            tickfont: {
+              color: theme.palette.text.primary
+            },
+            gridcolor: theme.palette.divider
           },
           yaxis: {
             tickvals: yTicks,
-            ticktext: yTicks.map(t => formatYAxis(t))
+            ticktext: yTicks.map(t => formatYAxis(t)),
+            titlefont: {
+              color: theme.palette.text.primary
+            },
+            tickfont: {
+              color: theme.palette.text.primary
+            },
+            gridcolor: theme.palette.divider
           },
+          paper_bgcolor: theme.palette.background.default,
+          plot_bgcolor: theme.palette.background.default,
           showlegend: false,
           shapes: [
             {

@@ -2,6 +2,7 @@
 import React, { useMemo, useState, useEffect, useContext, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { EventsContext } from '../contexts/EventsContext';
+import { useTheme } from '@mui/material/styles';
 import { transformEventsForChart } from '../utils/transformEvents';
 import '../styles/Chart.css';
 
@@ -26,6 +27,7 @@ const getMarkerSymbol = (type) => {
 
 const MiniChartComponent = ({ rawData, width, height }) => {
   const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen } = useContext(EventsContext);
+  const theme = useTheme(); // Use the theme context
   const [currentTime, setCurrentTime] = useState(Date.now());
   const hoveredPointRef = useRef(null);
   const selectedPointRef = useRef(null); // Ref for selected point
@@ -146,12 +148,28 @@ const MiniChartComponent = ({ rawData, width, height }) => {
             range: rawDomain, // Include one day on both sides
             tickformat: '%Y-%m-%d',
             tickvals: ticks,
-            ticktext: ticks.map(t => formatTime(t))
+            ticktext: ticks.map(t => formatTime(t)),
+            titlefont: {
+              color: theme.palette.text.primary
+            },
+            tickfont: {
+              color: theme.palette.text.primary
+            },
+            gridcolor: theme.palette.divider
           },
           yaxis: {
             tickvals: yTicks,
-            ticktext: yTicks.map(t => formatYAxis(t))
+            ticktext: yTicks.map(t => formatYAxis(t)),
+            titlefont: {
+              color: theme.palette.text.primary
+            },
+            tickfont: {
+              color: theme.palette.text.primary
+            },
+            gridcolor: theme.palette.divider
           },
+          paper_bgcolor: theme.palette.background.default,
+          plot_bgcolor: theme.palette.background.default,
           showlegend: false,
           shapes: [
             {

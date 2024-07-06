@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import Plot from 'react-plotly.js';
+import { useTheme } from '@mui/material/styles';
 import * as d3 from 'd3';
 
 // Function to calculate the best fit line
@@ -60,6 +61,7 @@ const generateRegularTimeIntervals = (minTime, maxTime, maxTicks) => {
 
 const ScatterPlotComponent = ({ data }) => {
   const plotRef = useRef(null);
+  const theme = useTheme(); // Use the theme context
 
   const { x, fitLine, slope, intercept } = calculateBestFitLine(data);
 
@@ -113,13 +115,29 @@ const ScatterPlotComponent = ({ data }) => {
             range: [adjustedMinDate, adjustedMaxDate], // Set the range to include one more day on both sides
             tickformat: '%Y-%m-%d',
             tickvals: data.map(d => new Date(d.businessDate)),
-            ticktext: data.map(d => new Date(d.businessDate).toISOString().split('T')[0])
+            ticktext: data.map(d => new Date(d.businessDate).toISOString().split('T')[0]),
+            titlefont: {
+              color: theme.palette.text.primary
+            },
+            tickfont: {
+              color: theme.palette.text.primary
+            },
+            gridcolor: theme.palette.divider
           },
           yaxis: {
             title: 'Event Time',
             tickvals: regularTimeIntervals,
-            ticktext: regularTimeIntervals.map(t => formatTime(t))
+            ticktext: regularTimeIntervals.map(t => formatTime(t)),
+            titlefont: {
+              color: theme.palette.text.primary
+            },
+            tickfont: {
+              color: theme.palette.text.primary
+            },
+            gridcolor: theme.palette.divider
           },
+          paper_bgcolor: theme.palette.background.default,
+          plot_bgcolor: theme.palette.background.default,
           showlegend: false,
           width: 1200, // Set the desired width here
           height: 400 // Set the desired height here

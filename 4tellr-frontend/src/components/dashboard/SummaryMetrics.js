@@ -5,8 +5,8 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { EventsContext } from '../../contexts/EventsContext';
 import '../../styles/SummaryMetrics.css'; // Import the CSS file
 
-const SummaryMetrics = () => {
-  const { metrics } = useContext(EventsContext);
+const SummaryMetrics = ( {metrics} ) => {
+
 
   const COLORS = ['#FF0000', '#FFD700', '#90EE90', '#008000']; // Colors for LATE, MEETS_SLA, MEETS_SLO, ON_TIME
 
