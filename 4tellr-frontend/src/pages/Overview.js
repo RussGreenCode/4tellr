@@ -66,7 +66,7 @@ const Overview = () => {
       </div>
       <Box p={2} display={isDrawerOpen ? 'block' : 'none'}>
         <Box mb={2}>
-          <FilteredSearchBar label="Search Group" setSearchEntry={setSearchGroupCriteria}  options={transformedGroupList}/>
+          <FormLabel>Event Search</FormLabel>
         </Box>
         <Box mb={2}>
           <SearchBar label="Search Application" setSearchEntry={setSearchApplicationCriteria} keyName={'appName'} initialValue={searchApplicationCriteria['appName']} />
@@ -80,8 +80,14 @@ const Overview = () => {
         <Box mb={2}>
           <SearchBar label="Search Outcome" setSearchEntry={setSearchOutcomeCriteria} keyName={'eventOutcome'} initialValue={searchOutcomeCriteria['eventOutcome']} />
         </Box>
-        <Box mt={4} display="flex" justifyContent="center">
+        <Box mt={4} display="flex" justifyContent="center" marginBottom={2}>
           <Button variant="outlined" onClick={resetSearchCriteria}>Reset Filters</Button>
+        </Box>
+        <Box mb={2}>
+          <FormLabel>Group Search</FormLabel>
+        </Box>
+        <Box mb={2}>
+          <FilteredSearchBar label="Search Group" setSearchEntry={setSearchGroupCriteria}  options={transformedGroupList}/>
         </Box>
         <Box mt={4}>
           <FormControl component="fieldset">

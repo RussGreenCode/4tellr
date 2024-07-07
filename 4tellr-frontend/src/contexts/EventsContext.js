@@ -35,8 +35,8 @@ export const EventsProvider = ({ children }) => {
   });
 
 
-  const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria, outcomeCriteria) => {
-    // Example filtering logic based on search criteria
+ const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria, outcomeCriteria) => {
+  // Example filtering logic based on search criteria
     return events.filter(event => {
       let matches = true;
 
@@ -52,6 +52,10 @@ export const EventsProvider = ({ children }) => {
         matches = matches && event.plotStatus.toLowerCase().includes(outcomeCriteria.eventOutcome.toLowerCase());
       }
 
+      if (groupCriteria.groupName) {
+        matches = matches && event.groups && event.groups.includes(groupCriteria.groupName);
+      }
+
       // Add more filtering conditions here as needed
       return matches;
     });
@@ -63,15 +67,49 @@ export const EventsProvider = ({ children }) => {
       const response = await axios.get('http://127.0.0.1:5000/api/chart_data', {
         params: { businessDate: date }
       });
-      console.log('Fetched events response:', response.data);
-      setEvents(response.data);
-      const calculatedMetrics = CalculateMettics(response.data);
+
+      // Add a method to process the events and add the groups that they exist in.
+      const modifiedEvents = addGroupInformationToEvents(response.data)
+
+      setEvents(modifiedEvents);
+      const calculatedMetrics = CalculateMettics(modifiedEvents);
       setMetrics(calculatedMetrics);
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching events:', error);
       setLoading(false);
     }
+  };
+
+  const addGroupInformationToEvents = (events) => {
+
+    //Check that the user has some groups first
+    if (!favouriteGroups || favouriteGroups.length === 0) {
+      return events;
+    }
+
+    // Iterate through the event list to see if there is a match (an event may exist in more than one group)
+    return events.map(event => {
+      let eventGroups = [];
+
+      favouriteGroups.forEach(group => {
+        // Check if the event is part of the group's events
+        if (group.events.includes(event.eventKey)) {
+          eventGroups.push(group.group_name);
+        }
+      });
+
+      // If there is a match, add the group names to the event
+      if (eventGroups.length > 0) {
+        return {
+          ...event,
+          groups: eventGroups,
+        };
+      }
+
+      return event;
+    });
   };
 
   const fetchUser = async (userEmail) => {
@@ -95,6 +133,7 @@ export const EventsProvider = ({ children }) => {
     } catch (error) {
       console.error('Error refreshing group list:', error)
     }
+
   };
 
 
@@ -112,29 +151,8 @@ export const EventsProvider = ({ children }) => {
   }, [businessDate]);
 
   function filterFavouriteEvents(events) {
-    // Ensure favoriteGroups is an array
-    if (!Array.isArray(favouriteGroups)) {
-      console.error('favoriteGroups should be an array.');
-      return events;
-    }
-
-    const favouriteEventList = [];
-
-     // Extract favourite events from favouriteGroups
-    favouriteGroups.forEach(group => {
-      if (Array.isArray(group.events)) {
-        favouriteEventList.push(...group.events);
-      } else {
-        favouriteEventList.push(group.events);
-      }
-    });
-
-    // Filter the events by eventKey where it matches the favouriteEventList
-    const filteredEvents = events.filter(event => favouriteEventList.includes(event.eventKey));
-
-
-    return filteredEvents;
-
+      //Check that the event belongs to a group
+    return events.filter(event => Array.isArray(event.groups) && event.groups.length > 0);
   }
 
   useEffect(() => {
@@ -142,15 +160,11 @@ export const EventsProvider = ({ children }) => {
     const updatedFilteredEvents = filterEvents(events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria );
     setFilteredEvents(updatedFilteredEvents);
 
-    const updatedFavouriteFilteredEvents = filterFavouriteEvents(events)
-    setFavouriteFilteredEvents(updatedFavouriteFilteredEvents)
-
     const calculatedMetrics = CalculateMettics(updatedFilteredEvents);
     setFilteredMetrics(calculatedMetrics);
     
-    const favouriteCalculatedMetrics = CalculateMettics(updatedFavouriteFilteredEvents)
+    const favouriteCalculatedMetrics = CalculateMettics( filterFavouriteEvents(events) )
     setFavouriteMetrics(favouriteCalculatedMetrics)
-    console.log('Filtered events:', filteredEvents);
 
   }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, favouriteGroups]);
 

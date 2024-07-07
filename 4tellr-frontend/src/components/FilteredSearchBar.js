@@ -20,12 +20,13 @@ const FilteredSearchBar = ({ label, setSearchEntry, options }) => {
 
   const handleInputChange = (e) => {
     setSearchText(e.target.value);
-    setSearchEntry(e.target.value);
+    setSearchEntry({ 'groupName': e.target.value });
   };
+
 
   const handleOptionClick = (option) => {
     setSearchText(option);
-    setSearchEntry(option);
+    setSearchEntry({ 'groupName': option });
     setFilteredOptions([]); // Clear the filtered options to hide the dropdown
   };
 
