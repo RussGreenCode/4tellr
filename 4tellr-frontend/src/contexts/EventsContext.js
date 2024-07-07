@@ -151,29 +151,8 @@ export const EventsProvider = ({ children }) => {
   }, [businessDate]);
 
   function filterFavouriteEvents(events) {
-    // Ensure favoriteGroups is an array
-    if (!Array.isArray(favouriteGroups)) {
-      console.error('favoriteGroups should be an array.');
-      return events;
-    }
-
-    const favouriteEventList = [];
-
-     // Extract favourite events from favouriteGroups
-    favouriteGroups.forEach(group => {
-      if (Array.isArray(group.events)) {
-        favouriteEventList.push(...group.events);
-      } else {
-        favouriteEventList.push(group.events);
-      }
-    });
-
-    // Filter the events by eventKey where it matches the favouriteEventList
-    const filteredEvents = events.filter(event => favouriteEventList.includes(event.eventKey));
-
-
-    return filteredEvents;
-
+      //Check that the event belongs to a group
+    return events.filter(event => Array.isArray(event.groups) && event.groups.length > 0);
   }
 
   useEffect(() => {
@@ -181,15 +160,11 @@ export const EventsProvider = ({ children }) => {
     const updatedFilteredEvents = filterEvents(events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria );
     setFilteredEvents(updatedFilteredEvents);
 
-    const updatedFavouriteFilteredEvents = filterFavouriteEvents(events)
-    setFavouriteFilteredEvents(updatedFavouriteFilteredEvents)
-
     const calculatedMetrics = CalculateMettics(updatedFilteredEvents);
     setFilteredMetrics(calculatedMetrics);
     
-    const favouriteCalculatedMetrics = CalculateMettics(updatedFavouriteFilteredEvents)
+    const favouriteCalculatedMetrics = CalculateMettics( filterFavouriteEvents(events) )
     setFavouriteMetrics(favouriteCalculatedMetrics)
-    console.log('Filtered events:', filteredEvents);
 
   }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, favouriteGroups]);
 
