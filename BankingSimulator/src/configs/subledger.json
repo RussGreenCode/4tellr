@@ -22,7 +22,6 @@
     {
       "process_id": "SubLedger_Product_Load",
       "type": "FILE",
-      "schedule_time": "01:45",
       "processing_time": "15 minutes",
       "dependencies": ["Fortress_Product_Standardisation"]
     },

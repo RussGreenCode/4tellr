@@ -1,0 +1,102 @@
+{
+  "application": "Flash",
+  "processes": [
+    {
+      "process_id": "Credit_Exposure_Review",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00",
+      "processing_time": "30 minutes",
+      "dependencies": ["Flash_Reporting"]
+    },
+    {
+      "process_id": "Review_PD_LGD_EAD_Metrics",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Credit_Exposure_Review"]
+    },
+    {
+      "process_id": "Prepare_Summary_Credit_Risk_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Review_PD_LGD_EAD_Metrics"]
+    },
+    {
+      "process_id": "Credit_Limit_Breach_Analysis",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": ["Prepare_Summary_Credit_Risk_Report"]
+    },
+    {
+      "process_id": "Check_Credit_Limit_Breaches",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Credit_Limit_Breach_Analysis"]
+    },
+    {
+      "process_id": "Analyze_Credit_Breach_Reasons",
+      "type": "PROCESS",
+      "processing_time": "15 minutes",
+      "dependencies": ["Check_Credit_Limit_Breaches"]
+    },
+    {
+      "process_id": "Prepare_Credit_Breach_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Analyze_Credit_Breach_Reasons"]
+    },
+    {
+      "process_id": "Daily_Counterparty_Risk_Assessment",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["Credit_Exposure_Review"]
+    },
+    {
+      "process_id": "Collect_Counterparty_Financial_Info",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Daily_Counterparty_Risk_Assessment"]
+    },
+    {
+      "process_id": "Assess_Counterparty_Risk",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": ["Collect_Counterparty_Financial_Info"]
+    },
+    {
+      "process_id": "Capital_Adequacy_Reports",
+      "type": "PROCESS",
+            "processing_time": "50 minutes",
+      "dependencies": ["Assess_Counterparty_Risk"]
+    },
+    {
+      "process_id": "Update_Counterparty_Ratings",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Assess_Counterparty_Risk"]
+    },
+    {
+      "process_id": "Credit_Risk_Mitigation_Analysis",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": ["Update_Counterparty_Ratings"]
+    },
+    {
+      "process_id": "Review_Credit_Risk_Mitigations",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Credit_Risk_Mitigation_Analysis"]
+    },
+    {
+      "process_id": "Analyze_Collateral_Netting_Agreements",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Review_Credit_Risk_Mitigations"]
+    },
+    {
+      "process_id": "Prepare_Mitigation_Analysis_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Analyze_Collateral_Netting_Agreements"]
+    }
+  ]
+}

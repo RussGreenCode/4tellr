@@ -1,0 +1,96 @@
+{
+  "application": "Subledger",
+  "processes": [
+    {
+      "process_id": "Daily_Financial_Close_Process",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00",
+      "processing_time": "60 minutes",
+      "dependencies": ["SubLedger_Financial_Reporting"]
+    },
+    {
+      "process_id": "Reconcile_Financial_Transactions",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Daily_Financial_Close_Process"]
+    },
+    {
+      "process_id": "Prepare_Daily_Financial_Statements",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Reconcile_Financial_Transactions"]
+    },
+    {
+      "process_id": "Distribute_Financial_Close_Reports",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Prepare_Daily_Financial_Statements"]
+    },
+    {
+      "process_id": "Liquidity_Management_Analysis",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["Liquidity_Reports"]
+    },
+    {
+      "process_id": "Assess_Liquidity_Position",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Liquidity_Management_Analysis"]
+    },
+    {
+      "process_id": "Prepare_Liquidity_Management_Report",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Assess_Liquidity_Position"]
+    },
+    {
+      "process_id": "Daily_Capital_Adequacy_Review",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": ["Capital_Adequacy_Reports"]
+    },
+    {
+      "process_id": "Monitor_Capital_Ratios",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Daily_Capital_Adequacy_Review"]
+    },
+    {
+      "process_id": "Prepare_Capital_Adequacy_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Monitor_Capital_Ratios"]
+    },
+    {
+      "process_id": "Daily_Variance_Analysis",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": ["Financial_Performance_Reports"]
+    },
+    {
+      "process_id": "Compare_Actual_vs_Forecasted_Results",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Daily_Variance_Analysis"]
+    },
+    {
+      "process_id": "Analyze_Variances",
+      "type": "PROCESS",
+      "processing_time": "15 minutes",
+      "dependencies": ["Compare_Actual_vs_Forecasted_Results"]
+    },
+    {
+      "process_id": "Prepare_Variance_Analysis_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Analyze_Variances"]
+    },
+    {
+      "process_id": "Daily_Treasury_Operations_Review",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["Financial_Reports"]
+    }
+  ]
+}

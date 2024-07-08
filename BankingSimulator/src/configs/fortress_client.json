@@ -4,7 +4,7 @@
     {
       "process_id": "Fortress_Client_Receipt",
       "type": "FILE",
-      "schedule_time": "20:00",
+      "schedule_time": "T 20:00",
       "processing_time": "20 minutes",
       "dependencies": []
     },

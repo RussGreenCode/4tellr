@@ -1,0 +1,96 @@
+{
+  "application": "Colossus",
+  "processes": [
+    {
+      "process_id": "Market_Risk_Report_Review",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00",
+      "processing_time": "30 minutes",
+      "dependencies": ["Colossus_Reporting"]
+    },
+    {
+      "process_id": "Analyze_VaR_Calculations",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Market_Risk_Report_Review"]
+    },
+    {
+      "process_id": "Prepare_Summary_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Analyze_VaR_Calculations"]
+    },
+    {
+      "process_id": "Limit_Breach_Analysis",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": ["Prepare_Summary_Report"]
+    },
+    {
+      "process_id": "Check_Limit_Breaches",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Limit_Breach_Analysis"]
+    },
+    {
+      "process_id": "Analyze_Breach_Reasons",
+      "type": "PROCESS",
+      "processing_time": "15 minutes",
+      "dependencies": ["Check_Limit_Breaches"]
+    },
+    {
+      "process_id": "Prepare_Breach_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Analyze_Breach_Reasons"]
+    },
+    {
+      "process_id": "PnL_Attribution_Analysis",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": ["SubLedger_Financial_Reporting"]
+    },
+    {
+      "process_id": "Collect_Daily_PnL_Data",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["PnL_Attribution_Analysis"]
+    },
+    {
+      "process_id": "Attribute_PnL_Trading_Desks",
+      "type": "PROCESS",
+      "processing_time": "15 minutes",
+      "dependencies": ["Collect_Daily_PnL_Data"]
+    },
+    {
+      "process_id": "Prepare_Daily_PnL_Report",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Attribute_PnL_Trading_Desks"]
+    },
+    {
+      "process_id": "Daily_Risk_Metrics_Calculation",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["Colossus_Risk_Data"]
+    },
+    {
+      "process_id": "Gather_Risk_Data",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Daily_Risk_Metrics_Calculation"]
+    },
+    {
+      "process_id": "Calculate_Daily_VaR_ES",
+      "type": "PROCESS",
+      "processing_time": "30 minutes",
+      "dependencies": ["Gather_Risk_Data"]
+    },
+    {
+      "process_id": "Distribute_Risk_Metrics",
+      "type": "PROCESS",
+      "processing_time": "10 minutes",
+      "dependencies": ["Calculate_Daily_VaR_ES"]
+    }
+  ]
+}

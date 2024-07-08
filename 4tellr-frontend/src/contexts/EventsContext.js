@@ -69,7 +69,7 @@ export const EventsProvider = ({ children }) => {
       });
 
       // Add a method to process the events and add the groups that they exist in.
-      const modifiedEvents = addGroupInformationToEvents(response.data)
+      const modifiedEvents = addGroupInformationToEvents(response.data, favouriteGroups)
 
       setEvents(modifiedEvents);
       const calculatedMetrics = CalculateMettics(modifiedEvents);
@@ -82,10 +82,10 @@ export const EventsProvider = ({ children }) => {
     }
   };
 
-  const addGroupInformationToEvents = (events) => {
+  const addGroupInformationToEvents = (events, userFavouriteGroups) => {
 
     //Check that the user has some groups first
-    if (!favouriteGroups || favouriteGroups.length === 0) {
+    if (!userFavouriteGroups || userFavouriteGroups.length === 0) {
       return events;
     }
 
@@ -93,7 +93,7 @@ export const EventsProvider = ({ children }) => {
     return events.map(event => {
       let eventGroups = [];
 
-      favouriteGroups.forEach(group => {
+      userFavouriteGroups.forEach(group => {
         // Check if the event is part of the group's events
         if (group.events.includes(event.eventKey)) {
           eventGroups.push(group.group_name);
@@ -119,7 +119,10 @@ export const EventsProvider = ({ children }) => {
         params: { email: userEmail }
       });
       setCurrentUser(response.data.user);
-      setFavouriteGroups(response.data.groups)
+      setFavouriteGroups(response.data.groups);
+
+      const modifiedEvents = addGroupInformationToEvents(response.data, response.data.groups);
+      setEvents(modifiedEvents);
     } catch (error) {
       console.error('Error refreshing user:', error)
     }

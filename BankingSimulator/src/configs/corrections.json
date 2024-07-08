@@ -1,0 +1,93 @@
+{
+  "application": "ClearWater_Corrections",
+  "processes": [
+    {
+      "process_id": "ClearWater_MarketRisk_Reports",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "Colossus_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_CreditRisk_Reports",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "Flash_Reporting"
+      ]
+    },
+    {
+      "process_id": "ClearWater_Financial_Reports",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "SubLedger_Financial_Reporting"
+      ]
+    },
+    {
+      "process_id": "Treasury_Operations_Review",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00",
+      "processing_time": "60 minutes",
+      "dependencies": ["ClearWater_Financial_Reports"]
+    },
+    {
+      "process_id": "ClearWater_Market_Risk_Report_Review",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00",
+      "processing_time": "30 minutes",
+      "dependencies": ["ClearWater_MarketRisk_Reports"]
+    },
+    {
+      "process_id": "ClearWater_Credit_Exposure_Review",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00",
+      "processing_time": "30 minutes",
+      "dependencies": ["ClearWater_CreditRisk_Reports"]
+    },
+    {
+      "process_id": "ClearWater_Daily_Financial_Close_Process",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00",
+      "processing_time": "60 minutes",
+      "dependencies": ["ClearWater_Financial_Reports"]
+    },
+    {
+      "process_id": "Colossus_Risk_Data",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["ClearWater_MarketRisk_Reports"]
+    },
+    {
+      "process_id": "Stress_Testing",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["ClearWater_Market_Risk_Report_Review"]
+    },
+    {
+      "process_id": "Scenario_Analysis",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["ClearWater_Market_Risk_Report_Review"]
+    },
+    {
+      "process_id": "Liquidity_Reports",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["SubLedger_Financial_Reporting"]
+    },
+    {
+      "process_id": "Financial_Performance_Reports",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["SubLedger_Financial_Reporting"]
+    },
+    {
+      "process_id": "Financial_Reports",
+      "type": "PROCESS",
+      "processing_time": "60 minutes",
+      "dependencies": ["SubLedger_Financial_Reporting"]
+    }
+  ]
+}

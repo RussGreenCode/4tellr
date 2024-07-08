@@ -470,22 +470,25 @@ class DynamoDBHelper:
             self.logger.error(f'Error scanning items for business date {business_date} - {str(e)}')
             raise
 
+    from boto3.dynamodb.conditions import Attr
+
     def delete_events_for_business_dates(self, business_dates):
         for business_date in business_dates:
             try:
-                # Scan to get all items with keys starting with 'EVT#' or 'OUT#' and matching the business date
-                response = self.event_table.scan(
-                    FilterExpression=(
-                        (Attr('eventId').begins_with('EVT#') | Attr('eventId').begins_with('OUT#')) &
-                        Attr('businessDate').eq(business_date)
-                    )
+                # Scan to get all items matching the business date
+                response = self.event_table.query(
+                    KeyConditionExpression=boto3.dynamodb.conditions.Key('businessDate').eq(business_date)
                 )
                 items = response['Items']
-                self.logger.info(f'Found {len(items)} events to delete for business date {business_date}')
+                self.logger.info(f'Found {len(items)} events for business date {business_date}')
+
+                # Filter out items with type "event" or "outcome"
+                items_to_delete = [item for item in items if item.get('type') in ['event', 'outcome']]
+                self.logger.info(f'Found {len(items_to_delete)} events to delete for business date {business_date}')
 
                 # Delete all matching items
                 with self.event_table.batch_writer() as batch:
-                    for item in items:
+                    for item in items_to_delete:
                         try:
                             batch.delete_item(
                                 Key={
@@ -495,12 +498,11 @@ class DynamoDBHelper:
                             )
                         except Exception as e:
                             self.logger.error(f'Error deleting item with eventId: {item["eventId"]} - {str(e)}')
-                    self.logger.info(f'Deleted {len(items)} events for business date {business_date}')
+                    self.logger.info(f'Deleted {len(items_to_delete)} events for business date {business_date}')
 
             except Exception as e:
                 self.logger.error(f'Error scanning items for business date {business_date} - {str(e)}')
                 raise
-
 
     def get_monthly_events(self, event_name, event_status):
 

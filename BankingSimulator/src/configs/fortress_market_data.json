@@ -4,7 +4,7 @@
     {
       "process_id": "Fortress_MarketData_Receipt",
       "type": "FILE",
-      "schedule_time": "18:00",
+      "schedule_time": "T 18:00",
       "processing_time": "20 minutes",
       "dependencies": []
     },

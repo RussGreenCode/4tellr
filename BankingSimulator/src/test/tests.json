@@ -1,0 +1,91 @@
+{
+  "application": "TestApp",
+  "processes": [
+    {
+      "process_id": "Start_Process",
+      "type": "PROCESS",
+      "schedule_time": "T 06:00",
+      "processing_time": "30 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "Single_Dependency_Process",
+      "type": "PROCESS",
+      "schedule_time": "T 08:00",
+      "processing_time": "20 minutes",
+      "dependencies": [
+        "Start_Process"
+      ]
+    },
+    {
+      "process_id": "Multiple_Dependencies_Process",
+      "type": "PROCESS",
+      "schedule_time": "T+1 09:00",
+      "processing_time": "40 minutes",
+      "dependencies": [
+        "Start_Process",
+        "Single_Dependency_Process"
+      ]
+    },
+    {
+      "process_id": "No_Schedule_Time_Process",
+      "type": "PROCESS",
+      "processing_time": "25 minutes",
+      "dependencies": [
+        "Start_Process"
+      ]
+    },
+    {
+      "process_id": "Dependency_Without_Schedule",
+      "type": "PROCESS",
+      "processing_time": "15 minutes",
+      "dependencies": [
+        "No_Schedule_Time_Process"
+      ]
+    },
+    {
+      "process_id": "Immediate_Process",
+      "type": "PROCESS",
+      "schedule_time": "T 07:00",
+      "processing_time": "10 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "Single_Dependency_T1_Process",
+      "type": "PROCESS",
+      "schedule_time": "T+1 10:00",
+      "processing_time": "35 minutes",
+      "dependencies": [
+        "Immediate_Process"
+      ]
+    },
+    {
+      "process_id": "Multiple_Dependencies_T1_Process",
+      "type": "PROCESS",
+      "schedule_time": "T+1 12:00",
+      "processing_time": "50 minutes",
+      "dependencies": [
+        "Single_Dependency_Process",
+        "Immediate_Process"
+      ]
+    },
+    {
+      "process_id": "Unscheduled_Multiple_Dependencies",
+      "type": "PROCESS",
+      "processing_time": "45 minutes",
+      "dependencies": [
+        "Single_Dependency_T1_Process",
+        "Multiple_Dependencies_Process"
+      ]
+    },
+    {
+      "process_id": "End_Process",
+      "type": "PROCESS",
+      "schedule_time": "T+1 15:00",
+      "processing_time": "60 minutes",
+      "dependencies": [
+        "Unscheduled_Multiple_Dependencies"
+      ]
+    }
+  ]
+}

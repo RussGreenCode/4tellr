@@ -1,0 +1,23 @@
+{
+  "application": "SubLedger",
+  "processes": [
+    {
+      "process_id": "SubLedger_Update_From_Financial_Performance",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["ClearWater_CFO_Financial_Performance_Report"]
+    },
+    {
+      "process_id": "SubLedger_Update_From_Capital_Adequacy",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Capital_Adequacy_Reports"]
+    },
+    {
+      "process_id": "SubLedger_Update_From_Treasury_Operations",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Treasury_Operations_Review"]
+    }
+  ]
+}

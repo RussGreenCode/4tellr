@@ -4,7 +4,7 @@
     {
       "process_id": "Fortress_Securities_Receipt",
       "type": "FILE",
-      "schedule_time": "19:00",
+      "schedule_time": "T 19:00",
       "processing_time": "20 minutes",
       "dependencies": []
     },

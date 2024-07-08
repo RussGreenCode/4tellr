@@ -56,6 +56,5 @@ class EventHelper:
                 response = requests.post(self.endpoint_url, json=event)
                 response.raise_for_status()
                 logging.info(f"Event sent to {self.endpoint_url}: {response.status_code}")
-                print(json.dumps(event, indent=2))
             except requests.RequestException as e:
                 logging.error(f"Failed to send event to {self.endpoint_url}: {e}")

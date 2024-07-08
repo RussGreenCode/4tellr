@@ -1,0 +1,23 @@
+{
+  "application": "Fortress",
+  "processes": [
+    {
+      "process_id": "Fortress_Update_From_ClearWater_Market_Risk",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["ClearWater_Market_Risk_Report_Review"]
+    },
+    {
+      "process_id": "Fortress_Update_From_ClearWater_Credit_Risk",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["ClearWater_Credit_Exposure_Review"]
+    },
+    {
+      "process_id": "Fortress_Update_From_ClearWater_Financial_Close",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["ClearWater_Daily_Financial_Close_Process"]
+    }
+  ]
+}

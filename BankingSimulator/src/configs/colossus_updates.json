@@ -1,0 +1,23 @@
+{
+  "application": "Colossus",
+  "processes": [
+    {
+      "process_id": "Colossus_Update_From_Limit_Breach",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Limit_Breach_Analysis"]
+    },
+    {
+      "process_id": "Colossus_Update_From_Stress_Testing",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Stress_Testing"]
+    },
+    {
+      "process_id": "Colossus_Update_From_Scenario_Analysis",
+      "type": "PROCESS",
+      "processing_time": "20 minutes",
+      "dependencies": ["Scenario_Analysis"]
+    }
+  ]
+}

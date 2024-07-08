@@ -73,7 +73,6 @@
     {
       "process_id": "ClearWater_PRA_Reports",
       "type": "PROCESS",
-      "schedule_time": "15:00",
       "processing_time": "60 minutes",
       "dependencies": [
         "SubLedger_Financial_Reporting",
