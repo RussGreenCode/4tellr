@@ -24,14 +24,14 @@ const getMarkerSymbol = (type) => {
 const ChartComponent = ({ data }) => {
   const theme = useTheme(); // Use the theme context
   const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen } = useContext(EventsContext);
-  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [currentTime, setCurrentTime] = useState(new Date().toISOString());
   const hoveredPointRef = useRef(null);
   const selectedPointRef = useRef(null); // Ref for selected point
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
-    }, 60000); // Update every minute
+    }, 6000); // Update every minute
     return () => clearInterval(interval);
   }, []);
 
@@ -184,8 +184,8 @@ const ChartComponent = ({ data }) => {
           shapes: [
             {
               type: 'line',
-              x0: currentTime,
-              x1: currentTime,
+              x0: new Date(currentTime).getTime(),
+              x1: new Date(currentTime).getTime(),
               y0: Math.min(...yTicks),
               y1: Math.max(...yTicks),
               line: {
@@ -193,6 +193,20 @@ const ChartComponent = ({ data }) => {
                 width: 2,
                 dash: 'dot'
               }
+            }
+          ],
+          annotations: [
+            {
+              x: new Date(currentTime).getTime(),
+              y: Math.max(...yTicks),
+              text: formatTime(new Date(currentTime).getTime()),
+              showarrow: false,
+              xanchor: 'left',
+              yanchor: 'bottom',
+              font: {
+                color: theme.palette.text.primary
+              },
+              bgcolor: theme.palette.background.default
             }
           ]
         }}

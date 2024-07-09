@@ -22,8 +22,9 @@ class EventGenerator:
         self.mode = mode
         self.output_mode = output_mode
         self.endpoint_url = endpoint_url
-        self.program_start_time = datetime.utcnow()  # Initialize the program start time in UTC
-        self.start_time = start_time if start_time else datetime.utcnow()  # Initialize the start time for events in UTC
+        self.program_start_time = datetime.now(timezone.utc)  # Initialize the program start time in UTC
+        self.start_time = start_time if start_time else datetime.now(
+            timezone.utc)  # Initialize the start time for events in UTC
         self.multiplier = multiplier
         self.start_time_variance = start_time_variance  # Maximum start time variance in minutes for initial events
         self.dependency_variance_min = dependency_variance_min  # Minimum variance for dependent events
@@ -69,7 +70,7 @@ class EventGenerator:
             raise ValueError(f"Invalid schedule_time day part: {day_part}")
 
         # Ensure time_part is correctly formatted
-        if len(time_part) != 5 or time_part[2] != ':':
+        if not (time_part[:2].isdigit() and time_part[3:].isdigit() and time_part[2] == ':'):
             raise ValueError(f"Invalid time part format: {time_part}")
 
         schedule_datetime = datetime.strptime(f"{target_date.strftime('%Y-%m-%d')} {time_part}",
@@ -91,14 +92,14 @@ class EventGenerator:
         return process_queue
 
     def update_virtual_time(self):
-        elapsed = (datetime.utcnow() - self.program_start_time).total_seconds()
+        elapsed = (datetime.now(timezone.utc) - self.program_start_time).total_seconds()
         self.virtual_time = self.start_time + timedelta(seconds=elapsed * self.multiplier)
         return self.virtual_time
 
     def process_events(self, process_queue, business_date):
         next_virtual_time_print = self.virtual_time + timedelta(minutes=15)
         while process_queue:
-            current_time = datetime.utcnow() if self.mode == 'real_time' else self.update_virtual_time()
+            current_time = datetime.now(timezone.utc) if self.mode == 'real_time' else self.update_virtual_time()
             if self.virtual_time >= next_virtual_time_print:
                 logging.info(f"Virtual Time: {self.virtual_time}")
                 next_virtual_time_print += timedelta(minutes=15)
@@ -170,17 +171,17 @@ class EventGenerator:
         logging.info(f"Processing configurations for business date: {business_date}")
         self.start_time = datetime.combine(datetime.strptime(business_date, "%Y-%m-%d"),
                                            self.start_time.time()).replace(tzinfo=timezone.utc)
-        self.program_start_time = datetime.utcnow()  # Reset the program start time to UTC
+        self.program_start_time = datetime.now(timezone.utc)  # Reset the program start time to UTC
         self.virtual_time = self.start_time  # Reset the virtual time to UTC
         process_queue = self.schedule_initial_processes(business_date)
         self.process_events(process_queue, business_date)
 
     def run_real_time(self):
         while True:
-            current_date = datetime.utcnow().date()
+            current_date = datetime.now(timezone.utc).date()
             if self.calendar.is_business_day(current_date):
                 self.run_for_business_date(current_date.strftime("%Y-%m-%d"))
-                while datetime.utcnow().date() == current_date:
+                while datetime.now(timezone.utc).date() == current_date:
                     time.sleep(60)  # Sleep for a minute before checking the date again
             else:
                 time.sleep(3600)  # Sleep for an hour if it's not a business day
@@ -217,37 +218,4 @@ def load_config_txt(config_path):
             key, value = line.strip().split('=')
             config_params[key] = value
     return config_params
-
-
-if __name__ == "__main__":
-    config_txt_path = "./config.txt"  # Path to the config.txt file
-    config_params = load_config_txt(config_txt_path)
-
-    mode = config_params.get('mode', 'real_time')
-    start_time = datetime.fromisoformat(config_params.get('start_time'))
-    multiplier = int(config_params.get('multiplier', 1))
-    directory_path = config_params.get('directory_path', './configs/')
-    output_mode = config_params.get('output_mode', 'console')
-    endpoint_url = config_params.get('endpoint_url', 'http://127.0.0.1/api/event')
-    start_time_variance = int(config_params.get('start_time_variance', 20))
-    dependency_variance_min = int(config_params.get('dependency_variance_min', 1))
-    dependency_variance_max = int(config_params.get('dependency_variance_max', 2))
-    processing_time_variance = float(config_params.get('processing_time_variance', 1.0))
-    start_business_date = datetime.strptime(config_params.get('start_business_date'), "%Y-%m-%d")
-    number_of_days = int(config_params.get('number_of_days', 1))
-
-    configs = load_configs(directory_path)
-
-    event_generator = EventGenerator(
-        configs,
-        mode=mode,
-        output_mode=output_mode,
-        start_time=start_time,
-        multiplier=multiplier,
-        endpoint_url=endpoint_url,
-        start_time_variance=start_time_variance,
-        dependency_variance_min=dependency_variance_min,
-        dependency_variance_max=dependency_variance_max,
-        processing_time_variance=processing_time_variance
-    )
-    event_generator.run(start_business_date, number_of_days)
+    

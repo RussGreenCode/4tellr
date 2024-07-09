@@ -8,7 +8,7 @@ const CalculateMetrics = (events) => {
     MEETS_SLA: [],
     LATE: [],
     ERROR: [],
-    NEW_EVT: [],
+    NEW: [],
     NOT_REACHED_EXP: [],
     BREACHED_EXP: [],
   };
@@ -43,7 +43,7 @@ const CalculateMetrics = (events) => {
       MEETS_SLA: categorizedEvents.MEETS_SLA.length,
       LATE: categorizedEvents.LATE.length,
       ERROR: categorizedEvents.ERROR.length,
-      NEW_EVT: categorizedEvents.NEW_EVT.length,
+      NEW: categorizedEvents.NEW.length,
       NOT_REACHED_EXP: categorizedEvents.NOT_REACHED_EXP.length,
       BREACHED_EXP: categorizedEvents.BREACHED_EXP.length,
     }
