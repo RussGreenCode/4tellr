@@ -11,6 +11,7 @@ import axios from 'axios';
 const Menu = ({ setIsAuthenticated }) => {
   const { events, filteredEvents } = useContext(EventsContext);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const navigate = useNavigate();
@@ -37,6 +38,10 @@ const Menu = ({ setIsAuthenticated }) => {
     setProfileOpen(!profileOpen);
   };
 
+  const handleAnalyticsClickClick = () => {
+    setAnalyticsOpen(!analyticsOpen);
+  };
+
   const handleAdminClick = () => {
     setAdminOpen(!adminOpen);
   };
@@ -54,6 +59,17 @@ const Menu = ({ setIsAuthenticated }) => {
         <ListItem button component={Link} to="/details">
           <ListItemText primary="Details" />
         </ListItem>
+         <ListItem button onClick={handleAnalyticsClickClick}>
+          <ListItemText primary="Analytics" />
+          {analyticsOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={analyticsOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItem button component={Link} to="/changePassword" sx={{ pl: 4 }}>
+              <ListItemText primary="Change Password" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+          </List>
+        </Collapse>
         <ListItem button onClick={handleProfileClick}>
           <ListItemText primary="My Profile" />
           {profileOpen ? <ExpandLess /> : <ExpandMore />}
