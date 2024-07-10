@@ -6,7 +6,7 @@ import BarChartComponent from './BarChartComponent';
 import PieChartComponent from './PieChartComponent';
 import ScatterPlotComponent from './ScatterPlotComponent';
 import EventDetailsComponent from './EventDetailsComponent';
-import { generateBarData } from '../utils/metricsHelper';
+import { generateBarData } from '../utils/MetricsHelper';
 import '../styles/AlertArea.css';
 
 const AlertArea = () => {

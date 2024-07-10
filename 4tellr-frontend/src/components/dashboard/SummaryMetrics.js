@@ -3,7 +3,7 @@ import React, { useMemo } from 'react';
 import { Grid, Box, Paper} from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import CurrentStatusBlock from './CurrentStatusBlock';
-import { generateBarData } from '../../utils/metricsHelper';
+import { generateBarData } from '../../utils/MetricsHelper';
 import '../../styles/SummaryMetrics.css'; // Import the CSS file
 
 const SummaryMetrics = ({ metrics }) => {

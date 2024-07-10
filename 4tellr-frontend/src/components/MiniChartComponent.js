@@ -3,7 +3,7 @@ import React, { useMemo, useState, useEffect, useContext, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { EventsContext } from '../contexts/EventsContext';
 import { useTheme } from '@mui/material/styles';
-import { transformEventsForChart } from '../utils/transformEvents';
+import { transformEventsForChart } from '../utils/TransformEvents';
 import '../styles/Chart.css';
 
 

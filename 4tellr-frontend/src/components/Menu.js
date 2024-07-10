@@ -5,7 +5,7 @@ import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import { EventsContext } from '../contexts/EventsContext';
 import '../styles/App.css';
-import { exportToCSV } from '../utils/exportUtils';
+import { exportToCSV } from '../utils/ExportUtils';
 import axios from 'axios';
 
 const Menu = ({ setIsAuthenticated }) => {

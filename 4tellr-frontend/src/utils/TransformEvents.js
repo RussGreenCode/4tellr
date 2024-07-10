@@ -1,4 +1,4 @@
-// src/utils/transformEvents.js
+// src/utils/TransformEvents.js
 import moment from 'moment';
 
 export const transformEventsForChart = (events) => {

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import ChartComponent from './ChartComponent';
 import { EventsContext } from '../contexts/EventsContext';
-import { transformEventsForChart } from '../utils/transformEvents';
+import { transformEventsForChart } from '../utils/TransformEvents';
 import { Box } from '@mui/material';
 
 

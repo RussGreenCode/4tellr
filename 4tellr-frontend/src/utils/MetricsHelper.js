@@ -1,4 +1,4 @@
-// src/utils/metricsHelper.js
+// src/utils/MetricsHelper.js
 export const generateBarData = (filteredMetrics) => {
   return [
     { name: 'Error', value: filteredMetrics.eventStatus.ERROR, color: 'darkred', eventType: 'ERROR' },

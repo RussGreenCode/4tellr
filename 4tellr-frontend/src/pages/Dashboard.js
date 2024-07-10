@@ -4,7 +4,7 @@ import { Box, Grid, Paper, Typography } from '@mui/material';
 import SummaryMetrics from '../components/dashboard/SummaryMetrics';
 import MiniChartComponent from '../components/MiniChartComponent';
 import { EventsContext } from '../contexts/EventsContext';
-import { filterFavouriteEvents } from '../utils/filterFavouriteEvents';
+import { filterFavouriteEvents } from '../utils/FilterFavouriteEvents';
 
 const Dashboard = () => {
   const { events, favouriteGroups, metrics, favouriteMetrics } = useContext(EventsContext);

@@ -36,7 +36,12 @@ export const EventsProvider = ({ children }) => {
 
 
  const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria, outcomeCriteria) => {
-  // Example filtering logic based on search criteria
+
+    if (!Array.isArray(events)) {
+        console.error('The events parameter is not an array.');
+        return [];
+    }
+
     return events.filter(event => {
       let matches = true;
 
@@ -121,8 +126,6 @@ export const EventsProvider = ({ children }) => {
       setCurrentUser(response.data.user);
       setFavouriteGroups(response.data.groups);
 
-      const modifiedEvents = addGroupInformationToEvents(response.data, response.data.groups);
-      setEvents(modifiedEvents);
     } catch (error) {
       console.error('Error refreshing user:', error)
     }
@@ -144,12 +147,10 @@ export const EventsProvider = ({ children }) => {
 
     fetchEvents(businessDate);
 
-
     const interval = setInterval(() => {
       fetchEvents(businessDate);
 
-
-    }, 600000); // Update every minute
+    }, 60000); // Update every minute
     return () => clearInterval(interval);
   }, [businessDate]);
 
