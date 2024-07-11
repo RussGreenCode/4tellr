@@ -247,7 +247,7 @@ class EventHelper():
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
 
-        self.db_helper.insert_event(outcome_data)
+        result = self.db_helper.insert_event(outcome_data)
 
         self.logger.info(f'Inserted event outcome: {outcome_data["eventId"]}')
 
@@ -309,7 +309,7 @@ class EventHelper():
                 'timestamp': datetime.now(timezone.utc).isoformat()
             }
 
-            self.insert_event(expectation_data)
+            result = self.db_helper.insert_event(expectation_data)
 
             expectations.append(expectation_data)
 
