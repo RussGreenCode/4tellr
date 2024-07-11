@@ -20,7 +20,7 @@ class UserHelper():
             # Check if the user already exists
             response = self.db_helper.get_user_by_email(email)
 
-            if response == None:
+            if response['success'] == False:
                 # Add the new user
                 self.db_helper.add_user(user)
                 return {'email': email, 'success': True, 'message': 'User added successfully'}
@@ -38,13 +38,15 @@ class UserHelper():
 
     def get_all_users(self):
 
-        users = self.db_helper.get_all_users()
+        response = self.db_helper.get_all_users()
 
-        return users
+        return response['data']
 
     def change_password(self, email, old_password, new_password):
 
-        user = self.db_helper.get_user_by_email(email)
+        response = self.db_helper.get_user_by_email(email)
+
+        user = response['data']
 
         if user and bcrypt.checkpw(old_password.encode('utf-8'), user['password'].encode('utf-8')):
             new_hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -60,4 +62,6 @@ class UserHelper():
 
     def save_user_favourite_groups(self, email, favourite_groups):
 
-        self.db_helper.save_user_favourite_groups(email, favourite_groups)
+        response = self.db_helper.save_user_favourite_groups(email, favourite_groups)
+
+        return response

@@ -21,10 +21,13 @@ class EventHelper():
 
     def query_events_by_date(self, business_date):
         response = self.db_helper.query_events_by_date(business_date)
-        return response
+        return response['data']
 
     def query_events_by_date_for_chart(self, business_date):
-        items = self.db_helper.query_events_by_date(business_date)
+        query_respone = self.db_helper.query_events_by_date(business_date)
+
+        items=query_respone['data']
+
         result = []
         utc = pytz.UTC
 
@@ -166,7 +169,7 @@ class EventHelper():
         while current_date <= end_date:
             current_date_str = current_date.strftime('%Y-%m-%d')
             response = self.db_helper.get_event_by_starting_prefix(sk_prefix, current_date_str)
-            all_events.extend(response)
+            all_events.extend(response['data'])
             current_date += timedelta(days=1)
 
         return {
@@ -181,7 +184,7 @@ class EventHelper():
 
         result = self.db_helper.insert_event(event_data)
 
-        if not result:
+        if not result['success']:
             return None
 
         event_time = datetime.fromisoformat(event_data['eventTime'])
@@ -203,8 +206,8 @@ class EventHelper():
         exp_prefix = str(f'EXP#{event_name}#{event_status}')
 
         # Get expectation for the event using the composite key
-        items = self.db_helper.get_event_by_starting_prefix(exp_prefix, business_date)
-
+        event_result = self.db_helper.get_event_by_starting_prefix(exp_prefix, business_date)
+        items = event_result['data']
         if not items:
             self.logger.info(f'No expectation found for {event_name} with status {event_status} on {business_date}')
             expected_time = None
@@ -247,7 +250,7 @@ class EventHelper():
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
 
-        result = self.db_helper.insert_event(outcome_data)
+        self.db_helper.insert_event(outcome_data)
 
         self.logger.info(f'Inserted event outcome: {outcome_data["eventId"]}')
 
@@ -255,15 +258,15 @@ class EventHelper():
     def delete_expectations_for_business_date(self, business_date):
 
         #Call the db_helper to delete the events.
-        self.db_helper.delete_expectations_for_business_date(business_date)
+        response = self.db_helper.delete_expectations_for_business_date(business_date)
 
-        return True
+        return response['success']
 
     def delete_events_for_business_dates(self, business_dates):
 
-        self.db_helper.delete_events_for_business_dates(self, business_dates)
+        response = self.db_helper.delete_events_for_business_dates(self, business_dates)
 
-        return True
+        return response['success']
 
     def get_latest_metrics(self):
 
@@ -271,7 +274,7 @@ class EventHelper():
         response = self.db_helper.get_latest_metrics()
 
         # Return the latest metrics as a list
-        return response
+        return response['data']
 
 
 
@@ -309,7 +312,7 @@ class EventHelper():
                 'timestamp': datetime.now(timezone.utc).isoformat()
             }
 
-            result = self.db_helper.insert_event(expectation_data)
+            self.db_helper.insert_event(expectation_data)
 
             expectations.append(expectation_data)
 
@@ -404,11 +407,11 @@ class EventHelper():
 
     def get_expected_time(self, event_name, event_status):
         response = self.db_helper.get_expected_time( event_name, event_status)
-        return response
+        return response['data']
 
     def get_expectation_list(self):
         # Perform a scan to get all items
-        response = self.get_expectation_list()
+        response = self.db_helper.get_expectation_list()
 
         # Return the latest metrics as a list
-        return response
+        return response['data']

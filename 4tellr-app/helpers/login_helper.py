@@ -11,7 +11,7 @@ class LoginHelper():
     def get_user_by_email(self, email):
         try:
             response = self.db_helper.get_user_by_email(email)
-            return response
+            return response['data']
         except Exception as e:
             print(f"An error occurred: {e}")
             return None
