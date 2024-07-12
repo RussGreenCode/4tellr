@@ -103,7 +103,7 @@ const SummaryMetrics = ({ metrics }) => {
         <Grid item>
           <CurrentStatusBlock
             label="New Event"
-            value={metrics.eventStatus.NEW_EVT}
+            value={metrics.eventStatus.NEW}
             plotStatus="NEW_EVT"
             className="new-event"
           />

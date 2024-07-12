@@ -1,16 +1,9 @@
 import boto3
-import pytz
-from boto3.dynamodb.conditions import Key, Attr
-import uuid
-from datetime import datetime, timedelta, timezone
-import statistics
+from boto3.dynamodb.conditions import Key
+from datetime import datetime, timedelta
 import bcrypt
-
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
-
 from helpers.database_helper_interface import DatabaseHelperInterface
-from utils.threshold import Threshold
-from utils.status_utilities import StatusUtilities
 
 
 class DynamoDBHelper(DatabaseHelperInterface):

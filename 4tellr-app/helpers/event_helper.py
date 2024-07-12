@@ -264,7 +264,7 @@ class EventHelper():
 
     def delete_events_for_business_dates(self, business_dates):
 
-        response = self.db_helper.delete_events_for_business_dates(self, business_dates)
+        response = self.db_helper.delete_events_for_business_dates(business_dates)
 
         return response['success']
 

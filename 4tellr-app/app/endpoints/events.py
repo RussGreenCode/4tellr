@@ -99,7 +99,7 @@ def create_event():
     except Exception as e:
         return jsonify({'error': 'AWS credentials not configured correctly'}), 500
 
-    return jsonify({'status': 'success', 'event_id': event_id, 'event_data': data}), 201
+    return jsonify({'status': 'success', 'event_id': event_id}), 201
 
 
 @events_bp.route('/api/events/<string:business_date>/<string:event_name>', methods=['GET'])

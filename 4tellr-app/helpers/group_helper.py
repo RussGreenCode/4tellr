@@ -25,7 +25,7 @@ class GroupHelper():
         if group_name and events is not None:
 
            response = self.db_helper.save_group(group_name, events, description)
-           return response['data']
+           return response
 
         else:
             print("[ERROR] 'group_name' and 'events' must not be None.")
@@ -35,7 +35,7 @@ class GroupHelper():
         if group_name:
             response = self.db_helper.delete_group(group_name)
 
-            return response['data']
+            return response
         else:
             print("[ERROR] 'group_name' must not be None.")
             return None

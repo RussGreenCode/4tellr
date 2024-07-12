@@ -7,6 +7,7 @@ from .endpoints.users import users_bp
 from .endpoints.login import login_bp
 from .endpoints.profile import profile_bp
 from helpers.dynamodb_helper import DynamoDBHelper
+from helpers.mongodb_helper import MongoDBHelper
 from helpers.logger import Logger
 
 def create_app():
@@ -28,7 +29,7 @@ def create_app():
     if config['DATABASE_TYPE'] == 'dynamoDB':
         db_helper = DynamoDBHelper(config, logger)
     elif config['DATABASE_TYPE'] == 'mongoDB':
-        db_helper = DynamoDBHelper(config, logger)
+        db_helper = MongoDBHelper(config, logger)
     else:
         logger.error('Invalid DATABASE_TYPE specified in config. Please use "dynamoDB" or "mongoDB".')
         return None

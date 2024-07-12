@@ -21,6 +21,10 @@ class UserHelper():
             response = self.db_helper.get_user_by_email(email)
 
             if response['success'] == False:
+
+                # Initialise any other structure in the user here
+                user['favourite_groups'] = []
+
                 # Add the new user
                 self.db_helper.add_user(user)
                 return {'email': email, 'success': True, 'message': 'User added successfully'}
@@ -65,3 +69,9 @@ class UserHelper():
         response = self.db_helper.save_user_favourite_groups(email, favourite_groups)
 
         return response
+
+    def get_user_by_email(self, email):
+
+        response = self.db_helper.get_user_by_email(email)
+
+        return response['data']
