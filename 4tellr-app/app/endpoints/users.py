@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify, Blueprint, current_app
 import bcrypt
 
+from helpers.user_helper import UserHelper
+from helpers.group_helper import GroupHelper
+
 users_bp = Blueprint('users', __name__)
 
 # Initialize db_helper at the module level
@@ -8,10 +11,11 @@ db_helper = None
 
 
 @users_bp.before_app_request
-def initialize_db_helper():
-    global db_helper
-    db_helper = current_app.config['DB_HELPER']
-
+def initialize_helpers():
+    global user_helper
+    user_helper = UserHelper()
+    global group_helper
+    group_helper = GroupHelper()
 
 @users_bp.route('/api/add_users', methods=['POST'])
 def add_users():
@@ -30,7 +34,7 @@ def add_users():
         }
         try:
 
-            result = db_helper.add_user(user)
+            result = user_helper.add_new_user(user)
             results.append(result)
 
         except Exception as e:
@@ -42,7 +46,7 @@ def add_users():
 @users_bp.route('/api/delete_user/<string:email>', methods=['DELETE'])
 def delete_user(email):
     try:
-        response = db_helper.delete_user_by_email(email)
+        response = user_helper.delete_user_by_email(email)
         results = []
         if response:
             results.append({'email': email, 'success': True, 'message': f'User with email {email} deleted successfully.'})
@@ -57,7 +61,7 @@ def delete_user(email):
 def get_users():
     try:
 
-        users = db_helper.get_all_users()
+        users = user_helper.get_all_users()
         return jsonify(users)
 
     except Exception as e:
@@ -74,7 +78,7 @@ def change_password():
         return jsonify({'error': 'Email, old password, and new password are required'}), 400
 
     try:
-        result = db_helper.change_password(email, old_password, new_password)
+        result = user_helper.change_password(email, old_password, new_password)
         if result['success']:
             return jsonify({'success': True, 'message': result['message']}), 200
         else:
@@ -90,7 +94,7 @@ def get_user():
         return jsonify({'error': 'Email parameter is required'}), 400
 
     try:
-        user = db_helper.get_user_by_email(email)
+        user = user_helper.get_user_by_email(email)
 
         groups = []
 
@@ -99,7 +103,7 @@ def get_user():
         if favourite_groups:
 
             for group_name in favourite_groups:
-                group = db_helper.get_group_details(group_name)
+                group = group_helper.get_group_details(group_name)
                 groups.append(group)
 
         response = {
@@ -121,7 +125,7 @@ def save_user_favourite_groups():
         return jsonify({'error': 'Email and favourite groups are required'}), 400
 
     try:
-        db_helper.save_user_favourite_groups(email, favourite_groups)
+        user_helper.save_user_favourite_groups(email, favourite_groups)
         return jsonify({'message': 'Favourite groups updated successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

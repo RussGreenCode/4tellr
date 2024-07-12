@@ -1,5 +1,5 @@
-from botocore.exceptions import NoCredentialsError, PartialCredentialsError
-from flask import Flask, request, jsonify, Blueprint, current_app
+from flask import request, jsonify, Blueprint, current_app
+from helpers.event_helper import EventHelper
 
 events_bp = Blueprint('events', __name__)
 
@@ -8,8 +8,9 @@ db_helper = None
 
 @events_bp.before_app_request
 def initialize_db_helper():
-    global db_helper
-    db_helper = current_app.config['DB_HELPER']
+    global event_helper
+    event_helper = EventHelper()
+
 
 @events_bp.route('/api/events', methods=['GET'])
 def get_events_by_date():
@@ -18,7 +19,7 @@ def get_events_by_date():
         return jsonify({'error': 'businessDate parameter is required'}), 400
 
     try:
-        events = db_helper.query_events_by_date(business_date)
+        events = event_helper.query_events_by_date(business_date)
         return jsonify(events), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -31,7 +32,7 @@ def get_events_by_date_for_chart():
         return jsonify({'error': 'businessDate parameter is required'}), 400
 
     try:
-        events = db_helper.query_events_by_date_for_chart(business_date)
+        events = event_helper.query_events_by_date_for_chart(business_date)
         return jsonify(events), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -47,7 +48,7 @@ def get_event_details():
         return jsonify({"error": "Missing required parameters"}), 400
 
     try:
-        data = db_helper.get_monthly_events(event_name, event_status)
+        data = event_helper.get_monthly_events(event_name, event_status)
         return jsonify(data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -94,18 +95,22 @@ def create_event():
         return jsonify({'error': 'Invalid eventType provided'}), 400
 
     try:
-        event_id = db_helper.insert_event(data)
-    except (NoCredentialsError, PartialCredentialsError):
+        event_id = event_helper.insert_event(data)
+    except Exception as e:
         return jsonify({'error': 'AWS credentials not configured correctly'}), 500
 
-    return jsonify({'status': 'success', 'event_id': event_id, 'event_data': data}), 201
+    return jsonify({'status': 'success', 'event_id': event_id}), 201
 
 
 @events_bp.route('/api/events/<string:business_date>/<string:event_name>', methods=['GET'])
 def get_event(business_date, event_name):
+
+    #Not sure this method is use anymore
+
     try:
-        events = db_helper.query_events_by_date(business_date)
-        event = next((e for e in events if e['eventName'] == event_name), None)
+        #events = db_helper.query_events_by_date(business_date)
+        #event = next((e for e in events if e['eventName'] == event_name), None)
+        event = None
         if not event:
             return jsonify({'error': 'Event not found'}), 404
         return jsonify(event), 200
@@ -126,13 +131,13 @@ def generate_expectations():
 
     try:
         # Delete existing expectations for the given business date
-        db_helper.delete_expectations_for_business_date(business_date)
+        event_helper.delete_expectations_for_business_date(business_date)
 
         # DGenerate the new expectations for that business date
-        expectations = db_helper.generate_expectations(business_date)
-        if not expectations:
+        result = event_helper.generate_expectations(business_date)
+        if not result:
             return jsonify({'error': 'Unable to generate expectations, no metrics found.'}), 404
-        return jsonify(expectations), 201
+        return jsonify({'status': 'Success'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -153,7 +158,7 @@ def delete_events():
 
     try:
         # Delete existing events for the given business dates
-        db_helper.delete_events_for_business_dates(business_dates)
+        event_helper.delete_events_for_business_dates(business_dates)
 
         return jsonify("Events deleted successfully"), 201
     except Exception as e:
@@ -163,7 +168,7 @@ def delete_events():
 @events_bp.route('/api/events/latest-metrics', methods=['GET'])
 def get_latest_metrics():
     try:
-        latest_metrics = db_helper.get_latest_metrics()
+        latest_metrics = event_helper.get_latest_metrics()
         return jsonify(latest_metrics), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -172,7 +177,7 @@ def get_latest_metrics():
 @events_bp.route('/api/events/expected-times/update', methods=['POST'])
 def update_expected_times():
     try:
-        db_helper.update_expected_times()
+        event_helper.update_expected_times()
         return jsonify({'status': 'success'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -181,7 +186,7 @@ def update_expected_times():
 @events_bp.route('/api/events/<string:event_name>/<string:event_status>/expected-time', methods=['GET'])
 def get_expected_time(event_name, event_status):
     try:
-        expected_time = db_helper.get_expected_time(event_name, event_status)
+        expected_time = event_helper.get_expected_time(event_name, event_status)
         if not expected_time:
             return jsonify({'error': 'Expected time not found'}), 404
         return jsonify(expected_time), 200
@@ -192,7 +197,7 @@ def get_expected_time(event_name, event_status):
 @events_bp.route('/api/get_expectation_list', methods=['GET'])
 def get_expectation_list():
     try:
-        items = db_helper.get_expectation_list()
+        items = event_helper.get_expectation_list()
         return jsonify(items)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

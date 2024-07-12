@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify, Blueprint, current_app
 import bcrypt
+from helpers.login_helper import LoginHelper
+
 
 login_bp = Blueprint('login', __name__)
 
@@ -7,9 +9,9 @@ login_bp = Blueprint('login', __name__)
 db_helper = None
 
 @login_bp.before_app_request
-def initialize_db_helper():
-    global db_helper
-    db_helper = current_app.config['DB_HELPER']
+def initialize_helpers():
+    global login_helper
+    login_helper = LoginHelper()
 
 
 
@@ -23,7 +25,7 @@ def login():
         return jsonify({'error': 'Email and password are required'}), 400
 
     try:
-        user = db_helper.get_user_by_email(email)
+        user = login_helper.get_user_by_email(email)
         if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
             return jsonify({'isAuthenticated': True, 'user': user}), 200
         else:
