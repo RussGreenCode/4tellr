@@ -11,6 +11,7 @@ import UserManagement from './pages/UserManagement';
 import UserDetails from './pages/UserDetails';
 import ChangePassword from './pages/ChangePassword';
 import FavouriteGroups from './pages/FavouriteGroups';
+import JobManagement from './pages/JobManagement';
 import Admin from './pages/Admin';
 import { EventsProvider } from './contexts/EventsContext';
 import { ThemeContextProvider } from './contexts/ThemeContext';
@@ -57,6 +58,7 @@ function App() {
                       <Route path="/userManagement" element={<UserManagement />} />
                       <Route path="/favouriteGroups" element={<FavouriteGroups />} />
                       <Route path="/userDetails" element={<UserDetails />} />
+                      <Route path="/jobManagement" element={<JobManagement />} />
                     </Routes>
                   </Grid>
                 </Grid>

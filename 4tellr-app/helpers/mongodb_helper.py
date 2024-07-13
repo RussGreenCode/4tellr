@@ -15,6 +15,7 @@ class MongoDBHelper(DatabaseHelperInterface):
         self.stats_collection = self.db['event_statistics']
         self.groups_collection = self.db['monitoring_groups']
         self.user_collection = self.db['user']
+        self.job_stats_collection = self.db['job_statistics']
 
         # Set up logging
         self.logger = logger
@@ -37,13 +38,13 @@ class MongoDBHelper(DatabaseHelperInterface):
                         before = item['_id']
                         item['_id'] = str(item['_id'])
                         after = item['_id']
-                        self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
+            #          self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
             elif isinstance(doc, dict):
                 if '_id' in doc:
                     before = doc['_id']
                     doc['_id'] = str(doc['_id'])
                     after = doc['_id']
-                    self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
+            #      self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
             else:
                 self.logger.error(f"Unexpected document structure: {doc}")
 
@@ -64,6 +65,18 @@ class MongoDBHelper(DatabaseHelperInterface):
     def query_events_by_date(self, business_date):
         try:
             events = list(self.event_collection.find({'businessDate': business_date}))
+            return {'success': True, 'data': self._serialize_id(events)}
+        except Exception as e:
+            self.logger.error(f"Error querying events by date: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def query_events_by_date_and_status(self, business_date, status):
+        try:
+            events = list(self.event_collection.find({
+                'eventStatus': status,
+                'businessDate': business_date,
+                'type': 'outcome',
+            }))
             return {'success': True, 'data': self._serialize_id(events)}
         except Exception as e:
             self.logger.error(f"Error querying events by date: {e}")
@@ -336,4 +349,14 @@ class MongoDBHelper(DatabaseHelperInterface):
                 return {'success': False, 'message': f"No user found with email '{email}'."}
         except PyMongoError as e:
             self.logger.error(f"Error updating favourite groups for user with email '{email}': {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    def save_job_statistics(self, job_lengths):
+
+        try:
+            self.job_stats_collection.insert_many(job_lengths)
+            self.logger.info(f"Saved '{len(job_lengths)}' stats successfully")
+            return {'success': True, 'message': 'Group saved successfully'}
+        except Exception as e:
+            self.logger.error(f"Error saving stats: {e}")
             return {'success': False, 'error': str(e)}

@@ -33,6 +33,38 @@ export const EventsProvider = ({ children }) => {
     SLO: false,
     SLA: false
   });
+  const REFRESH_INTERVAL_SECONDS = 60;
+  const [timeLeft, setTimeLeft] = useState(REFRESH_INTERVAL_SECONDS);
+
+  const resetState = () => {
+      setEvents([]);
+      setFilteredEvents([]);
+      setFavouriteFilteredEvents([]);
+      setLoading(true);
+      setBusinessDate(today); // Default date
+      setGroupList({});
+      setSearchEventCriteria({}); // Initialize search criteria
+      setSearchStatusCriteria({}); // Initialize search criteria
+      setSearchApplicationCriteria({}); // Initialize search criteria
+      setSortCriterion('EXP'); // Initialize search criteria
+      setSelectedEvent({}); // Initialize search criteria
+      setShowLabels(false);
+      setIsDrawerOpen(false);
+      setTabIndex(0);
+      setSearchGroupCriteria({});
+      setSearchOutcomeCriteria({});
+      setCurrentUser({}); // Initialize search criteria
+      setMetrics({ summary: {}, eventStatus: {} });
+      setFavouriteMetrics({ summary: {}, eventStatus: {} });
+      setFilteredMetrics({ summary: {}, eventStatus: {} });
+      setFavouriteGroups([]);
+      setSelectedTypes({
+        EVT: true,
+        EXP: true,
+        SLO: false,
+        SLA: false
+      });
+    };
 
 
  const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria, outcomeCriteria) => {
@@ -144,15 +176,9 @@ export const EventsProvider = ({ children }) => {
 
 
   useEffect(() => {
-
     fetchEvents(businessDate);
+  }, [businessDate, currentUser]);
 
-    const interval = setInterval(() => {
-      fetchEvents(businessDate);
-
-    }, 60000); // Update every minute
-    return () => clearInterval(interval);
-  }, [businessDate]);
 
   function filterFavouriteEvents(events) {
       //Check that the event belongs to a group
@@ -166,7 +192,7 @@ export const EventsProvider = ({ children }) => {
 
     const calculatedMetrics = CalculateMettics(updatedFilteredEvents);
     setFilteredMetrics(calculatedMetrics);
-    
+
     const favouriteCalculatedMetrics = CalculateMettics( filterFavouriteEvents(events) )
     setFavouriteMetrics(favouriteCalculatedMetrics)
 
@@ -176,14 +202,16 @@ export const EventsProvider = ({ children }) => {
     fetchGroupList()
   }, []);
 
-
+  const handleManualRefresh = () => {
+    fetchEvents(businessDate);
+  };
 
   return (
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
       setSearchStatusCriteria, searchStatusCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchEventCriteria, searchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
       groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
-      setSearchOutcomeCriteria, searchOutcomeCriteria,
+      setSearchOutcomeCriteria, searchOutcomeCriteria, timeLeft, handleManualRefresh, resetState,
       isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics, favouriteGroups}}>
       {children}
     </EventsContext.Provider>
