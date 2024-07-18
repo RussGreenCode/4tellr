@@ -201,3 +201,11 @@ def get_expectation_list():
         return jsonify(items)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@events_bp.route('/api/process/get_process_statistics_list', methods=['GET'])
+def get_process_stats_list():
+    try:
+        items = event_helper.get_process_stats_list()
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

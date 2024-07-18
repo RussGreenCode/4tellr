@@ -17,6 +17,8 @@ import { EventsProvider } from './contexts/EventsContext';
 import { ThemeContextProvider } from './contexts/ThemeContext';
 import './styles/App.css';
 import Dashboard from "./pages/Dashboard";
+import ProcessStatistics from "./pages/ProcessStatistics";
+import GanttChart from "./pages/GanttChart";
 
 function App() {
 
@@ -59,6 +61,8 @@ function App() {
                       <Route path="/favouriteGroups" element={<FavouriteGroups />} />
                       <Route path="/userDetails" element={<UserDetails />} />
                       <Route path="/jobManagement" element={<JobManagement />} />
+                      <Route path="/processStatistics" element={<ProcessStatistics />} />
+                      <Route path="/ganttChart" element={<GanttChart/>} />
                     </Routes>
                   </Grid>
                 </Grid>

@@ -66,8 +66,11 @@ const Menu = ({ setIsAuthenticated }) => {
         </ListItem>
         <Collapse in={analyticsOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItem button component={Link} to="/changePassword" sx={{ pl: 4 }}>
-              <ListItemText primary="Change Password" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            <ListItem button component={Link} to="/processStatistics" sx={{ pl: 4 }}>
+              <ListItemText primary="Process Statistics" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+            <ListItem button component={Link} to="/ganttChart" sx={{ pl: 4 }}>
+              <ListItemText primary="GanttChart" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
           </List>
         </Collapse>

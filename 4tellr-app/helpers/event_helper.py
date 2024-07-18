@@ -415,3 +415,10 @@ class EventHelper():
 
         # Return the latest metrics as a list
         return response['data']
+
+    def get_process_stats_list(self):
+        # Perform a scan to get all items
+        response = self.db_helper.get_process_stats_list()
+
+        # Return the latest metrics as a list
+        return response['data']

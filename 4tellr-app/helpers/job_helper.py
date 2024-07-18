@@ -26,13 +26,16 @@ class JobHelper():
             if success_event:
                 end_time = datetime.fromisoformat(success_event['eventTime'])
                 duration_seconds = (end_time - start_time).total_seconds()
-
+                outcome = success_event['outcomeStatus']
+                expected_time = success_event['expectedTime']
                 job_lengths.append({
                     'event_name': event_name,
                     'business_date': yesterday_str,
                     'start_time': start_time,
                     'end_time': end_time,
-                    'duration_seconds': duration_seconds
+                    'duration_seconds': duration_seconds,
+                    'expected_tIme': expected_time,
+                    'outcome': outcome
                 })
 
         if job_lengths:
