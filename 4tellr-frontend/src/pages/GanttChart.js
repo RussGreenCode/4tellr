@@ -1,9 +1,10 @@
+// src/pages/ProcessStatistics.js
 import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
-import { Chart } from 'react-google-charts';
 import axios from 'axios';
+import GanttChartD3 from '../components/GanttChartD3';
+import { Box, Typography } from '@mui/material';
 
-const GanttChartPage = () => {
+const GanttChart = () => {
   const [processes, setProcesses] = useState([]);
 
   useEffect(() => {
@@ -23,77 +24,14 @@ const GanttChartPage = () => {
     }
   };
 
-  const getColorByStatus = (status) => {
-    let color;
-    color = status === 'NEW' ? 'blue'
-      : status === 'ON_TIME' ? 'darkgreen'
-      : status === 'MEETS_SLO' ? 'lightgreen'
-      : status === 'MEETS_SLA' ? 'orange'
-      : status === 'MET_THRESHOLD' ? 'darkgreen'
-      : status === 'BREACHED' ? 'red'
-      : status === 'NOT_REACHED' ? 'grey'
-      : status === 'LATE' ? 'red'
-      : 'darkred';
-    return color;
-  };
-
-  const formatGanttData = () => {
-    const data = [
-      [
-        { type: 'string', label: 'Task ID' },
-        { type: 'string', label: 'Task Name' },
-        { type: 'string', label: 'Resource' },
-        { type: 'date', label: 'Start Date' },
-        { type: 'date', label: 'End Date' },
-        { type: 'number', label: 'Duration' },
-        { type: 'number', label: 'Percent Complete' },
-        { type: 'string', label: 'Dependencies' },
-      ],
-    ];
-
-    processes.forEach((process, index) => {
-      const color = getColorByStatus(process.outcome);
-      data.push([
-        process._id,
-        process.event_name,
-        process.outcome,
-        new Date(process.start_time),
-        new Date(process.end_time),
-        null,
-        100,
-        null,
-      ]);
-    });
-
-    return data;
-  };
-
-  const chartData = formatGanttData();
-
-  const options = {
-    height: 8000,
-    gantt: {
-      trackHeight: 30,
-    },
-  };
-
-
   return (
     <Box p={3}>
       <Typography variant="h4" gutterBottom>
         Process Statistics Gantt Chart
       </Typography>
-      <Box style={{ overflowX: 'auto' }}>
-        <Chart
-          chartType="Gantt"
-          width="100%"
-          height="800px"
-          data={chartData}
-          options={options}
-        />
-      </Box>
+      <GanttChartD3 data={processes} />
     </Box>
   );
 };
 
-export default GanttChartPage;
+export default GanttChart;

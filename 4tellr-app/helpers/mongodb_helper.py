@@ -368,6 +368,8 @@ class MongoDBHelper(DatabaseHelperInterface):
                 'business_date': 1,
                 'start_time': 1,
                 'end_time': 1,
+                'expected_start_time': 1,
+                'expected_end_time': 1,
                 'duration_seconds': 1,
                 'outcome': 1,
                 'expected_time': 1
@@ -378,6 +380,8 @@ class MongoDBHelper(DatabaseHelperInterface):
                 item['_id'] = str(item['_id'])
                 item['start_time'] = item['start_time'].isoformat() if item['start_time'] else None
                 item['end_time'] = item['end_time'].isoformat() if item['end_time'] else None
+                item['expected_start_time'] = item['expected_start_time'].isoformat() if item['expected_start_time'] else None
+                item['expected_end_time'] = item['expected_end_time'].isoformat() if item['expected_end_time'] else None
 
             return {'success': True, 'data': items}
         except Exception as e:

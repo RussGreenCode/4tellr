@@ -21,20 +21,22 @@ class JobHelper():
         for started_event in started_events:
             event_name = started_event['eventName']
             start_time = datetime.fromisoformat(started_event['eventTime'])
+            expected_start_time = datetime.fromisoformat(started_event['expectedTime'])
 
             success_event = next((e for e in success_events if e['eventName'] == event_name), None)
             if success_event:
                 end_time = datetime.fromisoformat(success_event['eventTime'])
                 duration_seconds = (end_time - start_time).total_seconds()
                 outcome = success_event['outcomeStatus']
-                expected_time = success_event['expectedTime']
+                expected_end_time = datetime.fromisoformat(success_event['expectedTime'])
                 job_lengths.append({
                     'event_name': event_name,
                     'business_date': yesterday_str,
                     'start_time': start_time,
+                    'expected_start_time': expected_start_time,
                     'end_time': end_time,
+                    'expected_end_time': expected_end_time,
                     'duration_seconds': duration_seconds,
-                    'expected_tIme': expected_time,
                     'outcome': outcome
                 })
 
