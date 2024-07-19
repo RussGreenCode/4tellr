@@ -12,14 +12,14 @@ export const transformEventsForChart = (events) => {
         : event.plotStatus === 'MEETS_SLO' ? 'lightgreen'
         : event.plotStatus === 'MEETS_SLA' ? 'orange'
         : event.plotStatus === 'MET_THRESHOLD' ? 'darkgreen'
-        : event.plotStatus === 'BREACHED' ? 'red'
+        : event.plotStatus === 'BREACHED' ? 'darkred'
         : event.plotStatus === 'NOT_REACHED' ? 'grey'
         : event.plotStatus === 'LATE' ? 'red'
         : 'darkred';
     } else if (event.type === 'EXP') {
       color = event.plotStatus === 'NOT_REACHED' ? 'grey'
-        : event.plotStatus === 'BREACHED' ? 'red'
-        : 'darkred';
+        : event.plotStatus === 'BREACHED' ? 'darkred'
+        : 'pink';
     }
 
     return {

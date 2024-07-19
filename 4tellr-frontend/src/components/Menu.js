@@ -13,6 +13,7 @@ const Menu = ({ setIsAuthenticated }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -51,15 +52,27 @@ const Menu = ({ setIsAuthenticated }) => {
     setExportOpen(!exportOpen);
   };
 
+  const handleDetailsClick = () => {
+    setDetailsOpen(!detailsOpen);
+  };
+
   return (
     <Box>
       <List>
         <ListItem button component={Link} to="/">
           <ListItemText primary="Dashboard" />
         </ListItem>
-        <ListItem button component={Link} to="/details">
+        <ListItem button onClick={handleDetailsClick}>
           <ListItemText primary="Details" />
+          {detailsOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
+        <Collapse in={detailsOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+        <ListItem button component={Link} to="/details" sx={{ pl: 4 }}>
+          <ListItemText primary="Scatter" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+        </ListItem>
+          </List>
+        </Collapse>
          <ListItem button onClick={handleAnalyticsClickClick}>
           <ListItemText primary="Analytics" />
           {analyticsOpen ? <ExpandLess /> : <ExpandMore />}

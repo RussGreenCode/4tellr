@@ -49,6 +49,9 @@ const Dashboard = () => {
       <Grid mt={4} display="flex" overflow="auto" flexDirection="row">
         {renderGroupCharts()}
       </Grid>
+      <Grid mt={4} display="flex" overflow="auto" flexDirection="row">
+        {renderGroupCharts()}
+      </Grid>
     </Box>
   );
 };
