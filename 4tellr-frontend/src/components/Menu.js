@@ -9,7 +9,7 @@ import { exportToCSV } from '../utils/ExportUtils';
 import axios from 'axios';
 
 const Menu = ({ setIsAuthenticated }) => {
-  const { events, filteredEvents } = useContext(EventsContext);
+  const { events, filteredEvents, resetState } = useContext(EventsContext);
   const [profileOpen, setProfileOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -28,6 +28,7 @@ const Menu = ({ setIsAuthenticated }) => {
     try {
       await axios.post('http://127.0.0.1:5000/api/logout');
       setIsAuthenticated(false);
+      resetState()
       navigate('/');
     } catch (error) {
       console.error('Error logging out:', error);
@@ -65,8 +66,11 @@ const Menu = ({ setIsAuthenticated }) => {
         </ListItem>
         <Collapse in={analyticsOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItem button component={Link} to="/changePassword" sx={{ pl: 4 }}>
-              <ListItemText primary="Change Password" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            <ListItem button component={Link} to="/processStatistics" sx={{ pl: 4 }}>
+              <ListItemText primary="Process Statistics" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+            <ListItem button component={Link} to="/ganttChart" sx={{ pl: 4 }}>
+              <ListItemText primary="GanttChart" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
           </List>
         </Collapse>
@@ -101,6 +105,9 @@ const Menu = ({ setIsAuthenticated }) => {
             </ListItem>
             <ListItem button component={Link} to="/userDetails" sx={{ pl: 4 }}>
               <ListItemText primary="User Details" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+            <ListItem button component={Link} to="/jobManagement" sx={{ pl: 4 }}>
+              <ListItemText primary="Job Management" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
           </List>
         </Collapse>

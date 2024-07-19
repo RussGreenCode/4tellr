@@ -15,6 +15,7 @@ class MongoDBHelper(DatabaseHelperInterface):
         self.stats_collection = self.db['event_statistics']
         self.groups_collection = self.db['monitoring_groups']
         self.user_collection = self.db['user']
+        self.job_stats_collection = self.db['job_statistics']
 
         # Set up logging
         self.logger = logger
@@ -37,13 +38,13 @@ class MongoDBHelper(DatabaseHelperInterface):
                         before = item['_id']
                         item['_id'] = str(item['_id'])
                         after = item['_id']
-                        self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
+            #          self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
             elif isinstance(doc, dict):
                 if '_id' in doc:
                     before = doc['_id']
                     doc['_id'] = str(doc['_id'])
                     after = doc['_id']
-                    self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
+            #      self.logger.info(f"_serialize_id transformation: before={before}, after={after}")
             else:
                 self.logger.error(f"Unexpected document structure: {doc}")
 
@@ -64,6 +65,18 @@ class MongoDBHelper(DatabaseHelperInterface):
     def query_events_by_date(self, business_date):
         try:
             events = list(self.event_collection.find({'businessDate': business_date}))
+            return {'success': True, 'data': self._serialize_id(events)}
+        except Exception as e:
+            self.logger.error(f"Error querying events by date: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def query_events_by_date_and_status(self, business_date, status):
+        try:
+            events = list(self.event_collection.find({
+                'eventStatus': status,
+                'businessDate': business_date,
+                'type': 'outcome',
+            }))
             return {'success': True, 'data': self._serialize_id(events)}
         except Exception as e:
             self.logger.error(f"Error querying events by date: {e}")
@@ -336,4 +349,41 @@ class MongoDBHelper(DatabaseHelperInterface):
                 return {'success': False, 'message': f"No user found with email '{email}'."}
         except PyMongoError as e:
             self.logger.error(f"Error updating favourite groups for user with email '{email}': {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    def save_job_statistics(self, job_lengths):
+
+        try:
+            self.job_stats_collection.insert_many(job_lengths)
+            self.logger.info(f"Saved '{len(job_lengths)}' stats successfully")
+            return {'success': True, 'message': 'Group saved successfully'}
+        except Exception as e:
+            self.logger.error(f"Error saving stats: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def get_process_stats_list(self):
+        try:
+            items = list(self.job_stats_collection.find({}, {
+                'event_name': 1,
+                'business_date': 1,
+                'start_time': 1,
+                'end_time': 1,
+                'expected_start_time': 1,
+                'expected_end_time': 1,
+                'duration_seconds': 1,
+                'outcome': 1,
+                'expected_time': 1
+            }))
+
+            # Convert ObjectId to string and datetime to ISO format
+            for item in items:
+                item['_id'] = str(item['_id'])
+                item['start_time'] = item['start_time'].isoformat() if item['start_time'] else None
+                item['end_time'] = item['end_time'].isoformat() if item['end_time'] else None
+                item['expected_start_time'] = item['expected_start_time'].isoformat() if item['expected_start_time'] else None
+                item['expected_end_time'] = item['expected_end_time'].isoformat() if item['expected_end_time'] else None
+
+            return {'success': True, 'data': items}
+        except Exception as e:
+            self.logger.error(f"Error getting latest process stats: {e}")
             return {'success': False, 'error': str(e)}
