@@ -25,7 +25,7 @@ const SummaryMetrics = ({ metrics }) => {
       <Grid container spacing={3} sx={{ flexWrap: 'nowrap', width: 'max-content' }}>
         <Grid item>
           <Paper className="status-block">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="70%">
               <PieChart>
                 <Pie
                   data={data}

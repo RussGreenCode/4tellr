@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import CalculateMettics from '../metrics/CalculateMetrics'
+import CategoriseProcesses from '../utils/CategoriseProcesses'
 
 export const EventsContext = createContext();
 
@@ -33,6 +34,9 @@ export const EventsProvider = ({ children }) => {
     SLO: false,
     SLA: false
   });
+  const [justFinishedProcesses, setJustFinishedProcesses] = useState([])
+  const [ongoingProcesses, setOngoingProcesses] = useState([])
+  const [upcomingProcesses, setUpcomingProcesses] = useState([])
   const REFRESH_INTERVAL_SECONDS = 60;
   const [timeLeft, setTimeLeft] = useState(REFRESH_INTERVAL_SECONDS);
 
@@ -196,6 +200,9 @@ export const EventsProvider = ({ children }) => {
     const favouriteCalculatedMetrics = CalculateMettics( filterFavouriteEvents(events) )
     setFavouriteMetrics(favouriteCalculatedMetrics)
 
+    //From the events we want to determine processes and then catagorise them
+    CategoriseProcesses(events, setUpcomingProcesses, setOngoingProcesses, setJustFinishedProcesses)
+
   }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, favouriteGroups]);
 
   useEffect(() => {
@@ -212,6 +219,7 @@ export const EventsProvider = ({ children }) => {
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
       groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
       setSearchOutcomeCriteria, searchOutcomeCriteria, timeLeft, handleManualRefresh, resetState,
+      upcomingProcesses, ongoingProcesses, justFinishedProcesses,
       isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics, favouriteGroups}}>
       {children}
     </EventsContext.Provider>
