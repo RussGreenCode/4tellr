@@ -1,3 +1,8 @@
 .process-text {
   font-size: 13px; /* Adjust the size as needed */
 }
+
+.mini-gantt-chart-box {
+  width: 12cm;
+  margin: 0 10px; /* Optional: Adds space between charts */
+}
