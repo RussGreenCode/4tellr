@@ -21,8 +21,8 @@ const AlertArea = () => {
         try {
           const response = await axios.get('http://127.0.0.1:5000/api/event_details', {
             params: {
-              eventName: selectedEvent.event,
-              eventStatus: selectedEvent.status,
+              event_name: selectedEvent.event,
+              event_status: selectedEvent.status,
             },
           });
           setMonthlyEvents(response.data.events);

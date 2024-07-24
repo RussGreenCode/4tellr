@@ -110,6 +110,9 @@ const Menu = ({ setIsAuthenticated }) => {
             <ListItem button component={Link} to="/groups" sx={{ pl: 4 }}>
               <ListItemText primary="Groups" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
+            <ListItem button component={Link} to="/eventMetadata" sx={{ pl: 4 }}>
+              <ListItemText primary="Events" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
             <ListItem button component={Link} to="/userManagement" sx={{ pl: 4 }}>
               <ListItemText primary="User Management" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>

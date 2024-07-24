@@ -41,8 +41,8 @@ def get_events_by_date_for_chart():
 
 @events_bp.route('/api/event_details', methods=['GET'])
 def get_event_details():
-    event_name = request.args.get('eventName')
-    event_status = request.args.get('eventStatus')
+    event_name = request.args.get('event_name')
+    event_status = request.args.get('event_status')
 
     if not event_name or not event_status:
         return jsonify({"error": "Missing required parameters"}), 400
@@ -202,10 +202,58 @@ def get_expectation_list():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+@events_bp.route('/api/event/event_metadata_list', methods=['GET'])
+def event_metadata_list():
+    try:
+        items = event_helper.event_metadata_list()
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @events_bp.route('/api/process/get_process_statistics_list', methods=['GET'])
 def get_process_stats_list():
     try:
         items = event_helper.get_process_stats_list()
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@events_bp.route('/api/process/get_process_statistics', methods=['GET'])
+def get_process_statistics():
+
+    event_name = request.args.get('eventName')
+
+    try:
+        items = event_helper.get_process_statistics(event_name)
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@events_bp.route('/api/event/get_event_metadata', methods=['GET'])
+def get_event_metadata():
+
+    id = request.args.get('id')
+
+    try:
+        items = event_helper.get_event_metadata(id)
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@events_bp.route('/api/event/event_metadata', methods=['PUT'])
+def save_event_metadata():
+
+    data = request.json
+
+    required_fields = ['expectation_time']
+
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'{field} is required'}), 400
+
+    try:
+        items = event_helper.save_event_metadata(data)
         return jsonify(items)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

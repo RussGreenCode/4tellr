@@ -7,6 +7,7 @@ import uuid
 
 from utils.threshold import Threshold
 from utils.status_utilities import StatusUtilities
+from utils.date_time_utilities import DateTimeUtils
 
 class EventHelper():
     def __init__(self):
@@ -320,27 +321,32 @@ class EventHelper():
 
         return True
 
-    def update_expected_times(self):
+    def update_expected_times(self, event_names_statuses=None):
         events = self.scan_events_last_month()
+
         if not events:
             return None
+
+        if event_names_statuses is None:
+            event_names_statuses = []
 
         grouped_events = {}
         for event in events:
             if event['type'] == 'event':
                 key = (event['eventName'], event['eventStatus'])
-                if key not in grouped_events:
-                    grouped_events[key] = []
-                grouped_events[key].append(event)
+                if not event_names_statuses or key in event_names_statuses:
+                    if key not in grouped_events:
+                        grouped_events[key] = []
+                    grouped_events[key].append(event)
 
         for (event_name, event_status), group in grouped_events.items():
             try:
                 avg_time_elapsed = self.calculate_expected_time(group)
                 self.logger.info(f'Storing {event_name}#{event_status} for time after T +: {avg_time_elapsed}')
                 if avg_time_elapsed:
-
+                    expectation_time = DateTimeUtils.convert_avg_time_to_t_format(avg_time_elapsed)
                     self.db_helper.store_statistic(event_name, event_status, avg_time_elapsed)
-
+                    self.db_helper.update_metadata_with_expectation(event_name, event_status, expectation_time)
             except ValueError as e:
                 self.logger.error(f'Failed to update expected times for {event_name}#{event_status}: {e}')
 
@@ -365,10 +371,6 @@ class EventHelper():
             event_time = datetime.fromisoformat(event['eventTime']).astimezone(utc)
             business_date_utc = datetime.strptime(event['businessDate'], "%Y-%m-%d").replace(tzinfo=utc)
 
-            if event['eventName'] == 'Fortress_MarketData_Receipt':
-                self.logger.info(f"event_time: {event_time}  business_date_utc: {business_date_utc}")
-                debug = True
-
             # Calculate the total seconds from the start of the business date to the event time
             time_difference = (event_time - business_date_utc).total_seconds()
             times_in_seconds.append(time_difference)
@@ -378,9 +380,6 @@ class EventHelper():
         mean = statistics.mean(times_in_seconds)
         stdev = statistics.stdev(times_in_seconds)
 
-        if debug:
-            self.logger.info(f"Mean time in seconds: {mean}")
-            self.logger.info(f"Standard deviation: {stdev}")
 
         filtered_times = [t for t in times_in_seconds if abs(t - mean) < 2 * stdev]
         if filtered_times and len(filtered_times) > 1:
@@ -422,3 +421,36 @@ class EventHelper():
 
         # Return the latest metrics as a list
         return response['data']
+
+    def get_process_statistics(self, event_name):
+        # Perform a scan to get all items
+        response = self.db_helper.get_process_statistics(event_name)
+
+        # Return the latest metrics as a list
+        return response['data']
+
+    def create_event_metadata_from_events(self, business_date):
+
+        response = self.db_helper.create_event_metadata_from_events(business_date)
+
+        return response['success']
+
+    def event_metadata_list(self):
+        # Perform a scan to get all items
+        response = self.db_helper.get_event_metadata_list()
+
+        # Return the latest metrics as a list
+        return response['data']
+
+    def get_event_metadata(self, id):
+        # Go get teh metadata
+        response = self.db_helper.get_event_metadata(id)
+
+        # Return the metadata for the event
+        return response['data']
+
+    def save_event_metadata(self, event_metadata):
+
+        response = self.db_helper.save_event_metadata(event_metadata)
+
+        return response['success']
