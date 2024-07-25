@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, IconButton, TextField, Typography, Button } from '@mui/material';
 import { ArrowDropUp, ArrowDropDown } from '@mui/icons-material';
+import {DateTimeUtils} from "../utils/DateTimeUtils";
 
 const TeePlusTimeInput = ({ label, value, onChange, fixedWidth = 600 }) => {
   const [days, setDays] = useState(1);
@@ -62,10 +63,11 @@ const TeePlusTimeInput = ({ label, value, onChange, fixedWidth = 600 }) => {
   };
 
   const handleSubmit = () => {
-    const newDate = new Date();
-    newDate.setUTCDate(newDate.getUTCDate() + (days - 1));
-    newDate.setUTCHours(hours, minutes, seconds, 0);
-    onChange(newDate.toISOString());
+    const newTPlusTime = DateTimeUtils.formatDifferenceFromStrings(days, hours, minutes, seconds)
+    onChange(newTPlusTime);
+
+    console.info('label', label);
+    console.info('newTPlusTime', newTPlusTime);
   };
 
   return (

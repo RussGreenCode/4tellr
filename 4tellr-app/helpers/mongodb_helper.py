@@ -13,7 +13,6 @@ class MongoDBHelper(DatabaseHelperInterface):
         self.client = self._initialize_mongo(config)
         self.db = self.client['4tellr']
         self.event_collection = self.db['event_details']
-        self.stats_collection = self.db['event_statistics']
         self.groups_collection = self.db['monitoring_groups']
         self.user_collection = self.db['user']
         self.process_stats_collection = self.db['process_statistics']
@@ -107,38 +106,6 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.logger.error(f"Error querying event details: {e}")
             return {'success': False, 'error': str(e)}
 
-    def store_statistic(self, event_name, event_status, avg_time_elapsed):
-        try:
-            self.stats_collection.update_one(
-                {'event_name_and_status': f"{event_name}#{event_status}"},
-                {'$set': {
-                    'expected_time': avg_time_elapsed,
-                    'last_updated': datetime.now().isoformat()
-                }},
-                upsert=True
-            )
-            self.logger.info(f"Stored statistic for {event_name}#{event_status}")
-            return {'success': True, 'message': 'Statistic stored successfully'}
-        except Exception as e:
-            self.logger.error(f"Failed to store statistic for {event_name}#{event_status}: {e}")
-            return {'success': False, 'error': str(e)}
-
-    def get_expected_time(self, event_name, event_status):
-        try:
-            stat = self.stats_collection.find_one({'event_name_and_status': f"{event_name}#{event_status}"})
-            return {'success': True, 'data': self._serialize_id(stat)}
-        except Exception as e:
-            self.logger.error(f"Error getting expected time: {e}")
-            return {'success': False, 'error': str(e)}
-
-    def get_latest_metrics(self):
-        try:
-            items = list(self.stats_collection.find())
-            latest_metrics = {item['event_name_and_status']: item for item in items}
-            return {'success': True, 'data': list(latest_metrics.values())}
-        except Exception as e:
-            self.logger.error(f"Error getting latest metrics: {e}")
-            return {'success': False, 'error': str(e)}
 
     def delete_expectations_for_business_date(self, business_date):
         try:
@@ -184,9 +151,15 @@ class MongoDBHelper(DatabaseHelperInterface):
 
     def get_expectation_list(self):
         try:
-            items = list(self.stats_collection.find())
-            latest_metrics = {item['event_name_and_status']: item for item in items}
-            return {'success': True, 'data': self._serialize_id(list(latest_metrics.values()))}
+            # Fetch all documents from event_metadata_collection
+            items = list(self.event_metadata_collection.find())
+
+            # Create a list of dictionaries with unique event_name#event_status combinations
+            unique_event_name_status = [{'event_name_and_status': f"{item['event_name']}#{item['event_status']}"} for
+                                        item in items]
+
+            # Convert the set to a list and return
+            return {'success': True, 'data': unique_event_name_status}
         except Exception as e:
             self.logger.error(f"Error getting expectation list: {e}")
             return {'success': False, 'error': str(e)}
@@ -512,4 +485,16 @@ class MongoDBHelper(DatabaseHelperInterface):
             return {'success': True, 'message': 'Event Metadata saved successfully'}
         except Exception as e:
             self.logger.error(f"Error saving Metadata: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def get_all_event_metadata(self):
+        try:
+            metadata_cursor = self.event_metadata_collection.find({})
+            metadata_list = list(metadata_cursor)
+
+            if metadata_list:
+                return {'success': True, 'data': self._serialize_id(metadata_list)}
+            else:
+                return {'success': False, 'message': 'No metadata found'}
+        except Exception as e:
             return {'success': False, 'error': str(e)}

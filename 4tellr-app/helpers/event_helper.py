@@ -269,33 +269,37 @@ class EventHelper():
 
         return response['success']
 
-    def get_latest_metrics(self):
+    def get_expectation_times_from_metadata(self):
 
-        # Perform a scan to get all items
-        response = self.db_helper.get_latest_metrics()
+        response = self.db_helper.get_all_event_metadata()
 
         # Return the latest metrics as a list
         return response['data']
 
-
-
     def generate_expectations(self, business_date):
-        latest_metrics = self.get_latest_metrics()
+        metadata_list = self.get_expectation_times_from_metadata()
         expectations = []
 
-        self.logger.info(f'Found {len(latest_metrics)} metrics for {business_date}')
+        self.logger.info(f'Found {len(metadata_list)} metrics for {business_date}')
 
-        for metric in latest_metrics:
-            event_name, event_status = metric['event_name_and_status'].split('#')
-            delay_str = metric['expected_time']  # Now the delay in HH:MM:SS format
+        for metadata in metadata_list:
+            event_name = metadata['event_name']
+            event_status = metadata['event_status']
+            expectation = metadata['expectation']
+
+            # return the expectation tim ein T+x HH:mm:ss format
+            expectation_delay = expectation['time']
 
             try:
-                # Parse the delay string to a timedelta
-                hours, minutes, seconds = map(int, delay_str.split(':'))
-                delay_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
+                days = DateTimeUtils.get_days_from_t_format(expectation_delay)
+                hours = DateTimeUtils.get_hours_from_t_format(expectation_delay)
+                minutes = DateTimeUtils.get_minutes_from_t_format(expectation_delay)
+                seconds = DateTimeUtils.get_seconds_from_t_format(expectation_delay)
+
+                delay_timedelta = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
             except ValueError as e:
                 # Log the error and the problematic string
-                print(f"Error parsing delay from '{delay_str}': {e}")
+                print(f"Error parsing delay from '{expectation_delay}': {e}")
                 continue  # Skip this iteration and proceed with the next metric
 
             # Combine the business_date and delay_timedelta to get the expected datetime in UTC
@@ -345,7 +349,6 @@ class EventHelper():
                 self.logger.info(f'Storing {event_name}#{event_status} for time after T +: {avg_time_elapsed}')
                 if avg_time_elapsed:
                     expectation_time = DateTimeUtils.convert_avg_time_to_t_format(avg_time_elapsed)
-                    self.db_helper.store_statistic(event_name, event_status, avg_time_elapsed)
                     self.db_helper.update_metadata_with_expectation(event_name, event_status, expectation_time)
             except ValueError as e:
                 self.logger.error(f'Failed to update expected times for {event_name}#{event_status}: {e}')
@@ -404,9 +407,6 @@ class EventHelper():
 
         return avg_time_elapsed
 
-    def get_expected_time(self, event_name, event_status):
-        response = self.db_helper.get_expected_time( event_name, event_status)
-        return response['data']
 
     def get_expectation_list(self):
         # Perform a scan to get all items

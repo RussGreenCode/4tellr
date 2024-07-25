@@ -82,6 +82,7 @@ const TimeInput = ({ label, baseValue, value, onChange, fixedWidth = 600 }) => {
   return (
     <Box display="flex" alignItems="center" width={fixedWidth}>
       <Typography variant="h8" style={{ marginRight: '16px', minWidth: '160px' }}>{label}</Typography>
+      <Typography variant="h8" style={{ marginRight: '16px', minWidth: '160px' }}>{value}</Typography>
       <Typography variant="h8" style={{ marginRight: '16px', minWidth: '120px' }}>{`${formatTime()}`}</Typography>
       <Box display="flex" flexDirection="column" alignItems="center" style={{ marginRight: '5px', marginLeft: '20px' }}>
         <TextField label="Hours" value={hours.toString().padStart(2, '0')} variant="outlined" size="small" style={{ width: '80px', marginRight: '0px' }} />

@@ -118,16 +118,23 @@ def get_event(business_date, event_name):
         return jsonify({'error': str(e)}), 500
 
 
-@events_bp.route('/api/events/generate-expectations', methods=['POST'])
+@events_bp.route('/api/events/generate-expectations', methods=['POST', 'GET'])
 def generate_expectations():
-    data = request.json
-    required_fields = ['businessDate']
+    business_date = ''
 
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'{field} is required'}), 400
+    if request.method == 'GET':
+        business_date = request.args.get('businessDate')
+        if not business_date:
+            return jsonify({'error': 'businessDate parameter is required'}), 400
+    elif request.method == 'POST':
+        data = request.json
+        required_fields = ['businessDate']
 
-    business_date = data['businessDate']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'{field} is required'}), 400
+
+        business_date = data['businessDate']
 
     try:
         # Delete existing expectations for the given business date
@@ -165,15 +172,6 @@ def delete_events():
         return jsonify({'error': str(e)}), 500
 
 
-@events_bp.route('/api/events/latest-metrics', methods=['GET'])
-def get_latest_metrics():
-    try:
-        latest_metrics = event_helper.get_latest_metrics()
-        return jsonify(latest_metrics), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 @events_bp.route('/api/events/expected-times/update', methods=['POST'])
 def update_expected_times():
     try:
@@ -182,16 +180,6 @@ def update_expected_times():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@events_bp.route('/api/events/<string:event_name>/<string:event_status>/expected-time', methods=['GET'])
-def get_expected_time(event_name, event_status):
-    try:
-        expected_time = event_helper.get_expected_time(event_name, event_status)
-        if not expected_time:
-            return jsonify({'error': 'Expected time not found'}), 404
-        return jsonify(expected_time), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 
 @events_bp.route('/api/get_expectation_list', methods=['GET'])

@@ -49,6 +49,15 @@ export const DateTimeUtils = {
     return `${days > 0 ? `T+${days} ` : ''}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   },
 
+  formatDifferenceFromStrings(daysStr, hoursStr, minutesStr, secondsStr) {
+    const days = parseInt(daysStr, 10) || 0;
+    const hours = parseInt(hoursStr, 10) || 0;
+    const minutes = parseInt(minutesStr, 10) || 0;
+    const seconds = parseInt(secondsStr, 10) || 0;
+
+    return `${days > 0 ? `T+${days} ` : ''}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  },
+
   addTimeToTPlus(baseValue, hoursToAdd, minutesToAdd) {
     const base = this.parseTPlusTime(baseValue);
     const additionalTime = {

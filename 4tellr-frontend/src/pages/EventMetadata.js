@@ -192,7 +192,6 @@ const EventMetadata = () => {
           </Box>
           <Box mt={3}>
             <Typography variant="h6">Edit Event Metadata</Typography>
-            {expectationTime}
             <TeePlusTimeInput
               label="Expectation Time"
               value={expectationTime}
