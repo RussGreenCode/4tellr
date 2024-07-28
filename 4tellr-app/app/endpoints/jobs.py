@@ -24,6 +24,8 @@ def calculate_job_length_statistics():
         return jsonify({'error': 'business_date parameter is required'}), 400
     try:
 
+        jobs_helper.delete_processes_for_date(business_date)
+
         result = jobs_helper.calculate_job_length_statistics(business_date)
         return jsonify(result)
     except Exception as e:

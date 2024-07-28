@@ -20,6 +20,7 @@ import Dashboard from "./pages/Dashboard";
 import ProcessStatistics from "./pages/ProcessStatistics";
 import GanttChart from "./pages/GanttChart";
 import EventMetadata from "./pages/EventMetadata";
+import EventDependencies from "./pages/EventDependencies";
 
 function App() {
 
@@ -65,6 +66,7 @@ function App() {
                       <Route path="/processStatistics" element={<ProcessStatistics />} />
                       <Route path="/ganttChart" element={<GanttChart/>} />
                       <Route path="/eventMetadata" element={<EventMetadata/>} />
+                      <Route path="/eventDependencies" element={<EventDependencies/>} />
                     </Routes>
                   </Grid>
                 </Grid>

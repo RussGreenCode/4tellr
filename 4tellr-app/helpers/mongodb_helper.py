@@ -71,7 +71,7 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.logger.error(f"Error querying events by date: {e}")
             return {'success': False, 'error': str(e)}
 
-    def query_events_by_date_and_status(self, business_date, status):
+    def query_outcomes_by_date_and_status(self, business_date, status):
         try:
             events = list(self.event_collection.find({
                 'eventStatus': status,
@@ -106,16 +106,18 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.logger.error(f"Error querying event details: {e}")
             return {'success': False, 'error': str(e)}
 
-
     def delete_expectations_for_business_date(self, business_date):
         try:
-            result = self.get_event_by_starting_prefix('EXP#', business_date)
+            result = self.get_events_by_type_and_date(business_date)
             items = result['data']
             if items is None:
                 return {'success': False, 'error': 'Error getting events for deletion'}
 
             for item in items:
+                if isinstance(item['_id'], str):
+                    item['_id'] = ObjectId(item['_id'])
                 self.event_collection.delete_one({'_id': item['_id']})
+
             self.logger.info(f"Deleted {len(items)} expectations for business date {business_date}")
             return {'success': True, 'message': f"Deleted {len(items)} expectations"}
         except Exception as e:
@@ -142,6 +144,18 @@ class MongoDBHelper(DatabaseHelperInterface):
             events = list(self.event_collection.find({
                 'businessDate': current_date_str,
                 'eventId': {'$regex': f'^{sk_prefix}'}
+            }))
+            self.logger.info(f"Retrieved {len(events)} events.")
+            return {'success': True, 'data': self._serialize_id(events)}
+        except Exception as e:
+            self.logger.error(f"Error retrieving events: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    def get_events_by_type_and_date(self, business_date):
+        try:
+            events = list(self.event_collection.find({
+                'businessDate': business_date,
+                'type': {'$in': ['expectation', 'slo', 'sla']}
             }))
             self.logger.info(f"Retrieved {len(events)} events.")
             return {'success': True, 'data': self._serialize_id(events)}
@@ -364,7 +378,7 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.logger.error(f"Error getting latest process stats: {e}")
             return {'success': False, 'error': str(e)}
 
-    def get_process_statistics(self, event_name):
+    def get_process_by_name(self, event_name):
         try:
             process_statistics = self.process_stats_collection.find_one({'event_name': event_name})
             if process_statistics:
@@ -375,6 +389,18 @@ class MongoDBHelper(DatabaseHelperInterface):
                 return {'success': False, 'message': f"No process found with name '{event_name}'."}
         except PyMongoError as e:
             self.logger.error(f"Error retrieving process with name '{event_name}': {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    def delete_processes_for_date(self, business_date):
+        try:
+            # Perform the deletion
+            result = self.process_stats_collection.delete_many({'business_date': business_date})
+
+            self.logger.info(
+                f"Deleted {result.deleted_count} processes for business date {business_date.strftime('%Y-%m-%d')}")
+            return {'success': True, 'message': f"Deleted {result.deleted_count} processes"}
+        except Exception as e:
+            self.logger.error(f"Error deleting processes for business date {business_date}: {e}")
             return {'success': False, 'error': str(e)}
 
     def create_event_metadata_from_events(self, business_date):
@@ -443,6 +469,17 @@ class MongoDBHelper(DatabaseHelperInterface):
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
+    def get_event_metadata_by_name_and_status(self, event_name, event_status):
+        try:
+
+            metadata = self.event_metadata_collection.find_one({'event_name': event_name, 'event_status': event_status})
+            if metadata:
+                return {'success': True, 'data': self._serialize_id(metadata)}
+            else:
+                return {'success': False, 'message': 'No metadata found for event'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     def save_event_metadata(self, event_metadata):
 
         event_name = event_metadata.get('event_name')
@@ -480,6 +517,18 @@ class MongoDBHelper(DatabaseHelperInterface):
             result = self.event_metadata_collection.update_one(
                 {'event_name': event_name, 'event_status': event_status},
                 {'$set': {'expectation': {'origin': 'auto', 'status': 'active', 'time': avg_time_elapsed}}}
+            )
+            self.logger.info(f"Event with name: '{event_name}' and status: '{event_status}' updated successfully.")
+            return {'success': True, 'message': 'Event Metadata saved successfully'}
+        except Exception as e:
+            self.logger.error(f"Error saving Metadata: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def update_metadata_with_dependencies(self, event_name, event_status, dependencies):
+        try:
+            result = self.event_metadata_collection.update_one(
+                {'event_name': event_name, 'event_status': event_status},
+                {'$set': {'dependencies': dependencies}}
             )
             self.logger.info(f"Event with name: '{event_name}' and status: '{event_status}' updated successfully.")
             return {'success': True, 'message': 'Event Metadata saved successfully'}

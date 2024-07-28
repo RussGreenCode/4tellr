@@ -98,7 +98,7 @@ const EventMetadata = () => {
     try {
       if (Object.keys(metadata).length !== 0) {
         const response = await axios.get(`http://127.0.0.1:5000/api/process/get_process_statistics`, { params: { eventName } });
-        setProcesses([response.data]);
+        setProcesses(response.data);
       }
     } catch (error) {
       console.error('Error fetching processes:', error);
@@ -108,13 +108,14 @@ const EventMetadata = () => {
   const fetchAllSuccessEvents = async () => {
     try {
       if (metadata !== {}) {
- //       const response = await axios.get(`http://127.0.0.1:5000/api/all_success_events`);
-  //      setAllSuccessEvents(response.data);
+        // Filter the events based on event_status being 'SUCCESS'
+        const successEvents = metadata.filter(event => event.event_status === 'SUCCESS');
+        setAllSuccessEvents(successEvents);
       }
     } catch (error) {
       console.error('Error fetching all success events:', error);
     }
-  };
+  }
 
   const handleSave = async () => {
     try {
@@ -209,22 +210,6 @@ const EventMetadata = () => {
               value={slaTime}
               onChange={setSlaTime}
             />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Dependencies</InputLabel>
-              <Select
-                multiple
-                value={dependencies}
-                onChange={(e) => setDependencies(e.target.value)}
-                renderValue={(selected) => selected.join(', ')}
-              >
-                {allSuccessEvents.map(event => (
-                  <MenuItem key={event._id} value={event.eventName}>
-                    <Checkbox checked={dependencies.indexOf(event.eventName) > -1} />
-                    <ListItemText primary={event.eventName} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
             <Button variant="contained" color="primary" onClick={handleSave}>
               Save
             </Button>

@@ -61,10 +61,21 @@ class DateTimeUtils:
         return f"T+{days} {remaining_hours:02}:{remaining_minutes:02}:{remaining_seconds:02}"
 
 
+    @staticmethod
+    def t_plus_to_iso(business_date: str, t_format: str) -> str:
+        business_date_obj = datetime.fromisoformat(business_date)
+        days = DateTimeUtils.get_days_from_t_format(t_format)
+        hours = DateTimeUtils.get_hours_from_t_format(t_format)
+        minutes = DateTimeUtils.get_minutes_from_t_format(t_format)
+        seconds = DateTimeUtils.get_seconds_from_t_format(t_format)
+        event_time_obj = business_date_obj + timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+        return event_time_obj.isoformat()
+
 # Example usage:
 business_date = "2024-07-01T00:00:00+00:00"
 event_time_utc = "2024-07-03T13:09:03+00:00"
 avg_time_elapsed = "61:19:07"
+t_format = "T+1 03:45:03"
 
 print(DateTimeUtils.format_time_difference(business_date, event_time_utc))  # Output: T+2 13:09:03
 print(DateTimeUtils.get_days_from_t_format("T+2 13:09:03"))  # Output: 2
@@ -73,3 +84,4 @@ print(DateTimeUtils.get_minutes_from_t_format("T+2 13:09:03"))  # Output: 9
 print(DateTimeUtils.get_seconds_from_t_format("T+2 13:09:03"))  # Output: 3
 print(DateTimeUtils.calculate_event_time(business_date, "T+2 13:00:00"))  # Output: 2024-07-03T13:00:00+00:00
 print(DateTimeUtils.convert_avg_time_to_t_format(avg_time_elapsed))  # Output: T+2 13:19:07
+print(DateTimeUtils.t_plus_to_iso(business_date, t_format)) # Output: 2024-07-20T03:45:03+00:00

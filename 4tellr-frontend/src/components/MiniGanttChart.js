@@ -44,6 +44,7 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12, slo
 
     renderAxes(chart, x, chartWidth, chartHeight);
     renderBars(chart, x, rowHeight, tooltip);
+    renderDependencies(chart, x, rowHeight);
     renderVerticalLine(chart, x, chartHeight);
     renderSloAndSla(chart, x, chartHeight);
 
@@ -63,8 +64,11 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12, slo
   };
 
   const renderBars = (chart, x, rowHeight, tooltip) => {
+    // Sort data by expected start time
+    const sortedData = data.sort((a, b) => new Date(a.expected_start_time) - new Date(b.expected_start_time));
+
     const rows = chart.selectAll('.row')
-      .data(data)
+      .data(sortedData)
       .enter()
       .append('g')
       .attr('class', 'row')
@@ -140,6 +144,54 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12, slo
         .attr('fill', 'black');
     }
   };
+
+  const renderDependencies = (chart, x, rowHeight) => {
+    const arrowMarker = chart.append('defs')
+      .append('marker')
+      .attr('id', 'arrow')
+      .attr('viewBox', '0 0 10 10')
+      .attr('refX', 5)
+      .attr('refY', 5)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto-start-reverse')
+      .append('path')
+      .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+      .attr('fill', 'black');
+
+    data.forEach((process, i) => {
+        if (process.dependencies && process.dependencies.length > 0) {
+            process.dependencies.forEach(dep => {
+                const dependentProcess = data.find(p => p.event_name === dep);
+                if (dependentProcess) {
+                    const startX = x(new Date(dependentProcess.start_time)) + (x(new Date(dependentProcess.end_time)) - x(new Date(dependentProcess.start_time))) / 2;
+                    const startY = data.findIndex(p => p.event_name === dep) * rowHeight + rowHeight / 2;
+                    const endX = x(new Date(process.start_time)) - 5; // Arrow ends at the process that lists the dependency
+                    const endY = i * rowHeight + rowHeight / 2;
+
+                    // Draw vertical and horizontal lines with arrow at the end
+                    chart.append('line')
+                        .attr('x1', startX)
+                        .attr('y1', startY)
+                        .attr('x2', startX)
+                        .attr('y2', endY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1);
+
+                    chart.append('line')
+                        .attr('x1', startX)
+                        .attr('y1', endY)
+                        .attr('x2', endX)
+                        .attr('y2', endY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1)
+                        .attr('marker-end', 'url(#arrow)');
+                }
+            });
+        }
+    });
+  };
+
 
   const showTooltip = (tooltip, event, data) => {
     tooltip.html(`
