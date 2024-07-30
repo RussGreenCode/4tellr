@@ -1,7 +1,9 @@
+// src/components/ScatterPlotComponent.js
 import React, { useEffect, useRef } from 'react';
 import Plot from 'react-plotly.js';
 import { useTheme } from '@mui/material/styles';
 import * as d3 from 'd3';
+import { getEventColorByStatus } from '../utils/GetEventColorByStatus';
 
 // Function to calculate the best fit line
 const calculateBestFitLine = (data) => {
@@ -20,19 +22,6 @@ const calculateBestFitLine = (data) => {
   const fitLine = x.map(xi => slope * xi + intercept);
 
   return { x, fitLine, slope, intercept };
-};
-
-// Function to get the color based on outcome status
-const getColor = (event) => {
-  return event.outcomeStatus === 'NEW' ? 'blue'
-       : event.outcomeStatus === 'ON_TIME' ? 'darkgreen'
-       : event.outcomeStatus === 'MEETS_SLO' ? 'lightgreen'
-       : event.outcomeStatus === 'MEETS_SLA' ? 'orange'
-       : event.outcomeStatus === 'MET_THRESHOLD' ? 'darkgreen'
-       : event.outcomeStatus === 'BREACHED' ? 'red'
-       : event.outcomeStatus === 'NOT_REACHED' ? 'grey'
-       : event.outcomeStatus === 'LATE' ? 'red'
-       : 'darkred';  // Default color
 };
 
 // Function to format event time as HH:MM
@@ -59,7 +48,7 @@ const generateRegularTimeIntervals = (minTime, maxTime, maxTicks) => {
   return intervals;
 };
 
-const ScatterPlotComponent = ({ data }) => {
+const ScatterPlotComponent = ({ data, width = 1200, height = 400, textSize = 10 }) => {
   const plotRef = useRef(null);
   const theme = useTheme(); // Use the theme context
 
@@ -94,8 +83,8 @@ const ScatterPlotComponent = ({ data }) => {
             mode: 'markers',
             type: 'scatter',
             marker: {
-              color: data.map(d => getColor(d)),
-              size: 10 // Set the desired size of the scatter points here
+              color: data.map(d => getEventColorByStatus(d.outcomeStatus)),
+              size: textSize // Set the desired size of the scatter points here
             },
             name: 'Event Times'
           },
@@ -117,10 +106,12 @@ const ScatterPlotComponent = ({ data }) => {
             tickvals: data.map(d => new Date(d.businessDate)),
             ticktext: data.map(d => new Date(d.businessDate).toISOString().split('T')[0]),
             titlefont: {
-              color: theme.palette.text.primary
+              color: theme.palette.text.primary,
+              size: textSize
             },
             tickfont: {
-              color: theme.palette.text.primary
+              color: theme.palette.text.primary,
+              size: textSize
             },
             gridcolor: theme.palette.divider
           },
@@ -129,21 +120,23 @@ const ScatterPlotComponent = ({ data }) => {
             tickvals: regularTimeIntervals,
             ticktext: regularTimeIntervals.map(t => formatTime(t)),
             titlefont: {
-              color: theme.palette.text.primary
+              color: theme.palette.text.primary,
+              size: textSize
             },
             tickfont: {
-              color: theme.palette.text.primary
+              color: theme.palette.text.primary,
+              size: textSize
             },
             gridcolor: theme.palette.divider
           },
           paper_bgcolor: theme.palette.background.default,
           plot_bgcolor: theme.palette.background.default,
           showlegend: false,
-          width: 1200, // Set the desired width here
-          height: 400 // Set the desired height here
+          width: width, // Set the desired width here
+          height: height // Set the desired height here
         }}
         config={{
-          displayModeBar: true // Always show the mode bar
+          displayModeBar: false // Always show the mode bar
         }}
         ref={plotRef}
       />

@@ -7,6 +7,7 @@ import uuid
 
 from utils.threshold import Threshold
 from utils.status_utilities import StatusUtilities
+from utils.date_time_utilities import DateTimeUtils
 
 class EventHelper():
     def __init__(self):
@@ -136,9 +137,65 @@ class EventHelper():
                         'outcomeStatus': 'NO_EVT_YET',
                         'plotStatus': expectation_outcome
                     })
+            elif event_id.startswith('SLO#') and event_key not in processed_event_keys:
+                time_value = item.get('expectedArrival')
+                expected_time = datetime.fromisoformat(time_value).astimezone(utc)
+                thresholds = Threshold.get_sla_slo_thresholds(event_name, event_status)
+
+                if current_time < (expected_time + thresholds['on_time']):
+                    expectation_outcome = 'NOT_REACHED'
+                else:
+                    expectation_outcome = 'BREACHED'
+
+                if time_value:
+                    result.append({
+                        'eventId': event_id,
+                        'eventType': event_type,
+                        'type': 'SLO',
+                        'eventKey': event_key,
+                        'eventName': event_name,
+                        'eventStatus': event_status,
+                        'TimeValue': time_value,
+                        'outcomeStatus': 'NO_EVT_YET',
+                        'plotStatus': expectation_outcome
+                    })
+            elif event_id.startswith('SLA#') and event_key not in processed_event_keys:
+                time_value = item.get('expectedArrival')
+                expected_time = datetime.fromisoformat(time_value).astimezone(utc)
+                thresholds = Threshold.get_sla_slo_thresholds(event_name, event_status)
+
+                if current_time < (expected_time + thresholds['on_time']):
+                    expectation_outcome = 'NOT_REACHED'
+                else:
+                    expectation_outcome = 'BREACHED'
+
+                if time_value:
+                    result.append({
+                        'eventId': event_id,
+                        'eventType': event_type,
+                        'type': 'SLA',
+                        'eventKey': event_key,
+                        'eventName': event_name,
+                        'eventStatus': event_status,
+                        'TimeValue': time_value,
+                        'outcomeStatus': 'NO_EVT_YET',
+                        'plotStatus': expectation_outcome
+                    })
             elif event_id.startswith('EVT#') and event_key not in processed_event_keys:
                 time_value = item.get('eventTime')
-                if time_value:
+                if event_status == 'ERROR':
+                    result.append({
+                        'eventId': event_id,
+                        'eventType': event_type,
+                        'type': 'EVT',
+                        'eventKey': event_key,
+                        'eventName': event_name,
+                        'eventStatus': event_status,
+                        'TimeValue': time_value,
+                        'outcomeStatus': 'ERROR',
+                        'plotStatus': 'ERROR'
+                    })
+                elif time_value:
                     result.append({
                         'eventId': event_id,
                         'eventType': event_type,
@@ -152,6 +209,8 @@ class EventHelper():
                     })
 
         return result
+
+
 
     def get_monthly_events(self, event_name, event_status):
 
@@ -192,10 +251,13 @@ class EventHelper():
             event_time = event_time.replace(tzinfo=timezone.utc)  # Assuming UTC if not specified
             event_data['eventTime'] = event_time.isoformat()
 
-        # Create event outcome
-        self.insert_event_outcome(event_data)
+        if event_data['eventStatus'] == 'ERROR':
+            return event_id
+        else:
+            # Create event outcome
+            self.insert_event_outcome(event_data)
+            return event_id
 
-        return event_id
 
     def insert_event_outcome(self, event_data):
         business_date = event_data['businessDate']
@@ -207,32 +269,61 @@ class EventHelper():
 
         # Get expectation for the event using the composite key
         event_result = self.db_helper.get_event_by_starting_prefix(exp_prefix, business_date)
+
+
         items = event_result['data']
+        slo_time = None
+        sla_time = None
+        slo_delta = None
+        sla_delta = None
+
         if not items:
+
             self.logger.info(f'No expectation found for {event_name} with status {event_status} on {business_date}')
             expected_time = None
             str_delta = ''
             outcome_status = 'NEW'
-            slo_time = None
-            sla_time = None
+
         else:
+
+            # Get Metadata for the event using the composite key - on must be there is an expectaion is there
+            metadata_response = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
+            event_metadata = metadata_response['data']
+
             # Assuming there is only one expectation per event_name, event_status, and business_date
             expectation = items[0]
             expected_time = datetime.fromisoformat(expectation['expectedArrival'])
             if expected_time.tzinfo is None:
                 expected_time = expected_time.replace(tzinfo=timezone.utc)  # Assuming UTC if not specified
 
+            # how long after the expectation did the event arrive
             delta = event_time - expected_time
 
-            # Get SLA, SLO thresholds
-            thresholds = Threshold.get_sla_slo_thresholds(event_name, event_status)
-            slo_time = (expected_time + thresholds['slo']).isoformat()
-            sla_time = (expected_time + thresholds['sla']).isoformat()
+            if event_metadata:
+                # Get SLA, SLO from metadata
+                if event_metadata.get('slo', {}).get('status') == 'active':
+                    slo_time_return = DateTimeUtils.t_plus_to_iso(business_date, event_metadata['slo']['time'])
+                    slo_time = datetime.fromisoformat(slo_time_return)
+                    if slo_time.tzinfo is None:
+                        slo_time = slo_time.replace(tzinfo=timezone.utc)
+                    slo_delta = slo_time - expected_time
 
-            outcome_status = 'ON_TIME' if delta <= thresholds['on_time'] else \
-                'MEETS_SLO' if delta <= thresholds['slo'] else \
-                    'MEETS_SLA' if delta <= thresholds['sla'] else \
-                        'LATE'
+                if event_metadata.get('sla', {}).get('status') == 'active':
+                    sla_time_return = DateTimeUtils.t_plus_to_iso(business_date, event_metadata['sla']['time'])
+                    sla_time = datetime.fromisoformat(sla_time_return)
+                    if sla_time.tzinfo is None:
+                        sla_time = sla_time.replace(tzinfo=timezone.utc)
+                    sla_delta = sla_time - expected_time
+
+            outcome_status = 'LATE'  # Default outcome status
+
+            if delta <= timedelta(minutes=10):
+                outcome_status = 'ON_TIME'
+            elif slo_delta is not None and delta <= slo_delta:
+                outcome_status = 'MEETS_SLO'
+            elif sla_delta is not None and delta <= sla_delta:
+                outcome_status = 'MEETS_SLA'
+
             str_delta = str(delta.total_seconds())
 
         outcome_data = {
@@ -243,8 +334,8 @@ class EventHelper():
             'businessDate': event_data['businessDate'],
             'eventTime': event_time.isoformat(),
             'expectedTime': expected_time.isoformat() if expected_time else None,
-            'sloTime': slo_time,
-            'slaTime': sla_time,
+            'sloTime': slo_time.isoformat() if slo_time else None,
+            'slaTime': sla_time.isoformat() if sla_time else None,
             'delta': str_delta if str_delta else None,
             'outcomeStatus': outcome_status,
             'timestamp': datetime.now(timezone.utc).isoformat()
@@ -268,79 +359,93 @@ class EventHelper():
 
         return response['success']
 
-    def get_latest_metrics(self):
-
-        # Perform a scan to get all items
-        response = self.db_helper.get_latest_metrics()
-
-        # Return the latest metrics as a list
-        return response['data']
-
-
-
     def generate_expectations(self, business_date):
-        latest_metrics = self.get_latest_metrics()
-        expectations = []
+        response = self.db_helper.get_all_event_metadata()
+        metadata_list = response['data']
 
-        self.logger.info(f'Found {len(latest_metrics)} metrics for {business_date}')
+        self.logger.info(f'Found {len(metadata_list)} metrics for {business_date}')
 
-        for metric in latest_metrics:
-            event_name, event_status = metric['event_name_and_status'].split('#')
-            delay_str = metric['expected_time']  # Now the delay in HH:MM:SS format
+        for metadata in metadata_list:
+            event_name = metadata['event_name']
+            event_status = metadata['event_status']
 
-            try:
-                # Parse the delay string to a timedelta
-                hours, minutes, seconds = map(int, delay_str.split(':'))
-                delay_timedelta = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-            except ValueError as e:
-                # Log the error and the problematic string
-                print(f"Error parsing delay from '{delay_str}': {e}")
-                continue  # Skip this iteration and proceed with the next metric
 
-            # Combine the business_date and delay_timedelta to get the expected datetime in UTC
-            business_date_dt = datetime.strptime(business_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-            expected_datetime = business_date_dt + delay_timedelta
+            # Handle expectation
+            expectation = metadata.get('expectation', {})
+            if expectation['status'] == 'active':
+                self.create_expectation_record(business_date, event_name, event_status, expectation, 'expectation','EXP')
 
-            expectation_id = f'EXP#{event_name}#{event_status}#{str(uuid.uuid4())}'
-            expectation_data = {
-                'type': 'expectation',
-                'eventId': expectation_id,
-                'eventName': event_name,
-                'eventStatus': event_status,
-                'businessDate': business_date,
-                'expectedArrival': expected_datetime.isoformat(),
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }
+            # Handle SLO
+            slo = metadata.get('slo', {})
+            if slo.get('status') == 'active':
+                self.create_expectation_record(business_date, event_name, event_status, slo, 'slo','SLO')
 
-            self.db_helper.insert_event(expectation_data)
+            # Handle SLA
+            sla = metadata.get('sla', {})
+            if sla.get('status') == 'active':
+                self.create_expectation_record(business_date, event_name, event_status, sla, 'sla', 'SLA')
 
-            expectations.append(expectation_data)
-
-        self.logger.info(f'Created {len(expectations)} Expectations for {business_date}')
-
+        self.logger.info(f'Created Expectations for {business_date}')
         return True
 
-    def update_expected_times(self):
+    def create_expectation_record(self, business_date, event_name, event_status, time_metadata,
+                                  record_type, prefix):
+        time_delay = time_metadata['time']
+
+        try:
+            days = DateTimeUtils.get_days_from_t_format(time_delay)
+            hours = DateTimeUtils.get_hours_from_t_format(time_delay)
+            minutes = DateTimeUtils.get_minutes_from_t_format(time_delay)
+            seconds = DateTimeUtils.get_seconds_from_t_format(time_delay)
+
+            delay_timedelta = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+        except ValueError as e:
+            # Log the error and the problematic string
+            print(f"Error parsing delay from '{time_delay}': {e}")
+            return  # Skip this iteration and proceed with the next metric
+
+        # Combine the business_date and delay_timedelta to get the expected datetime in UTC
+        business_date_dt = datetime.strptime(business_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        expected_datetime = business_date_dt + delay_timedelta
+
+        expectation_id = f'{prefix}#{event_name}#{event_status}#{str(uuid.uuid4())}'
+        expectation_data = {
+            'type': record_type,
+            'eventId': expectation_id,
+            'eventName': event_name,
+            'eventStatus': event_status,
+            'businessDate': business_date,
+            'expectedArrival': expected_datetime.isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
+        self.db_helper.insert_event(expectation_data)
+
+    def update_expected_times(self, event_names_statuses=None):
         events = self.scan_events_last_month()
+
         if not events:
             return None
+
+        if event_names_statuses is None:
+            event_names_statuses = []
 
         grouped_events = {}
         for event in events:
             if event['type'] == 'event':
                 key = (event['eventName'], event['eventStatus'])
-                if key not in grouped_events:
-                    grouped_events[key] = []
-                grouped_events[key].append(event)
+                if not event_names_statuses or key in event_names_statuses:
+                    if key not in grouped_events:
+                        grouped_events[key] = []
+                    grouped_events[key].append(event)
 
         for (event_name, event_status), group in grouped_events.items():
             try:
                 avg_time_elapsed = self.calculate_expected_time(group)
                 self.logger.info(f'Storing {event_name}#{event_status} for time after T +: {avg_time_elapsed}')
                 if avg_time_elapsed:
-
-                    self.db_helper.store_statistic(event_name, event_status, avg_time_elapsed)
-
+                    expectation_time = DateTimeUtils.convert_avg_time_to_t_format(avg_time_elapsed)
+                    self.db_helper.update_metadata_with_expectation(event_name, event_status, expectation_time)
             except ValueError as e:
                 self.logger.error(f'Failed to update expected times for {event_name}#{event_status}: {e}')
 
@@ -365,10 +470,6 @@ class EventHelper():
             event_time = datetime.fromisoformat(event['eventTime']).astimezone(utc)
             business_date_utc = datetime.strptime(event['businessDate'], "%Y-%m-%d").replace(tzinfo=utc)
 
-            if event['eventName'] == 'Fortress_MarketData_Receipt':
-                self.logger.info(f"event_time: {event_time}  business_date_utc: {business_date_utc}")
-                debug = True
-
             # Calculate the total seconds from the start of the business date to the event time
             time_difference = (event_time - business_date_utc).total_seconds()
             times_in_seconds.append(time_difference)
@@ -378,9 +479,6 @@ class EventHelper():
         mean = statistics.mean(times_in_seconds)
         stdev = statistics.stdev(times_in_seconds)
 
-        if debug:
-            self.logger.info(f"Mean time in seconds: {mean}")
-            self.logger.info(f"Standard deviation: {stdev}")
 
         filtered_times = [t for t in times_in_seconds if abs(t - mean) < 2 * stdev]
         if filtered_times and len(filtered_times) > 1:
@@ -405,9 +503,6 @@ class EventHelper():
 
         return avg_time_elapsed
 
-    def get_expected_time(self, event_name, event_status):
-        response = self.db_helper.get_expected_time( event_name, event_status)
-        return response['data']
 
     def get_expectation_list(self):
         # Perform a scan to get all items
@@ -422,3 +517,64 @@ class EventHelper():
 
         # Return the latest metrics as a list
         return response['data']
+
+    def get_process_by_name(self, event_name):
+        # Perform a scan to get all items
+        response = self.db_helper.get_process_by_name(event_name)
+
+        if not response['success']:
+            self.logger.error(f"Error retrieving process for event name: {event_name}")
+            return {'success': False, 'error': f"Error retrieving process for event name: {event_name}"}
+
+        process = response['data']
+
+        dependencies = process.get('dependencies', [])
+
+        # Iterate through the dependency list to get the list of processes
+        process_list = []
+
+        process_list.append(process)
+        for dependency_name in dependencies:
+            dependency_response = self.db_helper.get_process_by_name(dependency_name)
+            if dependency_response['success']:
+                process_list.append(dependency_response['data'])
+            else:
+                self.logger.error(f"Error retrieving process for dependency: {dependency_name}")
+
+        return process_list
+
+    def create_event_metadata_from_events(self, business_date):
+
+        response = self.db_helper.create_event_metadata_from_events(business_date)
+
+        return response['success']
+
+    def event_metadata_list(self):
+        # Perform a scan to get all items
+        response = self.db_helper.get_event_metadata_list()
+
+        # Return the latest metrics as a list
+        return response['data']
+
+    def get_event_metadata(self, id):
+        # Go get teh metadata
+        response = self.db_helper.get_event_metadata(id)
+
+        # Return the metadata for the event
+        return response['data']
+
+    def update_metadata_with_dependencies(self, event_metadata):
+
+        event_name = event_metadata['event_name']
+        event_status = event_metadata['event_status']
+        dependencies = event_metadata['dependencies']
+
+        response = self.db_helper.update_metadata_with_dependencies(event_name, event_status, dependencies)
+
+        return response['success']
+
+    def save_event_metadata_dependencies(self, event_metadata):
+
+        response = self.db_helper.save_event_metadata_dependencies(event_metadata)
+
+        return response['success']

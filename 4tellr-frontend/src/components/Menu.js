@@ -73,7 +73,7 @@ const Menu = ({ setIsAuthenticated }) => {
         </ListItem>
           </List>
         </Collapse>
-         <ListItem button onClick={handleAnalyticsClickClick}>
+        <ListItem button onClick={handleAnalyticsClickClick}>
           <ListItemText primary="Analytics" />
           {analyticsOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
@@ -87,17 +87,17 @@ const Menu = ({ setIsAuthenticated }) => {
             </ListItem>
           </List>
         </Collapse>
-        <ListItem button onClick={handleProfileClick}>
-          <ListItemText primary="My Profile" />
-          {profileOpen ? <ExpandLess /> : <ExpandMore />}
+        <ListItem button onClick={handleAnalyticsClickClick}>
+          <ListItemText primary="Events" />
+          {analyticsOpen ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
-        <Collapse in={profileOpen} timeout="auto" unmountOnExit>
+        <Collapse in={analyticsOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItem button component={Link} to="/changePassword" sx={{ pl: 4 }}>
-              <ListItemText primary="Change Password" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            <ListItem button component={Link} to="/eventMetadata" sx={{ pl: 4 }}>
+              <ListItemText primary="Threshold" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
-            <ListItem button component={Link} to="/favouriteGroups" sx={{ pl: 4 }}>
-              <ListItemText primary="Manage Groups" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            <ListItem button component={Link} to="/eventDependencies" sx={{ pl: 4 }}>
+              <ListItemText primary="Dependencies" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
           </List>
         </Collapse>
@@ -135,6 +135,20 @@ const Menu = ({ setIsAuthenticated }) => {
             </ListItem>
             <ListItem button onClick={handleExportFiltered} sx={{ pl: 4 }}>
               <ListItemText primary="Export Filtered Dataset" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+          </List>
+        </Collapse>
+        <ListItem button onClick={handleProfileClick}>
+          <ListItemText primary="My Profile" />
+          {profileOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={profileOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItem button component={Link} to="/changePassword" sx={{ pl: 4 }}>
+              <ListItemText primary="Change Password" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+            <ListItem button component={Link} to="/favouriteGroups" sx={{ pl: 4 }}>
+              <ListItemText primary="Manage Groups" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
           </List>
         </Collapse>

@@ -41,8 +41,8 @@ def get_events_by_date_for_chart():
 
 @events_bp.route('/api/event_details', methods=['GET'])
 def get_event_details():
-    event_name = request.args.get('eventName')
-    event_status = request.args.get('eventStatus')
+    event_name = request.args.get('event_name')
+    event_status = request.args.get('event_status')
 
     if not event_name or not event_status:
         return jsonify({"error": "Missing required parameters"}), 400
@@ -70,8 +70,11 @@ def create_event():
 
     event_type = data.get('eventType')
     details = data.get('details', {})
+    status = data.get('eventStatus')
 
-    if event_type == 'FILE':
+    if status == 'ERROR':
+        db_fields = ['error_code', 'error_description']
+    elif event_type == 'FILE':
         file_fields = ['fileName', 'fileLocation', 'fileSize', 'numberOfRows']
         for field in file_fields:
             if field not in details:
@@ -89,8 +92,7 @@ def create_event():
             if field not in details:
                 return jsonify({'error': f'{field} is required for database events'}), 400
     elif event_type == 'PROCESS':
-        db_fields = ['databaseName', 'tableName', 'operation']
-
+        db_fields = ['process_id', 'process_name']
     else:
         return jsonify({'error': 'Invalid eventType provided'}), 400
 
@@ -102,32 +104,23 @@ def create_event():
     return jsonify({'status': 'success', 'event_id': event_id}), 201
 
 
-@events_bp.route('/api/events/<string:business_date>/<string:event_name>', methods=['GET'])
-def get_event(business_date, event_name):
-
-    #Not sure this method is use anymore
-
-    try:
-        #events = db_helper.query_events_by_date(business_date)
-        #event = next((e for e in events if e['eventName'] == event_name), None)
-        event = None
-        if not event:
-            return jsonify({'error': 'Event not found'}), 404
-        return jsonify(event), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@events_bp.route('/api/events/generate-expectations', methods=['POST'])
+@events_bp.route('/api/events/generate-expectations', methods=['POST', 'GET'])
 def generate_expectations():
-    data = request.json
-    required_fields = ['businessDate']
+    business_date = ''
 
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'{field} is required'}), 400
+    if request.method == 'GET':
+        business_date = request.args.get('businessDate')
+        if not business_date:
+            return jsonify({'error': 'businessDate parameter is required'}), 400
+    elif request.method == 'POST':
+        data = request.json
+        required_fields = ['businessDate']
 
-    business_date = data['businessDate']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'{field} is required'}), 400
+
+        business_date = data['businessDate']
 
     try:
         # Delete existing expectations for the given business date
@@ -165,15 +158,6 @@ def delete_events():
         return jsonify({'error': str(e)}), 500
 
 
-@events_bp.route('/api/events/latest-metrics', methods=['GET'])
-def get_latest_metrics():
-    try:
-        latest_metrics = event_helper.get_latest_metrics()
-        return jsonify(latest_metrics), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
 @events_bp.route('/api/events/expected-times/update', methods=['POST'])
 def update_expected_times():
     try:
@@ -182,16 +166,6 @@ def update_expected_times():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@events_bp.route('/api/events/<string:event_name>/<string:event_status>/expected-time', methods=['GET'])
-def get_expected_time(event_name, event_status):
-    try:
-        expected_time = event_helper.get_expected_time(event_name, event_status)
-        if not expected_time:
-            return jsonify({'error': 'Expected time not found'}), 404
-        return jsonify(expected_time), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 
 @events_bp.route('/api/get_expectation_list', methods=['GET'])
@@ -202,10 +176,75 @@ def get_expectation_list():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
+@events_bp.route('/api/event/event_metadata_list', methods=['GET'])
+def event_metadata_list():
+    try:
+        items = event_helper.event_metadata_list()
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @events_bp.route('/api/process/get_process_statistics_list', methods=['GET'])
 def get_process_stats_list():
     try:
         items = event_helper.get_process_stats_list()
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@events_bp.route('/api/process/get_process_statistics', methods=['GET'])
+def get_process_statistics():
+
+    event_name = request.args.get('eventName')
+
+    try:
+        items = event_helper.get_process_by_name(event_name)
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@events_bp.route('/api/event/get_event_metadata', methods=['GET'])
+def get_event_metadata():
+
+    id = request.args.get('id')
+
+    try:
+        items = event_helper.get_event_metadata(id)
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@events_bp.route('/api/event/event_metadata', methods=['PUT'])
+def save_event_metadata():
+
+    data = request.json
+
+    required_fields = ['expectation_time']
+
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'{field} is required'}), 400
+
+    try:
+        items = event_helper.save_event_metadata(data)
+        return jsonify(items)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@events_bp.route('/api/event/event_metadata_dependencies', methods=['PUT'])
+def save_event_metadata_dependencies():
+
+    data = request.json
+
+    required_fields = ['dependencies']
+
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'{field} is required'}), 400
+
+    try:
+        items = event_helper.update_metadata_with_dependencies(data)
         return jsonify(items)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

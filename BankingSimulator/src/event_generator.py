@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class EventGenerator:
     def __init__(self, configs, mode='real_time', output_mode='console', start_time=None, multiplier=1,
                  endpoint_url=None, start_time_variance=20, dependency_variance_min=1, dependency_variance_max=2,
-                 processing_time_variance=1.0):
+                 processing_time_variance=1.0, error_chance=1.0, retry_delay=20):
         self.configs = configs
         self.events = []
         self.mode = mode
@@ -34,6 +34,8 @@ class EventGenerator:
         self.virtual_time = self.start_time  # Initialize virtual time for accelerated mode
         self.event_helper = EventHelper(output_mode=output_mode, endpoint_url=endpoint_url)
         self.calendar = ProcessingCalendar()  # Initialize the calendar
+        self.error_chance = error_chance
+        self.retry_delay = retry_delay
 
     def randomize_start_time(self, schedule_time, has_dependencies):
         if has_dependencies:
@@ -141,8 +143,14 @@ class EventGenerator:
                     processing_time = self.process_time_to_minutes(next_process["processing_time"])
                     randomized_processing_time = self.randomize_processing_time(processing_time)
                     end_time = next_time + timedelta(minutes=randomized_processing_time)
-                    process_queue.append((end_time, next_process, "SUCCESS"))
-                    logging.info(f"Scheduled end event for: {next_process['process_id']} at time: {end_time}")
+
+                    if random.uniform(0, 100) < self.error_chance:
+                        error_time = next_time + timedelta(minutes=random.uniform(0, randomized_processing_time))
+                        process_queue.append((error_time, next_process, "ERROR"))
+                        logging.info(f"Scheduled ERROR event for: {next_process['process_id']} at time: {error_time}")
+                    else:
+                        process_queue.append((end_time, next_process, "SUCCESS"))
+                        logging.info(f"Scheduled end event for: {next_process['process_id']} at time: {end_time}")
 
                     for config in self.configs:
                         for process in config["processes"]:
@@ -151,7 +159,21 @@ class EventGenerator:
                                 process_queue.append((dependent_start_time, process, "STARTED"))
                                 logging.info(
                                     f"Scheduled dependent process: {process['process_id']} to start at: {dependent_start_time}")
-                else:
+
+                elif status == "ERROR":
+                    event = self.event_helper.generate_event(next_process, status, current_time, business_date)
+                    self.event_helper.output_event(event)
+                    self.process_status[next_process["process_id"]] = status
+
+                    retry_time = current_time + timedelta(minutes=self.retry_delay)
+                    process_queue.append((retry_time, next_process, "STARTED"))
+                    logging.info(f"Scheduled retry of process: {next_process['process_id']} to start at: {retry_time}")
+
+                elif status == "SUCCESS":
+                    event = self.event_helper.generate_event(next_process, status, current_time, business_date)
+                    self.event_helper.output_event(event)
+                    self.process_status[next_process["process_id"]] = status
+
                     for config in self.configs:
                         for process in config["processes"]:
                             if next_process["process_id"] in process["dependencies"] and self.dependencies_met(process):

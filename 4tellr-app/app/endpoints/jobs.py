@@ -2,6 +2,7 @@ import requests
 from flask import  request, jsonify, jsonify, Blueprint, current_app
 
 from helpers.job_helper import JobHelper
+from helpers.event_helper import EventHelper
 from helpers.job_functions import fetch_url
 
 jobs_bp = Blueprint('jobs', __name__)
@@ -11,6 +12,8 @@ jobs_bp = Blueprint('jobs', __name__)
 def initialize_db_helper():
     global jobs_helper
     jobs_helper = JobHelper()
+    global event_helper
+    event_helper = EventHelper()
 
 @jobs_bp.route('/api/job/calculate_job_length_statistics', methods=['GET'])
 def calculate_job_length_statistics():
@@ -21,10 +24,28 @@ def calculate_job_length_statistics():
         return jsonify({'error': 'business_date parameter is required'}), 400
     try:
 
+        jobs_helper.delete_processes_for_date(business_date)
+
         result = jobs_helper.calculate_job_length_statistics(business_date)
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@jobs_bp.route('/api/job/create_event_metadata_from_events', methods=['GET'])
+def create_event_metadata_from_events():
+
+    business_date = request.args.get('businessDate')
+
+    if not business_date:
+        return jsonify({'error': 'business_date parameter is required'}), 400
+    try:
+
+        result = event_helper.create_event_metadata_from_events(business_date)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 @jobs_bp.route('/api/jobs', methods=['GET'])

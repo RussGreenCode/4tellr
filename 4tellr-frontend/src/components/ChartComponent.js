@@ -4,6 +4,7 @@ import { EventsContext } from '../contexts/EventsContext';
 import { useTheme } from '@mui/material/styles';
 import '../styles/Chart.css';
 import { ResponsiveContainer } from "recharts";
+import { generateYCoordinateIndexMap } from '../utils/GenerateYCoordinateIndexMap';
 
 const formatTime = (tick) => {
   const date = new Date(tick);
@@ -23,7 +24,7 @@ const getMarkerSymbol = (type) => {
 
 const ChartComponent = ({ data }) => {
   const theme = useTheme(); // Use the theme context
-  const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen } = useContext(EventsContext);
+  const { sortCriterion, selectedTypes, setSelectedEvent, setTabIndex, tabIndex, showLabels, isDrawerOpen, setSelectedEventList } = useContext(EventsContext);
   const [currentTime, setCurrentTime] = useState(new Date().toISOString());
   const hoveredPointRef = useRef(null);
   const selectedPointRef = useRef(null); // Ref for selected point
@@ -35,37 +36,21 @@ const ChartComponent = ({ data }) => {
     return () => clearInterval(interval);
   }, []);
 
+  const yCoordinateMap = generateYCoordinateIndexMap(data)
+
   const transformedData = useMemo(() => {
     if (!data || !Array.isArray(data) || data.length === 0) {
       console.error('Invalid data:', data);
       return [];
     }
 
-    const yCoordinateMap = {};
-    let yCounter = 0;
-
-    const sortedData = data.flatMap(item => item.data).sort((a, b) => {
-      if (sortCriterion === 'EVT') {
-        return a.time - b.time;
-      } else if (sortCriterion === 'EXP') {
-        return (a.expectationTime || a.time) - (b.expectationTime || b.time);
-      }
-      return 0;
-    });
-
-    sortedData.forEach(item => {
-      if (!(item.yCoordinate in yCoordinateMap)) {
-        yCounter += 1;
-        yCoordinateMap[item.yCoordinate] = yCounter;
-      }
-    });
-
-    return sortedData.map(item => ({
+    return data.flatMap(item => item.data).map(item => ({
       ...item,
-      yValue: yCoordinateMap[item.yCoordinate],
+      yValue: sortCriterion === 'EXP' ? yCoordinateMap[item.yCoordinate].exp_index : yCoordinateMap[item.yCoordinate].evt_index,
       markerSymbol: getMarkerSymbol(item.type)
     }));
   }, [data, sortCriterion]);
+
 
   const yLabelMap = useMemo(() => {
     const map = {};
@@ -130,6 +115,27 @@ const ChartComponent = ({ data }) => {
       hoveredPointRef.current = event.points[0].customdata;
     } else {
       hoveredPointRef.current = null;
+    }
+  };
+
+  const handleRelayout = (event) => {
+    if (event['xaxis.range[0]'] && event['xaxis.range[1]']) {
+      const xRange = [event['xaxis.range[0]'], event['xaxis.range[1]']];
+      const yRange = [event['yaxis.range[0]'], event['yaxis.range[1]']];
+
+      const selectedPoints = transformedData.filter(d =>
+        d.time >= new Date(xRange[0]).getTime() &&
+        d.time <= new Date(xRange[1]).getTime() &&
+        d.yValue >= yRange[0] &&
+        d.yValue <= yRange[1]
+      );
+
+      const selectedEventList = selectedPoints.map(d => ({
+        event: d.event,
+        status: d.status
+      }));
+
+      setSelectedEventList(selectedEventList);
     }
   };
 
@@ -213,6 +219,7 @@ const ChartComponent = ({ data }) => {
         config={{ displayModeBar: true }}
         onClick={handlePointClick}
         onHover={handleHover}
+        onRelayout={handleRelayout}
         style={{ width: '100%', height: '600px' }}
       />
     </ResponsiveContainer>

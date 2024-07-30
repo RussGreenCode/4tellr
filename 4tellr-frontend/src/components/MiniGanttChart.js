@@ -3,8 +3,9 @@ import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 import { Box } from '@mui/material';
 import '../styles/GantChartD3.css';
+import { getEventColorByStatus } from '../utils/GetEventColorByStatus';
 
-const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) => {
+const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12, sloTime = null, slaTime = null }) => {
   const svgRef = useRef(null);
   const xAxisTopRef = useRef(null);
   const xAxisBottomRef = useRef(null);
@@ -17,7 +18,7 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
     const chartHeight = data.length * rowHeight;
 
     const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove(); // Clear previous content
+    svg.selectAll('*').remove();
 
     const chart = svg
       .attr('width', chartWidth + margin.left + margin.right)
@@ -32,6 +33,24 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
       ])
       .range([0, chartWidth]);
 
+    const tooltip = d3.select(tooltipRef.current)
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('background', 'rgba(0, 0, 0, 0.7)')
+      .style('color', '#fff')
+      .style('padding', '5px')
+      .style('border-radius', '5px')
+      .style('pointer-events', 'none');
+
+    renderAxes(chart, x, chartWidth, chartHeight);
+    renderBars(chart, x, rowHeight, tooltip);
+    renderDependencies(chart, x, rowHeight);
+    renderVerticalLine(chart, x, chartHeight);
+    renderSloAndSla(chart, x, chartHeight);
+
+  }, [data, width, height, textSize, sloTime, slaTime]);
+
+  const renderAxes = (chart, x, chartWidth, chartHeight) => {
     const xAxisTop = d3.axisTop(x).ticks(chartWidth / 80).tickSizeOuter(0);
     const xAxisBottom = d3.axisBottom(x).ticks(chartWidth / 80).tickSizeOuter(0);
 
@@ -42,18 +61,14 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
     d3.select(xAxisBottomRef.current)
       .attr('width', chartWidth + margin.left + margin.right)
       .call(xAxisBottom);
+  };
 
-    const tooltip = d3.select(tooltipRef.current)
-      .style('position', 'absolute')
-      .style('visibility', 'hidden')
-      .style('background', 'rgba(0, 0, 0, 0.7)')
-      .style('color', '#fff')
-      .style('padding', '5px')
-      .style('border-radius', '5px')
-      .style('pointer-events', 'none');
+  const renderBars = (chart, x, rowHeight, tooltip) => {
+    // Sort data by expected start time
+    const sortedData = data.sort((a, b) => new Date(a.expected_start_time) - new Date(b.expected_start_time));
 
     const rows = chart.selectAll('.row')
-      .data(data)
+      .data(sortedData)
       .enter()
       .append('g')
       .attr('class', 'row')
@@ -66,25 +81,9 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
       .attr('width', d => x(new Date(d.expected_end_time)) - x(new Date(d.expected_start_time)))
       .attr('height', rowHeight * 0.7)
       .attr('fill', 'lightgrey')
-      .on('mouseover', (event, d) => {
-        tooltip.html(`
-          <div><strong>Event Name:</strong> ${d.event_name}</div>
-          <div><strong>Business Date:</strong> ${d.business_date}</div>
-          <div><strong>Start Time:</strong> ${new Date(d.start_time).toLocaleString()}</div>
-          <div><strong>End Time:</strong> ${new Date(d.end_time).toLocaleString()}</div>
-          <div><strong>Expected Start:</strong> ${new Date(d.expected_start_time).toLocaleString()}</div>
-          <div><strong>Expected End:</strong> ${new Date(d.expected_end_time).toLocaleString()}</div>
-          <div><strong>Duration (seconds):</strong> ${d.duration_seconds}</div>
-          <div><strong>Status:</strong> ${d.outcome}</div>
-        `);
-        return tooltip.style('visibility', 'visible');
-      })
-      .on('mousemove', (event) => {
-        return tooltip.style('top', (event.pageY - 10) + 'px').style('left', (event.pageX + 10) + 'px');
-      })
-      .on('mouseout', () => {
-        return tooltip.style('visibility', 'hidden');
-      });
+      .on('mouseover', (event, d) => showTooltip(tooltip, event, d))
+      .on('mousemove', (event) => moveTooltip(tooltip, event))
+      .on('mouseout', () => hideTooltip(tooltip));
 
     rows.append('rect')
       .attr('class', 'bar')
@@ -92,30 +91,12 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
       .attr('y', rowHeight * 0.25)
       .attr('width', d => d.start_time ? x(new Date(d.end_time)) - x(new Date(d.start_time)) : 0)
       .attr('height', rowHeight * 0.5)
-      .attr('fill', d => getColorByStatus(d.outcome))
-      .attr('rx', 5) // Rounded corners x-axis radius
-      .attr('ry', 5) // Rounded corners y-axis radius
-      .on('mouseover', (event, d) => {
-        if (d.start_time) {
-          tooltip.html(`
-            <div><strong>Event Name:</strong> ${d.event_name}</div>
-            <div><strong>Business Date:</strong> ${d.business_date}</div>
-            <div><strong>Start Time:</strong> ${new Date(d.start_time).toLocaleString()}</div>
-            <div><strong>End Time:</strong> ${new Date(d.end_time).toLocaleString()}</div>
-            <div><strong>Expected Start:</strong> ${new Date(d.expected_start_time).toLocaleString()}</div>
-            <div><strong>Expected End:</strong> ${new Date(d.expected_end_time).toLocaleString()}</div>
-            <div><strong>Duration (seconds):</strong> ${d.duration_seconds}</div>
-            <div><strong>Status:</strong> ${d.outcome}</div>
-          `);
-          return tooltip.style('visibility', 'visible');
-        }
-      })
-      .on('mousemove', (event) => {
-        return tooltip.style('top', (event.pageY - 10) + 'px').style('left', (event.pageX + 10) + 'px');
-      })
-      .on('mouseout', () => {
-        return tooltip.style('visibility', 'hidden');
-      });
+      .attr('fill', d => getEventColorByStatus(d.outcome))
+      .attr('rx', 5)
+      .attr('ry', 5)
+      .on('mouseover', (event, d) => d.start_time && showTooltip(tooltip, event, d))
+      .on('mousemove', (event) => moveTooltip(tooltip, event))
+      .on('mouseout', () => hideTooltip(tooltip));
 
     rows.append('text')
       .attr('x', -10)
@@ -123,11 +104,12 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
       .attr('dy', '.35em')
       .attr('class', 'process-text')
       .attr('text-anchor', 'end')
-      .attr('fill', d => getColorByStatus(d.outcome))
+      .attr('fill', d => getEventColorByStatus(d.outcome))
       .style('font-size', `${textSize}px`)
       .text(d => d.event_name);
+  };
 
-    // Add vertical line
+  const renderVerticalLine = (chart, x, chartHeight) => {
     const currentTime = new Date();
     chart.append('line')
       .attr('x1', x(currentTime))
@@ -138,7 +120,6 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
       .attr('stroke-width', 2)
       .attr('stroke-dasharray', '4');
 
-    // Add text above the vertical line
     chart.append('text')
       .attr('x', x(currentTime))
       .attr('y', -10)
@@ -146,19 +127,93 @@ const MiniGanttChartD3 = ({ data, width = 1200, height = 500, textSize = 12 }) =
       .attr('fill', 'red')
       .style('font-size', '10px')
       .text(currentTime.toUTCString());
+  };
 
-  }, [data, width, height, textSize]);
+  const renderSloAndSla = (chart, x, chartHeight) => {
+    if (sloTime) {
+      chart.append('path')
+        .attr('d', d3.symbol().type(d3.symbolTriangle).size(100)())
+        .attr('transform', `translate(${x(new Date(sloTime))}, ${chartHeight + margin.bottom / 2})`)
+        .attr('fill', 'black');
+    }
 
-  const getColorByStatus = (status) => {
-    return status === 'NEW' ? 'blue'
-      : status === 'ON_TIME' ? 'darkgreen'
-      : status === 'MEETS_SLO' ? 'lightgreen'
-      : status === 'MEETS_SLA' ? 'orange'
-      : status === 'MET_THRESHOLD' ? 'darkgreen'
-      : status === 'BREACHED' ? 'red'
-      : status === 'NOT_REACHED' ? 'grey'
-      : status === 'LATE' ? 'red'
-      : 'darkred';
+    if (slaTime) {
+      chart.append('path')
+        .attr('d', d3.symbol().type(d3.symbolDiamond).size(100)())
+        .attr('transform', `translate(${x(new Date(slaTime))}, ${chartHeight + margin.bottom / 2})`)
+        .attr('fill', 'black');
+    }
+  };
+
+  const renderDependencies = (chart, x, rowHeight) => {
+    const arrowMarker = chart.append('defs')
+      .append('marker')
+      .attr('id', 'arrow')
+      .attr('viewBox', '0 0 10 10')
+      .attr('refX', 5)
+      .attr('refY', 5)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto-start-reverse')
+      .append('path')
+      .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+      .attr('fill', 'black');
+
+    data.forEach((process, i) => {
+        if (process.dependencies && process.dependencies.length > 0) {
+            process.dependencies.forEach(dep => {
+                const dependentProcess = data.find(p => p.event_name === dep);
+                if (dependentProcess) {
+                    const startX = x(new Date(dependentProcess.start_time)) + (x(new Date(dependentProcess.end_time)) - x(new Date(dependentProcess.start_time))) / 2;
+                    const startY = data.findIndex(p => p.event_name === dep) * rowHeight + rowHeight / 2;
+                    const endX = x(new Date(process.start_time)) - 5; // Arrow ends at the process that lists the dependency
+                    const endY = i * rowHeight + rowHeight / 2;
+
+                    // Draw vertical and horizontal lines with arrow at the end
+                    chart.append('line')
+                        .attr('x1', startX)
+                        .attr('y1', startY)
+                        .attr('x2', startX)
+                        .attr('y2', endY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1);
+
+                    chart.append('line')
+                        .attr('x1', startX)
+                        .attr('y1', endY)
+                        .attr('x2', endX)
+                        .attr('y2', endY)
+                        .attr('stroke', 'black')
+                        .attr('stroke-width', 1)
+                        .attr('marker-end', 'url(#arrow)');
+                }
+            });
+        }
+    });
+  };
+
+
+  const showTooltip = (tooltip, event, data) => {
+    tooltip.html(`
+      <div><strong>Event Name:</strong> ${data.event_name}</div>
+      <div><strong>Business Date:</strong> ${data.business_date}</div>
+      <div><strong>Start Time:</strong> ${new Date(data.start_time).toLocaleString()}</div>
+      <div><strong>End Time:</strong> ${new Date(data.end_time).toLocaleString()}</div>
+      <div><strong>Expected Start:</strong> ${new Date(data.expected_start_time).toLocaleString()}</div>
+      <div><strong>Expected End:</strong> ${new Date(data.expected_end_time).toLocaleString()}</div>
+      <div><strong>Duration (seconds):</strong> ${data.duration_seconds}</div>
+      <div><strong>Status:</strong> ${data.outcome}</div>
+    `);
+    tooltip.style('visibility', 'visible');
+  };
+
+  const moveTooltip = (tooltip, event) => {
+    tooltip.style('top', `${event.pageY - 10}px`);
+    tooltip.style('left', `${event.pageX + 10}px`);
+  };
+
+  const hideTooltip = (tooltip) => {
+    tooltip.style('visibility', 'hidden');
   };
 
   return (

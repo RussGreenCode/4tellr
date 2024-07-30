@@ -14,11 +14,10 @@ const drawerWidth = 300; // Fixed width for the expanded drawer
 const collapsedWidth = 60; // Fixed width for the collapsed drawer
 
 const Overview = () => {
-  const [sortCriterion, setSortCriterion] = useState('EXP');
   const { setSearchEventCriteria, searchEventCriteria, setSearchApplicationCriteria, searchApplicationCriteria,
     setSearchStatusCriteria, searchStatusCriteria, setSelectedTypes, selectedTypes,
-    groupList, setSearchGroupCriteria, searchGroupCriteria,
-    searchOutcomeCriteria, setSearchOutcomeCriteria,
+    groupList, setSearchGroupCriteria, sortCriterion, setSortCriterion,
+    searchOutcomeCriteria, setSearchOutcomeCriteria, setSelectedEventList,
     isDrawerOpen, setIsDrawerOpen, setShowLabels, showLabels} = useContext(EventsContext);
   const [transformedGroupList, setTransformedGroupList] = useState([]);
 
@@ -35,7 +34,10 @@ const Overview = () => {
   };
 
   const handleSortChange = (event) => {
-    setSortCriterion(event.target.value);
+
+    const newSortValue = event.target.defaultValue
+
+    setSortCriterion(newSortValue);
   };
 
   const handleTypeChange = (event) => {
@@ -55,6 +57,7 @@ const Overview = () => {
     setSearchStatusCriteria({'eventStatus': ''});
     setSearchGroupCriteria({'groupName': ''});
     setSearchOutcomeCriteria({'eventOutcome': ''});
+    setSelectedEventList([])
   };
 
   const drawer = (

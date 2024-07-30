@@ -16,6 +16,7 @@ export const EventsProvider = ({ children }) => {
   const [searchEventCriteria, setSearchEventCriteria] = useState({}); // Initialize search criteria
   const [searchStatusCriteria, setSearchStatusCriteria] = useState({}); // Initialize search criteria
   const [searchApplicationCriteria, setSearchApplicationCriteria] = useState({}); // Initialize search criteria
+  const [selectedEventList, setSelectedEventList] = useState([]);
   const [sortCriterion, setSortCriterion] = useState('EXP'); // Initialize search criteria
   const [selectedEvent, setSelectedEvent] = useState({}); // Initialize search criteria
   const [showLabels, setShowLabels] = useState(false);
@@ -70,37 +71,42 @@ export const EventsProvider = ({ children }) => {
       });
     };
 
-
- const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria, outcomeCriteria) => {
-
-    if (!Array.isArray(events)) {
+    const filterEvents = (events, groupCriteria, applicationCriteria, eventCriteria, statusCriteria, outcomeCriteria, selectedEventList) => {
+      if (!Array.isArray(events)) {
         console.error('The events parameter is not an array.');
         return [];
-    }
-
-    return events.filter(event => {
-      let matches = true;
-
-      if (eventCriteria.eventName) {
-        matches = matches && event.eventName.toLowerCase().includes(eventCriteria.eventName.toLowerCase());
       }
 
-      if (statusCriteria.eventStatus) {
-        matches = matches && event.eventStatus.toLowerCase().includes(statusCriteria.eventStatus.toLowerCase());
-      }
+      return events.filter(event => {
+        let matches = true;
 
-      if (outcomeCriteria.eventOutcome) {
-        matches = matches && event.plotStatus.toLowerCase().includes(outcomeCriteria.eventOutcome.toLowerCase());
-      }
+        if (eventCriteria.eventName) {
+          matches = matches && event.eventName.toLowerCase().includes(eventCriteria.eventName.toLowerCase());
+        }
 
-      if (groupCriteria.groupName) {
-        matches = matches && event.groups && event.groups.includes(groupCriteria.groupName);
-      }
+        if (statusCriteria.eventStatus) {
+          matches = matches && event.eventStatus.toLowerCase().includes(statusCriteria.eventStatus.toLowerCase());
+        }
 
-      // Add more filtering conditions here as needed
-      return matches;
-    });
-  };
+        if (outcomeCriteria.eventOutcome) {
+          matches = matches && event.plotStatus.toLowerCase().includes(outcomeCriteria.eventOutcome.toLowerCase());
+        }
+
+        if (groupCriteria.groupName) {
+          matches = matches && event.groups && event.groups.includes(groupCriteria.groupName);
+        }
+
+        // Check against selectedEventList criteria
+        if (selectedEventList && selectedEventList.length > 0) {
+          const isSelected = selectedEventList.some(selectedEvent =>
+            selectedEvent.event === event.eventName && selectedEvent.status === event.eventStatus
+          );
+          matches = matches && isSelected;
+        }
+
+        return matches;
+      });
+    };
 
   const fetchEvents = async (date) => {
     try {
@@ -191,7 +197,7 @@ export const EventsProvider = ({ children }) => {
 
   useEffect(() => {
     // Filter events whenever events or search criteria change
-    const updatedFilteredEvents = filterEvents(events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria );
+    const updatedFilteredEvents = filterEvents(events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, selectedEventList );
     setFilteredEvents(updatedFilteredEvents);
 
     const calculatedMetrics = CalculateMettics(updatedFilteredEvents);
@@ -203,7 +209,7 @@ export const EventsProvider = ({ children }) => {
     //From the events we want to determine processes and then catagorise them
     CategoriseProcesses(events, setUpcomingProcesses, setOngoingProcesses, setJustFinishedProcesses)
 
-  }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, favouriteGroups]);
+  }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, selectedEventList, favouriteGroups]);
 
   useEffect(() => {
     fetchGroupList()
@@ -216,9 +222,9 @@ export const EventsProvider = ({ children }) => {
   return (
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
       setSearchStatusCriteria, searchStatusCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchEventCriteria, searchEventCriteria, selectedEvent, setSelectedEvent,
-      tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSelectedTypes, selectedTypes,
+      tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSortCriterion, setSelectedTypes, selectedTypes,
       groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
-      setSearchOutcomeCriteria, searchOutcomeCriteria, timeLeft, handleManualRefresh, resetState,
+      setSearchOutcomeCriteria, searchOutcomeCriteria, setSelectedEventList, timeLeft, handleManualRefresh, resetState,
       upcomingProcesses, ongoingProcesses, justFinishedProcesses,
       isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics, favouriteGroups}}>
       {children}
