@@ -70,8 +70,11 @@ def create_event():
 
     event_type = data.get('eventType')
     details = data.get('details', {})
+    status = data.get('eventStatus')
 
-    if event_type == 'FILE':
+    if status == 'ERROR':
+        db_fields = ['error_code', 'error_description']
+    elif event_type == 'FILE':
         file_fields = ['fileName', 'fileLocation', 'fileSize', 'numberOfRows']
         for field in file_fields:
             if field not in details:
@@ -89,8 +92,7 @@ def create_event():
             if field not in details:
                 return jsonify({'error': f'{field} is required for database events'}), 400
     elif event_type == 'PROCESS':
-        db_fields = ['databaseName', 'tableName', 'operation']
-
+        db_fields = ['process_id', 'process_name']
     else:
         return jsonify({'error': 'Invalid eventType provided'}), 400
 

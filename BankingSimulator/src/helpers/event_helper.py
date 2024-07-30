@@ -7,7 +7,15 @@ class EventHelper:
         self.output_mode = output_mode
         self.endpoint_url = endpoint_url
 
-    def generate_event_details(self, event_type):
+    def generate_event_details(self, event_type, status):
+
+        if status == 'ERROR':
+            return {
+                "error_code": "ERR-008",
+                "error_description": "500 Server Error: INTERNAL SERVER ERROR for url: http://127.0.0.1:5000/api/events"
+            }
+
+
         if event_type == 'PROCESS':
             return {
                 "processId": "proc-12345",
@@ -44,7 +52,7 @@ class EventHelper:
             "eventStatus": status,
             "resource": "Machine_1",
             "message": "",
-            "details": self.generate_event_details(process["type"])
+            "details": self.generate_event_details(process["type"], status)
         }
         return event
 

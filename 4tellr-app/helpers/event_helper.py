@@ -183,7 +183,19 @@ class EventHelper():
                     })
             elif event_id.startswith('EVT#') and event_key not in processed_event_keys:
                 time_value = item.get('eventTime')
-                if time_value:
+                if event_status == 'ERROR':
+                    result.append({
+                        'eventId': event_id,
+                        'eventType': event_type,
+                        'type': 'EVT',
+                        'eventKey': event_key,
+                        'eventName': event_name,
+                        'eventStatus': event_status,
+                        'TimeValue': time_value,
+                        'outcomeStatus': 'ERROR',
+                        'plotStatus': 'ERROR'
+                    })
+                elif time_value:
                     result.append({
                         'eventId': event_id,
                         'eventType': event_type,
@@ -239,10 +251,13 @@ class EventHelper():
             event_time = event_time.replace(tzinfo=timezone.utc)  # Assuming UTC if not specified
             event_data['eventTime'] = event_time.isoformat()
 
-        # Create event outcome
-        self.insert_event_outcome(event_data)
+        if event_data['eventStatus'] == 'ERROR':
+            return event_id
+        else:
+            # Create event outcome
+            self.insert_event_outcome(event_data)
+            return event_id
 
-        return event_id
 
     def insert_event_outcome(self, event_data):
         business_date = event_data['businessDate']
@@ -254,8 +269,7 @@ class EventHelper():
 
         # Get expectation for the event using the composite key
         event_result = self.db_helper.get_event_by_starting_prefix(exp_prefix, business_date)
-        metadata_response = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
-        event_metadata = metadata_response['data']
+
 
         items = event_result['data']
         slo_time = None
@@ -263,14 +277,19 @@ class EventHelper():
         slo_delta = None
         sla_delta = None
 
-
         if not items:
+
             self.logger.info(f'No expectation found for {event_name} with status {event_status} on {business_date}')
             expected_time = None
             str_delta = ''
             outcome_status = 'NEW'
 
         else:
+
+            # Get Metadata for the event using the composite key - on must be there is an expectaion is there
+            metadata_response = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
+            event_metadata = metadata_response['data']
+
             # Assuming there is only one expectation per event_name, event_status, and business_date
             expectation = items[0]
             expected_time = datetime.fromisoformat(expectation['expectedArrival'])

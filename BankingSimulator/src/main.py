@@ -19,6 +19,8 @@ if __name__ == "__main__":
     dependency_variance_min = int(config_params.get('dependency_variance_min', 1))
     dependency_variance_max = int(config_params.get('dependency_variance_max', 2))
     processing_time_variance = float(config_params.get('processing_time_variance', 1.0))
+    error_chance = float(config_params.get('error_chance', 1.0))  # Default error chance is 1%
+    retry_delay = int(config_params.get('retry_delay', 20))  # Default retry delay is 20 minutes
     start_business_date = datetime.strptime(config_params.get('start_business_date'), "%Y-%m-%d")
     number_of_days = int(config_params.get('number_of_days', 1))
 
@@ -34,6 +36,8 @@ if __name__ == "__main__":
         start_time_variance=start_time_variance,
         dependency_variance_min=dependency_variance_min,
         dependency_variance_max=dependency_variance_max,
-        processing_time_variance=processing_time_variance
+        processing_time_variance=processing_time_variance,
+        error_chance=error_chance,
+        retry_delay=retry_delay
     )
     event_generator.run(start_business_date, number_of_days)
