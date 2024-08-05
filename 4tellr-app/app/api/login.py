@@ -13,7 +13,7 @@ class LoginRequest(BaseModel):
 
 
 def get_login_helper(request: Request):
-    return LoginServices(request.app.state.DB_HELPER, request.app.state.LOGG    ER)
+    return LoginServices(request.app.state.DB_HELPER, request.app.state.LOGGER)
 
 
 @router.post("/api/login")

@@ -565,8 +565,8 @@ class EventServices:
 
         return response['success']
 
-    def save_event_metadata_dependencies(self, event_metadata):
+    def save_event_metadata(self, event_metadata):
 
-        response = self.db_helper.save_event_metadata_dependencies(event_metadata)
+        response = self.db_helper.save_event_metadata(event_metadata)
 
         return response['success']

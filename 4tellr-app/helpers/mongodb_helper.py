@@ -1,4 +1,3 @@
-from flask import jsonify
 import bcrypt
 from pymongo import MongoClient, ReturnDocument
 from pymongo.errors import ConnectionFailure, PyMongoError

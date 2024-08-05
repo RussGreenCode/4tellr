@@ -1,5 +1,4 @@
 import bcrypt
-from flask import current_app
 
 class UserServices:
     def __init__(self, db_helper, logger):
