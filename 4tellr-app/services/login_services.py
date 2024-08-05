@@ -1,12 +1,8 @@
-from flask import current_app
 
-class LoginHelper():
-    def __init__(self):
-        pass
-
-    @property
-    def db_helper(self):
-        return current_app.config['DB_HELPER']
+class LoginServices:
+    def __init__(self, db_helper,logger):
+        self.db_helper = db_helper
+        self.logger = logger
 
     def get_user_by_email(self, email):
         try:

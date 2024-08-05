@@ -1,12 +1,9 @@
-from flask import current_app
 
-class GroupHelper():
-    def __init__(self):
-        pass
 
-    @property
-    def db_helper(self):
-        return current_app.config['DB_HELPER']
+class GroupServices:
+    def __init__(self, db_helper, logger):
+        self.db_helper = db_helper
+        self.logger = logger
 
     def get_group_details(self, group_name):
         if group_name is not None:

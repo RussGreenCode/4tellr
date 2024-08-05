@@ -1,14 +1,10 @@
 from datetime import datetime, timedelta
 
-from flask import current_app
+class JobServices:
+    def __init__(self, db_helper, logger):
+        self.db_helper = db_helper
+        self.logger = logger
 
-class JobHelper():
-    def __init__(self):
-        pass
-
-    @property
-    def db_helper(self):
-        return current_app.config['DB_HELPER']
 
 
     def calculate_job_length_statistics(self, business_date):

@@ -1,13 +1,9 @@
 import bcrypt
-from flask import current_app
 
-class UserHelper():
-    def __init__(self):
-        pass
-
-    @property
-    def db_helper(self):
-        return current_app.config['DB_HELPER']
+class UserServices:
+    def __init__(self, db_helper, logger):
+        self.db_helper = db_helper
+        self.logger = logger
 
     def add_new_user(self, user):
         user['email'] = user.get('email', '').lower()

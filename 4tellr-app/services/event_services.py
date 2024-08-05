@@ -1,7 +1,5 @@
 import statistics
-
 import pytz
-from flask import current_app
 from datetime import datetime, timezone, timedelta
 import uuid
 
@@ -9,16 +7,10 @@ from utils.threshold import Threshold
 from utils.status_utilities import StatusUtilities
 from utils.date_time_utilities import DateTimeUtils
 
-class EventHelper():
-    def __init__(self):
-        pass
-
-    @property
-    def db_helper(self):
-        return current_app.config['DB_HELPER']
-    @property
-    def logger(self):
-        return current_app.config['LOGGER']
+class EventServices:
+    def __init__(self, db_helper, logger):
+        self.db_helper = db_helper
+        self.logger = logger
 
     def query_events_by_date(self, business_date):
         response = self.db_helper.query_events_by_date(business_date)
@@ -573,8 +565,8 @@ class EventHelper():
 
         return response['success']
 
-    def save_event_metadata_dependencies(self, event_metadata):
+    def save_event_metadata(self, event_metadata):
 
-        response = self.db_helper.save_event_metadata_dependencies(event_metadata)
+        response = self.db_helper.save_event_metadata(event_metadata)
 
         return response['success']
