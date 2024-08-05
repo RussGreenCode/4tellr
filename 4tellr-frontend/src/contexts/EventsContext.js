@@ -112,7 +112,7 @@ export const EventsProvider = ({ children }) => {
     try {
       console.log('Fetching events for businessDate:', date);
       const response = await axios.get('http://127.0.0.1:5000/api/chart_data', {
-        params: { businessDate: date }
+        params: { business_date: date }
       });
 
       // Add a method to process the events and add the groups that they exist in.

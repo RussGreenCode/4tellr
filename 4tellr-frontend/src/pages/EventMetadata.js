@@ -97,7 +97,8 @@ const EventMetadata = () => {
   const fetchProcesses = async () => {
     try {
       if (Object.keys(metadata).length !== 0) {
-        const response = await axios.get(`http://127.0.0.1:5000/api/process/get_process_statistics`, { params: { eventName } });
+        const event_name = eventName
+        const response = await axios.get(`http://127.0.0.1:5000/api/process/get_process_statistics`, { params: { event_name } });
         setProcesses(response.data);
       }
     } catch (error) {

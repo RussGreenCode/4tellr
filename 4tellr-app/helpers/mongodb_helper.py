@@ -10,16 +10,22 @@ from bson.objectid import ObjectId
 class MongoDBHelper(DatabaseHelperInterface):
     def __init__(self, config, logger):
         self.config = config
-        self.client = self._initialize_mongo(config)
-        self.db = self.client['4tellr']
-        self.event_collection = self.db['event_details']
-        self.groups_collection = self.db['monitoring_groups']
-        self.user_collection = self.db['user']
-        self.process_stats_collection = self.db['process_statistics']
-        self.event_metadata_collection = self.db['event_metadata']
-
-        # Set up logging
         self.logger = logger
+
+
+        try:
+            self.client = self._initialize_mongo(config)
+            self.db = self.client['4tellr']
+            self.event_collection = self.db['event_details']
+            self.groups_collection = self.db['monitoring_groups']
+            self.user_collection = self.db['user']
+            self.process_stats_collection = self.db['process_statistics']
+            self.event_metadata_collection = self.db['event_metadata']
+        except Exception as e:
+            self.logger.error(f"Error initializing MongoDB collections: {e}")
+            raise
+
+
 
     def _initialize_mongo(self, config):
         try:
