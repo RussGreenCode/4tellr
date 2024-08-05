@@ -21,11 +21,11 @@ class SaveUserFavouriteGroupsRequest(BaseModel):
 
 # Dependency to get the user helper
 def get_user_helper(req: Request):
-    return UserServices(req.app.state.DB_HELPER)
+    return UserServices(req.app.state.DB_HELPER, req.app.state.LOGGER)
 
 # Dependency to get the group helper
 def get_group_helper(req: Request):
-    return GroupHelper(req.app.state.DB_HELPER, req.app.state.LOGGER)
+    return GroupServices(req.app.state.DB_HELPER, req.app.state.LOGGER)
 
 @router.post("/api/add_users")
 async def add_users(request: AddUsersRequest, user_helper: UserServices = Depends(get_user_helper)):
