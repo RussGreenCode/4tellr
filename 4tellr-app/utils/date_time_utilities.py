@@ -71,6 +71,23 @@ class DateTimeUtils:
         event_time_obj = business_date_obj + timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
         return event_time_obj.isoformat()
 
+    @staticmethod
+    def add_time_to_t_format(t_format: str, minutes_to_add: int) -> str:
+        parts = t_format.split()
+        days_part = parts[0]  # e.g., 'T+1'
+        time_part = parts[1]  # e.g., '01:45:00'
+
+        days = int(days_part[2:])  # Extract the number of days
+        time_obj = datetime.strptime(time_part, "%H:%M:%S")
+        added_time = timedelta(minutes=minutes_to_add)
+
+        new_time = time_obj + added_time
+        new_days = days + new_time.day - 1  # Adjust days if overflow
+        new_time_part = new_time.strftime("%H:%M:%S")
+
+        return f"T+{new_days} {new_time_part}"
+
+
 # Example usage:
 business_date = "2024-07-01T00:00:00+00:00"
 event_time_utc = "2024-07-03T13:09:03+00:00"

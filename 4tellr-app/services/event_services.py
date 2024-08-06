@@ -570,3 +570,41 @@ class EventServices:
         response = self.db_helper.save_event_metadata(event_metadata)
 
         return response['success']
+
+    def add_slo_sla_to_metadata(self, events, slo_threshold, sla_threshold):
+        if not events:
+            return {'success': False, 'message': 'No events provided'}
+
+        if slo_threshold >= sla_threshold:
+            return {'success': False, 'message': 'SLA threshold must be greater than SLO threshold'}
+
+        for event in events:
+            event_name = event['event_name']
+            event_status = event['event_status']
+
+            # Retrieve the event metadata
+            event_metadata = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
+
+            if not event_metadata:
+                continue
+
+            # Get the expectation time
+            expectation_time_t_format = event_metadata['data']['expectation']['time']
+
+            # Update the SLO and SLA times
+            slo_time = DateTimeUtils.add_time_to_t_format(expectation_time_t_format, slo_threshold)
+            sla_time = DateTimeUtils.add_time_to_t_format(expectation_time_t_format, sla_threshold)
+
+            new_event_metadata = {
+                'event_name': event_name,
+                'event_status': event_status,
+                'slo_time': slo_time,
+                'sla_time': sla_time,
+                'origin': 'auto',
+                'status': 'active'
+            }
+
+            # Use this method to update the metadata
+            self.db_helper.save_event_metadata_slo_sla(new_event_metadata)
+
+        return {'success': True, 'message': 'SLO and SLA times updated for the provided events'}

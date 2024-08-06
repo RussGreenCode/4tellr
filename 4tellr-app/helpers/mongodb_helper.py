@@ -494,6 +494,7 @@ class MongoDBHelper(DatabaseHelperInterface):
         sla_time = event_metadata.get('sla_time')
         current_time = datetime.now().isoformat()
 
+
         try:
             result = self.event_metadata_collection.update_one(
                 {'event_name': event_name, 'event_status': event_status},
@@ -516,6 +517,37 @@ class MongoDBHelper(DatabaseHelperInterface):
         except Exception as e:
             self.logger.error(f"Error saving Metadata: {e}")
             return {'success': False, 'error': str(e)}
+
+    def save_event_metadata_slo_sla(self, event_metadata):
+
+        event_name = event_metadata.get('event_name')
+        event_status = event_metadata.get('event_status')
+        slo_time = event_metadata.get('slo_time')
+        sla_time = event_metadata.get('sla_time')
+        current_time = datetime.now().isoformat()
+        origin = event_metadata.get('origin')
+        status = event_metadata.get('status')
+
+
+        try:
+            result = self.event_metadata_collection.update_one(
+                {'event_name': event_name, 'event_status': event_status},
+                {'$set': {'slo': {'origin': origin,
+                                  'status': status,
+                                  'time': slo_time,
+                                  'updated_at': current_time},
+                          'sla': {'origin': origin,
+                                  'status': status,
+                                  'time': sla_time,
+                                  'updated_at': current_time}}
+                 }
+            )
+            self.logger.info(f"Metadata with name: '{event_name}' added successfully.")
+            return {'success': True, 'message': 'Event Metadata saved successfully'}
+        except Exception as e:
+            self.logger.error(f"Error saving Metadata: {e}")
+            return {'success': False, 'error': str(e)}
+
 
     def update_metadata_with_expectation(self, event_name, event_status, avg_time_elapsed):
         try:

@@ -4,6 +4,13 @@ from pydantic import BaseModel
 from services.job_services import JobServices
 from services.event_services import EventServices
 from helpers.job_functions import fetch_url
+import logging
+import httpx
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -14,6 +21,10 @@ class JobCreateRequest(BaseModel):
     seconds: int = 60
     url: str
     params: dict = {}
+
+class NewThresholds(BaseModel):
+    slo_threshold: int
+    sla_threshold: int
 
 
 def get_job_helper(request: Request):
@@ -110,6 +121,8 @@ async def trigger_job(job_id: str, request: Request, override: dict = None):
         if not job:
             raise HTTPException(status_code=404, detail=f"No job found with ID {job_id}")
 
+        # Currently not using this func - can add back in later....from
+        # The fetch_url function was timing out so used a different method to cll - see below
         job_func = job.func
         job_args = job.args
         job_kwargs = job.kwargs
@@ -117,9 +130,23 @@ async def trigger_job(job_id: str, request: Request, override: dict = None):
         if override:
             job_kwargs = override
 
-        job_func(*job_args, **job_kwargs)
-        request.app.state.LOGGER.info(f"Job with ID={job_id} triggered successfully")
-        return {'success': True, 'message': 'Job triggered successfully'}
+        url = job_args[0]  # Extract the URL from the tuple
+        params = job_kwargs['params']
+
+        logger.info(f"Raising request: {url} with JSON body: {params}")
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=params)
+            response.raise_for_status()
+            logger.info(f"Job triggered successfully with status code: {response.status_code}")
+            return {"status": "Job triggered successfully"}
+        except httpx.RequestError as exc:
+            logger.error(f"Error triggering job: {exc}")
+            raise HTTPException(status_code=500, detail=f"Error triggering job: {exc}")
+        except httpx.HTTPStatusError as exc:
+            logger.error(f"HTTP error: {exc.response.status_code}")
+            raise HTTPException(status_code=exc.response.status_code, detail=f"HTTP error: {exc.response.status_code}")
     except Exception as e:
         request.app.state.LOGGER.error(f"Error triggering job: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -144,4 +171,13 @@ async def resume_job(job_id: str, request: Request):
         return {'success': True, 'message': 'Job resumed successfully'}
     except Exception as e:
         request.app.state.LOGGER.error(f"Error resuming job: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/jobs/create_slos_slas")
+async def create_slo_sla(thresholds: NewThresholds, request: Request, jobs_helper: JobServices = Depends(get_job_helper)):
+    try:
+        jobs_helper.create_slo_sla_for_metadata_without_them(thresholds.slo_threshold, thresholds.sla_threshold)
+        return {'success': True, 'message': 'Metadata updated successfully'}
+    except Exception as e:
+        request.app.state.LOGGER.error(f"Error updating metadata: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

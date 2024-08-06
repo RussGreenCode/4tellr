@@ -1,9 +1,13 @@
 from datetime import datetime, timedelta
 
+from services.event_services import EventServices
+
+
 class JobServices:
     def __init__(self, db_helper, logger):
         self.db_helper = db_helper
         self.logger = logger
+        self.event_helper = EventServices(db_helper, logger)
 
 
 
@@ -48,3 +52,37 @@ class JobServices:
 
         result = self.db_helper.delete_processes_for_date(business_date)
         return result
+
+    def create_slo_sla_for_metadata_without_them(self, slo_threshold, sla_threshold):
+        try:
+            # Retrieve all event metadata
+            response = self.db_helper.get_all_event_metadata()
+            metadata_list = response['data']
+
+            # Initialize a list to hold events without SLO or SLA
+            events_without_slo_sla = []
+
+            # Iterate through the metadata
+            for metadata in metadata_list:
+                # Check if both SLO and SLA times are missing
+                if (metadata['slo']['time'] == 'undefined') and (metadata['sla']['time'] == 'undefined'):
+                    events_without_slo_sla.append({
+                        'event_name': metadata['event_name'],
+                        'event_status': metadata['event_status']
+                    })
+
+            # Pass the list of events to add SLO and SLA
+            self.event_helper.add_slo_sla_to_metadata(events_without_slo_sla, slo_threshold, sla_threshold)
+            return {'success': True, 'message': 'SLO and SLA added to metadata successfully'}
+
+        except Exception as e:
+            self.logger.error(f"Error in create_slo_sla_for_metadata_without_them: {e}")
+            return {'success': False, 'error': str(e)}
+
+
+
+
+
+
+
+
