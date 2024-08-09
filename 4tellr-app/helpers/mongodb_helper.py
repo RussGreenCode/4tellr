@@ -20,6 +20,7 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.user_collection = self.db['user']
             self.process_stats_collection = self.db['process_statistics']
             self.event_metadata_collection = self.db['event_metadata']
+            self.alerts_collection = self.db['alert_details']
         except Exception as e:
             self.logger.error(f"Error initializing MongoDB collections: {e}")
             raise
@@ -270,6 +271,10 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.logger.error(error_message)
             return {'success': False, 'error': error_message}
 
+        # Add favourite_groups and favourite_alerts as empty arrays
+        user['favourite_groups'] = []
+        user['favourite_alerts'] = []
+
         try:
             self.user_collection.insert_one(user)
             self.logger.info(f"User with email '{email}' added successfully.")
@@ -343,6 +348,22 @@ class MongoDBHelper(DatabaseHelperInterface):
                 return {'success': False, 'message': f"No user found with email '{email}'."}
         except PyMongoError as e:
             self.logger.error(f"Error updating favourite groups for user with email '{email}': {str(e)}")
+            return {'success': False, 'error': str(e)}
+
+    def save_user_favourite_alerts(self, email, favourite_alerts):
+        try:
+            result = self.user_collection.update_one(
+                {'email': email},
+                {'$set': {'favourite_alerts': favourite_alerts}}
+            )
+            if result.modified_count > 0:
+                self.logger.info(f"Favourite alerts for user with email '{email}' updated successfully.")
+                return {'success': True, 'message': 'Favourite alerts updated successfully'}
+            else:
+                self.logger.info(f"No user found with email '{email}' to update favourite alerts.")
+                return {'success': False, 'message': f"No user found with email '{email}'."}
+        except PyMongoError as e:
+            self.logger.error(f"Error updating favourite alerts for user with email '{email}': {str(e)}")
             return {'success': False, 'error': str(e)}
 
     def save_job_statistics(self, job_lengths):
@@ -584,3 +605,52 @@ class MongoDBHelper(DatabaseHelperInterface):
                 return {'success': False, 'message': 'No metadata found'}
         except Exception as e:
             return {'success': False, 'error': str(e)}
+
+    def save_alert(self, alert_name, description, group_name):
+        try:
+            self.alerts_collection.insert_one(
+                {'alert_name': alert_name, 'description': description, 'group_name': group_name}
+            )
+            self.logger.info(f"Saved alert '{alert_name}' successfully")
+            return {'success': True, 'message': 'Alert saved successfully'}
+        except Exception as e:
+            self.logger.error(f"Error saving alert '{alert_name}': {e}")
+            return {'success': False, 'error': str(e)}
+
+
+    def update_alert(self, alert_name, description, group_name):
+        try:
+            self.alerts_collection.update_one({'alert_name': alert_name},
+                {'$set':{'description': description, 'group_name': group_name}}
+            )
+            self.logger.info(f"Updated alert '{alert_name}' successfully")
+            return {'success': True, 'message': 'Alert updated successfully'}
+        except Exception as e:
+            self.logger.error(f"Error updating alert '{alert_name}': {e}")
+            return {'success': False, 'error': str(e)}
+
+    def get_all_alerts(self):
+        try:
+            alert_cursor = self.alerts_collection.find({})
+            alerts = list(alert_cursor)
+
+            if alerts:
+                return {'success': True, 'data': self._serialize_id(alerts)}
+            else:
+                return {'success': False, 'message': 'No alerts found'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def delete_alert(self, alert_name):
+        if alert_name:
+            try:
+                result = self.alerts_collection.delete_one({'alert_name': alert_name})
+                self.logger.info(f"Alert '{alert_name}' deleted successfully.")
+                return {'success': True, 'message': f"Alert '{alert_name}' deleted successfully.", 'result': result}
+            except Exception as e:
+                self.logger.error(f"Error deleting alert '{alert_name}': {str(e)}")
+                return {'success': False, 'error': str(e)}
+        else:
+            error_message = "'alert_name' must not be None."
+            self.logger.error(error_message)
+            return {'success': False, 'error': error_message}

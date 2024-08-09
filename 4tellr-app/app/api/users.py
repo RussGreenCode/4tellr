@@ -19,6 +19,10 @@ class SaveUserFavouriteGroupsRequest(BaseModel):
     email: str
     favourite_groups: list[str]
 
+class SaveUserFavouriteAlertsRequest(BaseModel):
+    email: str
+    favourite_alerts: list[str]
+
 # Dependency to get the user helper
 def get_user_helper(req: Request):
     return UserServices(req.app.state.DB_HELPER, req.app.state.LOGGER)
@@ -120,5 +124,19 @@ async def save_user_favourite_groups(request: SaveUserFavouriteGroupsRequest, us
     try:
         user_helper.save_user_favourite_groups(email, favourite_groups)
         return {'message': 'Favourite groups updated successfully'}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/save_user_favourite_alerts")
+async def save_user_favourite_alerts(request: SaveUserFavouriteAlertsRequest, user_helper: UserServices = Depends(get_user_helper)):
+    email = request.email
+    favourite_alerts = request.favourite_alerts
+
+    if not email or favourite_alerts is None:
+        raise HTTPException(status_code=400, detail='Email and favourite alerts are required')
+
+    try:
+        user_helper.save_user_favourite_alerts(email, favourite_alerts)
+        return {'message': 'Favourite alerts updated successfully'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

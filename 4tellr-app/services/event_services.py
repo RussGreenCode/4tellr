@@ -6,6 +6,7 @@ import uuid
 from utils.threshold import Threshold
 from utils.status_utilities import StatusUtilities
 from utils.date_time_utilities import DateTimeUtils
+from collections import defaultdict
 
 class EventServices:
     def __init__(self, db_helper, logger):
@@ -15,6 +16,26 @@ class EventServices:
     def query_events_by_date(self, business_date):
         response = self.db_helper.query_events_by_date(business_date)
         return response['data']
+
+    def get_events_for_chart_by_month(self, year, month):
+        start_date = datetime(year, month, 1)
+        end_date = (start_date + timedelta(days=32)).replace(day=1)  # Next month, first day
+
+        summary = defaultdict(lambda: defaultdict(int))
+
+        current_date = start_date
+        while current_date < end_date:
+            business_date = current_date.strftime('%Y-%m-%d')
+            events = self.query_events_by_date_for_chart(business_date)
+
+            for event in events:
+                day = current_date.day
+                summary[day]['TOTAL_EVENTS'] += 1
+                summary[day][event['plotStatus']] += 1
+
+            current_date += timedelta(days=1)
+
+        return summary
 
     def query_events_by_date_for_chart(self, business_date):
         query_respone = self.db_helper.query_events_by_date(business_date)

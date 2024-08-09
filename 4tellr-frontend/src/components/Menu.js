@@ -71,6 +71,9 @@ const Menu = ({ setIsAuthenticated }) => {
         <ListItem button component={Link} to="/details" sx={{ pl: 4 }}>
           <ListItemText primary="Scatter" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
         </ListItem>
+        <ListItem button component={Link} to="/calendarSummary" sx={{ pl: 4 }}>
+          <ListItemText primary="Monthly" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+        </ListItem>
           </List>
         </Collapse>
         <ListItem button onClick={handleAnalyticsClickClick}>
@@ -109,6 +112,9 @@ const Menu = ({ setIsAuthenticated }) => {
           <List component="div" disablePadding>
             <ListItem button component={Link} to="/groups" sx={{ pl: 4 }}>
               <ListItemText primary="Groups" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+            <ListItem button component={Link} to="/alerts" sx={{ pl: 4 }}>
+              <ListItemText primary="Alerts" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
             <ListItem button component={Link} to="/userManagement" sx={{ pl: 4 }}>
               <ListItemText primary="User Management" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
@@ -149,6 +155,9 @@ const Menu = ({ setIsAuthenticated }) => {
             </ListItem>
             <ListItem button component={Link} to="/favouriteGroups" sx={{ pl: 4 }}>
               <ListItemText primary="Manage Groups" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
+            </ListItem>
+            <ListItem button component={Link} to="/favouriteAlerts" sx={{ pl: 4 }}>
+              <ListItemText primary="Manage Alerts" primaryTypographyProps={{ fontSize: '0.9rem', color: 'text.secondary' }} />
             </ListItem>
           </List>
         </Collapse>

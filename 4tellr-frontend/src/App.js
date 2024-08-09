@@ -7,10 +7,13 @@ import Login from './pages/Login';
 import TopBar from './components/TopBar';
 import Overview from './pages/Overview';
 import GroupManagement from './pages/GroupManagement';
+import AlertManagement from './pages/AlertManagement';
 import UserManagement from './pages/UserManagement';
 import UserDetails from './pages/UserDetails';
 import ChangePassword from './pages/ChangePassword';
 import FavouriteGroups from './pages/FavouriteGroups';
+import FavouriteAlerts from './pages/FavouriteAlerts';
+import CalendarSummary from './pages/CalendarSummary';
 import JobManagement from './pages/JobManagement';
 import Admin from './pages/Admin';
 import { EventsProvider } from './contexts/EventsContext';
@@ -61,12 +64,15 @@ function App() {
                       <Route path="/changePassword" element={<ChangePassword email={email}/>} />
                       <Route path="/userManagement" element={<UserManagement />} />
                       <Route path="/favouriteGroups" element={<FavouriteGroups />} />
+                      <Route path="/favouriteAlerts" element={<FavouriteAlerts />} />
                       <Route path="/userDetails" element={<UserDetails />} />
                       <Route path="/jobManagement" element={<JobManagement />} />
                       <Route path="/processStatistics" element={<ProcessStatistics />} />
                       <Route path="/ganttChart" element={<GanttChart/>} />
                       <Route path="/eventMetadata" element={<EventMetadata/>} />
                       <Route path="/eventDependencies" element={<EventDependencies/>} />
+                      <Route path="/alerts" element={<AlertManagement/>} />
+                      <Route path="/calendarSummary" element={<CalendarSummary/>} />
                     </Routes>
                   </Grid>
                 </Grid>

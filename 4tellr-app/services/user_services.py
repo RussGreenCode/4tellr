@@ -66,6 +66,12 @@ class UserServices:
 
         return response
 
+    def save_user_favourite_alerts(self, email, favourite_alerts):
+
+        response = self.db_helper.save_user_favourite_alerts(email, favourite_alerts)
+
+        return response
+
     def get_user_by_email(self, email):
 
         response = self.db_helper.get_user_by_email(email)

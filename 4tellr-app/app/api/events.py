@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends, Query
 from pydantic import BaseModel
 from services.event_services import EventServices
 
@@ -23,6 +23,7 @@ class BusinessDateRequest(BaseModel):
 class BusinessDatesRequest(BaseModel):
     businessDates: list[str]
 
+
 @router.get('/api/events')
 async def get_events_by_date(business_date: str, event_helper: EventServices = Depends(get_event_helper)):
     if not business_date:
@@ -42,6 +43,15 @@ async def get_events_by_date_for_chart(business_date: str, event_helper: EventSe
         return events
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get('/api/chart_data_monthly_summary')
+async def get_events_for_chart_by_month(year: int = Query(...), month: int = Query(...), event_helper: EventServices = Depends(get_event_helper)):
+    try:
+        summary = event_helper.get_events_for_chart_by_month(year, month)
+        return summary
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get('/api/event_details')
 async def get_event_details(event_name: str, event_status: str, event_helper: EventServices = Depends(get_event_helper)):
