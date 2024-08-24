@@ -158,7 +158,7 @@ const ChartComponent = ({ data }) => {
           customdata: transformedData.filter(d => d.type === type)
         }))}
         layout={{
-          margin: { t: 10, l: showLabels ? 200 : 0, r: 30, b: 50 },
+          margin: { t: 10, l: showLabels ? 200 : 0, r: 0,  b: 50 },
           xaxis: {
             range: adjustedDomain, // Include one day on both sides
             tickformat: '%Y-%m-%d',

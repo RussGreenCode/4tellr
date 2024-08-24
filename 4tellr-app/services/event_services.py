@@ -5,7 +5,7 @@ import uuid
 
 from utils.threshold import Threshold
 from utils.status_utilities import StatusUtilities
-from utils.date_time_utilities import DateTimeUtils
+from utils.date_time_utilities import DateTimeUtils, business_date
 from collections import defaultdict
 
 class EventServices:
@@ -249,10 +249,19 @@ class EventServices:
         }
 
     def insert_event(self, event_data):
-        event_id = 'EVT#' + event_data['eventName'] + '#' + event_data['eventStatus'] + '#' + str(uuid.uuid4())
+
+        event_name = event_data.get('eventName')
+        event_status = event_data.get('eventStatus')
+        business_date = event_data.get('businessDate')
+
+        event_id = 'EVT#' + event_name + '#' + event_status + '#' + str(uuid.uuid4())
         event_data['eventId'] = event_id
         event_data['type'] = 'event'
         event_data['timestamp'] = datetime.now(timezone.utc).isoformat()
+
+        # Retrieve existing events for the same name, status, and business date
+        existing_event_data = self.db_helper.get_event_by_name_status_date(event_name, event_status, business_date).get(
+            'data')
 
         result = self.db_helper.insert_event(event_data)
 
@@ -268,29 +277,96 @@ class EventServices:
             return event_id
         else:
             # Create event outcome
-            self.insert_event_outcome(event_data)
+            self.insert_event_outcome(event_data, existing_event_data)
             return event_id
 
-
-    def insert_event_outcome(self, event_data):
+    def insert_event_outcome(self, event_data, existing_event_data):
         business_date = event_data['businessDate']
         event_name = event_data['eventName']
         event_status = event_data['eventStatus']
         event_time = datetime.fromisoformat(event_data['eventTime'])
+        previous_events = []
+        expectations = []
+        previous_outcomes = []
+        expectation = None
+        sla = None
+        slo = None
+        sequence_number = 0
 
-        exp_prefix = str(f'EXP#{event_name}#{event_status}')
-
-        # Get expectation for the event using the composite key
-        event_result = self.db_helper.get_event_by_starting_prefix(exp_prefix, business_date)
 
 
-        items = event_result['data']
+        # Separate events by type: expectations, events, and outcomes
+        for existing_event in existing_event_data:
+            if existing_event['type'] == 'expectation':
+                expectations.append(existing_event)
+
+            elif existing_event['type'] == 'event':
+                previous_events.append(existing_event)
+
+            else:
+                continue
+
+        # If there are existing expectations, proceed to find the appropriate expectation, SLA, and SLO
+        if len(expectations) > 0:
+            # Get the metadata for the event, which includes SLAs and SLOs
+            metadata_response = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
+            event_metadata = metadata_response['data']
+
+            if event_status == 'STARTED':
+                # Calculate the current event count for the day, considering only 'STARTED' events
+                current_daily_event_count = len(previous_events)
+
+                if current_daily_event_count >= 1:
+                    # Check if there are ERROR events
+                    error_event_data = self.db_helper.get_event_by_name_status_date(event_name, 'ERROR',
+                                                                                    business_date).get('data', [])
+
+                    if len(error_event_data) > 0:
+                        # Subtract the count of ERROR events from the current_daily_event_count
+                        error_event_count = len(error_event_data)
+                        current_daily_event_count -= error_event_count
+
+            elif event_status == 'SUCCESS':
+                # Use the count of previous outcomes to determine the sequence
+                current_daily_event_count = len(previous_events)
+            else:
+                return None
+
+            # Retrieve the appropriate daily occurrence from the event_metadata based on the sequence number
+            sequence_number = current_daily_event_count + 1
+            matching_occurrence = next(
+                (occurrence for occurrence in event_metadata.get('daily_occurrences') if
+                 occurrence.get('sequence') == sequence_number),
+                None
+            )
+
+            # Set expectation, SLA, and SLO based on the retrieved values from the matching occurrence
+            if matching_occurrence:
+                sla = matching_occurrence.get('sla', None)
+                slo = matching_occurrence.get('slo', None)
+
+            # Get the correct expectation to match the event occurrence
+            expectation = next(
+                (expectation for expectation in expectations if expectation.get('sequence') == sequence_number), None)
+
+        else:
+            # If no expectations are found, set expectation, SLA, and SLO to None
+            expectation = None
+            sla = None
+            slo = None
+
+        # Determine the outcome based on the business date, event name, event status, event time, and the matched expectation, SLA, and SLO
+        self.determine_outcome(business_date, event_name, event_status, sequence_number, event_time, expectation, slo, sla)
+
+
+    def determine_outcome(self, business_date, event_name, event_status, sequence_number, event_time, expectation, slo, sla):
+
         slo_time = None
         sla_time = None
         slo_delta = None
         sla_delta = None
 
-        if not items:
+        if expectation == None:
 
             self.logger.info(f'No expectation found for {event_name} with status {event_status} on {business_date}')
             expected_time = None
@@ -299,12 +375,6 @@ class EventServices:
 
         else:
 
-            # Get Metadata for the event using the composite key - on must be there is an expectaion is there
-            metadata_response = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
-            event_metadata = metadata_response['data']
-
-            # Assuming there is only one expectation per event_name, event_status, and business_date
-            expectation = items[0]
             expected_time = datetime.fromisoformat(expectation['expectedArrival'])
             if expected_time.tzinfo is None:
                 expected_time = expected_time.replace(tzinfo=timezone.utc)  # Assuming UTC if not specified
@@ -312,17 +382,17 @@ class EventServices:
             # how long after the expectation did the event arrive
             delta = event_time - expected_time
 
-            if event_metadata:
+            if slo and sla:
                 # Get SLA, SLO from metadata
-                if event_metadata.get('slo', {}).get('status') == 'active':
-                    slo_time_return = DateTimeUtils.t_plus_to_iso(business_date, event_metadata['slo']['time'])
+                if slo.get('status') == 'active':
+                    slo_time_return = DateTimeUtils.t_plus_to_iso(business_date, slo.get('time'))
                     slo_time = datetime.fromisoformat(slo_time_return)
                     if slo_time.tzinfo is None:
                         slo_time = slo_time.replace(tzinfo=timezone.utc)
                     slo_delta = slo_time - expected_time
 
-                if event_metadata.get('sla', {}).get('status') == 'active':
-                    sla_time_return = DateTimeUtils.t_plus_to_iso(business_date, event_metadata['sla']['time'])
+                if sla.get('status') == 'active':
+                    sla_time_return = DateTimeUtils.t_plus_to_iso(business_date, sla.get('time'))
                     sla_time = datetime.fromisoformat(sla_time_return)
                     if sla_time.tzinfo is None:
                         sla_time = sla_time.replace(tzinfo=timezone.utc)
@@ -341,10 +411,11 @@ class EventServices:
 
         outcome_data = {
             'type': 'outcome',
-            'eventId': 'OUT#' + event_data['eventName'] + '#' + event_data['eventStatus'] + '#' + str(uuid.uuid4()),
-            'eventName': event_data['eventName'],
-            'eventStatus': event_data['eventStatus'],
-            'businessDate': event_data['businessDate'],
+            'eventId': 'OUT#' + event_name + '#' + event_status + '#' + str(uuid.uuid4()),
+            'eventName': event_name,
+            'eventStatus': event_status,
+            'sequence': sequence_number,
+            'businessDate': business_date,
             'eventTime': event_time.isoformat(),
             'expectedTime': expected_time.isoformat() if expected_time else None,
             'sloTime': slo_time.isoformat() if slo_time else None,
@@ -353,11 +424,8 @@ class EventServices:
             'outcomeStatus': outcome_status,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
-
         self.db_helper.insert_event(outcome_data)
-
         self.logger.info(f'Inserted event outcome: {outcome_data["eventId"]}')
-
 
     def delete_expectations_for_business_date(self, business_date):
 
@@ -382,26 +450,33 @@ class EventServices:
             event_name = metadata['event_name']
             event_status = metadata['event_status']
 
+            # Check if 'daily_occurrences' exists and is a list
+            daily_occurrences = metadata.get('daily_occurrences', [])
 
-            # Handle expectation
-            expectation = metadata.get('expectation', {})
-            if expectation['status'] == 'active':
-                self.create_expectation_record(business_date, event_name, event_status, expectation, 'expectation','EXP')
+            # Iterate through each occurrence in daily_occurrences
+            for occurrence in daily_occurrences:
+                # Handle expectation
+                sequence = occurrence.get('sequence')
 
-            # Handle SLO
-            slo = metadata.get('slo', {})
-            if slo.get('status') == 'active':
-                self.create_expectation_record(business_date, event_name, event_status, slo, 'slo','SLO')
+                expectation = occurrence.get('expectation', {})
+                if expectation.get('status') == 'active':
+                    self.create_expectation_record(business_date, event_name, event_status, sequence, expectation, 'expectation',
+                                                   'EXP')
 
-            # Handle SLA
-            sla = metadata.get('sla', {})
-            if sla.get('status') == 'active':
-                self.create_expectation_record(business_date, event_name, event_status, sla, 'sla', 'SLA')
+                # Handle SLO
+                slo = occurrence.get('slo', {})
+                if slo.get('status') == 'active':
+                    self.create_expectation_record(business_date, event_name, event_status, sequence, slo, 'slo', 'SLO')
+
+                # Handle SLA
+                sla = occurrence.get('sla', {})
+                if sla.get('status') == 'active':
+                    self.create_expectation_record(business_date, event_name, event_status, sequence, sla, 'sla', 'SLA')
 
         self.logger.info(f'Created Expectations for {business_date}')
         return True
 
-    def create_expectation_record(self, business_date, event_name, event_status, time_metadata,
+    def create_expectation_record(self, business_date, event_name, event_status, sequence, time_metadata,
                                   record_type, prefix):
         time_delay = time_metadata['time']
 
@@ -427,6 +502,7 @@ class EventServices:
             'eventId': expectation_id,
             'eventName': event_name,
             'eventStatus': event_status,
+            'sequence': sequence,
             'businessDate': business_date,
             'expectedArrival': expected_datetime.isoformat(),
             'timestamp': datetime.now(timezone.utc).isoformat()
@@ -434,33 +510,125 @@ class EventServices:
 
         self.db_helper.insert_event(expectation_data)
 
-    def update_expected_times(self, event_names_statuses=None):
+    def update_expected_times(self):
         events = self.scan_events_last_month()
 
         if not events:
             return None
 
-        if event_names_statuses is None:
-            event_names_statuses = []
-
+        # Group events by their event_name and event_status
         grouped_events = {}
         for event in events:
-            if event['type'] == 'event':
+            if event['type'] == 'event' and event['eventStatus'] != 'ERROR':
                 key = (event['eventName'], event['eventStatus'])
-                if not event_names_statuses or key in event_names_statuses:
-                    if key not in grouped_events:
-                        grouped_events[key] = []
-                    grouped_events[key].append(event)
+                if key not in grouped_events:
+                    grouped_events[key] = []
+                grouped_events[key].append(event)
 
+        # Calculate the expected time for each intraday event
         for (event_name, event_status), group in grouped_events.items():
             try:
-                avg_time_elapsed = self.calculate_expected_time(group)
-                self.logger.info(f'Storing {event_name}#{event_status} for time after T +: {avg_time_elapsed}')
-                if avg_time_elapsed:
-                    expectation_time = DateTimeUtils.convert_avg_time_to_t_format(avg_time_elapsed)
-                    self.db_helper.update_metadata_with_expectation(event_name, event_status, expectation_time)
+                intraday_groups = self.group_events_by_intraday_order(group)
+                num_of_days = len(set(event['businessDate'] for event in group))
+                num_of_events_per_day = round(sum(len(events) for events in intraday_groups.values()) / num_of_days)
+                statistics = []
+
+
+                for intraday_order in range(1, num_of_events_per_day + 1):
+                    if intraday_order in intraday_groups:
+                        intraday_events = intraday_groups[intraday_order]
+                        avg_time_elapsed = self.calculate_expected_time(intraday_events)
+                        standard_deviation = self.calculate_standard_deviation(intraday_events, avg_time_elapsed)
+                        monthly_growth = self.calculate_monthly_growth(intraday_events)
+
+                        event_occurrence = {
+                            'sequence': intraday_order,
+                            'no_events_in_sequence': len(intraday_events),
+                            'average_time_elapsed': avg_time_elapsed,
+                            'standard_deviation': standard_deviation,
+                            'monthly_growth': monthly_growth
+                        }
+
+                        statistics.append(event_occurrence)
+
+
+                if len(statistics) > 0:
+                    self.db_helper.update_metadata_with_statistics(event_name, event_status, num_of_events_per_day,
+                                                                     statistics)
+
             except ValueError as e:
                 self.logger.error(f'Failed to update expected times for {event_name}#{event_status}: {e}')
+
+        return {'success': True, 'message': "Created Expectations for all events"}
+
+    def calculate_standard_deviation(self, events, avg_time_elapsed):
+        times_in_seconds = []
+        utc = pytz.UTC
+
+        for event in events:
+            event_time = datetime.fromisoformat(event['eventTime']).astimezone(utc)
+            business_date_utc = datetime.strptime(event['businessDate'], "%Y-%m-%d").replace(tzinfo=utc)
+            time_difference = (event_time - business_date_utc).total_seconds()
+            times_in_seconds.append(time_difference)
+
+        # Calculate the standard deviation of the times
+        if len(times_in_seconds) > 1:
+            stdev = statistics.stdev(times_in_seconds)
+        else:
+            stdev = 0  # If there's only one event, standard deviation is 0
+
+        return stdev
+
+    def calculate_monthly_growth(self, events):
+        # Group events by week
+        events_by_week = {}
+        utc = pytz.UTC
+
+        for event in events:
+            event_time = datetime.fromisoformat(event['eventTime']).astimezone(utc)
+            week_start = event_time - timedelta(days=event_time.weekday())
+            week_start_str = week_start.strftime('%Y-%m-%d')
+
+            if week_start_str not in events_by_week:
+                events_by_week[week_start_str] = []
+            events_by_week[week_start_str].append(event)
+
+        # Calculate the number of events per week
+        event_counts = [len(events) for week, events in sorted(events_by_week.items())]
+
+        if len(event_counts) > 1:
+            # Calculate percentage growth from first week to last week
+            initial_count = event_counts[0]
+            final_count = event_counts[-1]
+
+            if initial_count > 0:
+                growth_percentage = ((final_count - initial_count) / initial_count) * 100
+            else:
+                growth_percentage = 0  # No growth if the initial count was 0
+        else:
+            growth_percentage = 0  # No growth if there was only one week
+
+        return growth_percentage
+
+    def group_events_by_intraday_order(self, events):
+        intraday_groups = {}
+        event_dates = {}
+
+        for event in events:
+            date_key = event['businessDate']
+            if date_key not in event_dates:
+                event_dates[date_key] = []
+            event_dates[date_key].append(event)
+
+        for date_key, day_events in event_dates.items():
+            day_events.sort(key=lambda x: x['eventTime'])
+            for idx, event in enumerate(day_events):
+                intraday_order = idx + 1
+                if intraday_order not in intraday_groups:
+                    intraday_groups[intraday_order] = []
+                intraday_groups[intraday_order].append(event)
+
+        return intraday_groups
 
     def scan_events_last_month(self):
         today = datetime.now()
@@ -499,9 +667,6 @@ class EventServices:
         else:
             avg_seconds = int(mean)
 
-        if debug:
-            self.logger.info(f"Average time in seconds after filtering: {avg_seconds}")
-
         avg_time_delta = timedelta(seconds=avg_seconds)
 
         # Calculate days, hours, minutes, and seconds from the avg_time_delta
@@ -524,35 +689,47 @@ class EventServices:
         # Return the latest metrics as a list
         return response['data']
 
-    def get_process_stats_list(self):
+    def get_process_stats_list(self, business_date):
+
         # Perform a scan to get all items
-        response = self.db_helper.get_process_stats_list()
+        response = self.db_helper.get_process_stats_list(business_date)
 
         # Return the latest metrics as a list
         return response['data']
 
     def get_process_by_name(self, event_name):
-        # Perform a scan to get all items
+        # Perform a scan to get all items related to the event name
         response = self.db_helper.get_process_by_name(event_name)
 
         if not response['success']:
             self.logger.error(f"Error retrieving process for event name: {event_name}")
-            return {'success': False, 'error': f"Error retrieving process for event name: {event_name}"}
+            return []
 
-        process = response['data']
-
-        dependencies = process.get('dependencies', [])
-
-        # Iterate through the dependency list to get the list of processes
+        processes = response['data']
         process_list = []
+        dependency_name_list = []
 
-        process_list.append(process)
-        for dependency_name in dependencies:
-            dependency_response = self.db_helper.get_process_by_name(dependency_name)
-            if dependency_response['success']:
-                process_list.append(dependency_response['data'])
-            else:
-                self.logger.error(f"Error retrieving process for dependency: {dependency_name}")
+        # Iterate through the processes to get their dependencies
+        for process in processes:
+            dependencies = process.get('dependencies', [])
+
+            # Add the main process to the list
+            process_list.append(process)
+
+            # Add each dependency's process to the list
+            for dependency_name in dependencies:
+                if dependency_name not in dependency_name_list:  # Avoid adding duplicate dependencies
+                    dependency_response = self.db_helper.get_process_by_name(dependency_name)
+                    if dependency_response['success']:
+                        dependency_processes = dependency_response['data']
+                        # If the dependency itself has multiple processes, add them all
+                        if isinstance(dependency_processes, list):
+                            process_list.extend(dependency_processes)
+                        else:
+                            process_list.append(dependency_processes)
+                        dependency_name_list.append(dependency_name)
+                    else:
+                        self.logger.error(f"Error retrieving process for dependency: {dependency_name}")
 
         return process_list
 
@@ -592,6 +769,7 @@ class EventServices:
 
         return response['success']
 
+
     def add_slo_sla_to_metadata(self, events, slo_threshold, sla_threshold):
         if not events:
             return {'success': False, 'message': 'No events provided'}
@@ -604,28 +782,102 @@ class EventServices:
             event_status = event['event_status']
 
             # Retrieve the event metadata
-            event_metadata = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
+            event_metadata_response = self.db_helper.get_event_metadata_by_name_and_status(event_name, event_status)
+            event_metadata = event_metadata_response.get('data')
 
             if not event_metadata:
                 continue
 
-            # Get the expectation time
-            expectation_time_t_format = event_metadata['data']['expectation']['time']
+            # Iterate over each daily occurrence to update SLO and SLA times
+            for occurrence in event_metadata.get('daily_occurrences', []):
+                # Get the expectation time in T format
+                expectation_time_t_format = occurrence['expectation']['time']
 
-            # Update the SLO and SLA times
-            slo_time = DateTimeUtils.add_time_to_t_format(expectation_time_t_format, slo_threshold)
-            sla_time = DateTimeUtils.add_time_to_t_format(expectation_time_t_format, sla_threshold)
+                # Calculate the new SLO and SLA times based on the thresholds
+                slo_time = DateTimeUtils.add_time_to_t_format(expectation_time_t_format, slo_threshold)
+                sla_time = DateTimeUtils.add_time_to_t_format(expectation_time_t_format, sla_threshold)
 
-            new_event_metadata = {
-                'event_name': event_name,
-                'event_status': event_status,
-                'slo_time': slo_time,
-                'sla_time': sla_time,
-                'origin': 'auto',
-                'status': 'active'
-            }
+                # Update the occurrence with new SLO and SLA times
+                occurrence['slo'] = {
+                    'origin': 'auto',
+                    'status': 'active',
+                    'time': slo_time,
+                    'updated_at': datetime.utcnow().isoformat()
+                }
 
-            # Use this method to update the metadata
-            self.db_helper.save_event_metadata_slo_sla(new_event_metadata)
+                occurrence['sla'] = {
+                    'origin': 'auto',
+                    'status': 'active',
+                    'time': sla_time,
+                    'updated_at': datetime.utcnow().isoformat()
+                }
+
+            # Save the updated event metadata back to the database
+            self.db_helper.save_event_metadata_slo_sla(event_metadata)
 
         return {'success': True, 'message': 'SLO and SLA times updated for the provided events'}
+
+    from datetime import datetime
+
+    def create_daily_occurrences_from_statistics(self, params):
+        # Get all the event_metadata
+        response = self.db_helper.get_all_event_metadata()
+
+        event_metadata_list = response['data']
+
+        for event_metadata in event_metadata_list:
+            # Check that the event_metadata has statistics - if not move on to the next one
+            if 'statistics' not in event_metadata or not event_metadata['statistics']:
+                continue
+
+            # Initialize the daily_occurrences field if not already present
+            if 'daily_occurrences' not in event_metadata or not isinstance(event_metadata['daily_occurrences'], list):
+                event_metadata['daily_occurrences'] = []
+
+            # Iterate through each entity in the event_metadata.statistics
+            for statistic in event_metadata['statistics']:
+                sequence = statistic['sequence']
+
+                # Check if there is a corresponding entry in the daily_occurrences
+                existing_occurrence = next(
+                    (occurrence for occurrence in event_metadata['daily_occurrences'] if
+                     occurrence['sequence'] == sequence), None)
+
+                if existing_occurrence:
+                    # If there is already one then move on to the next
+                    continue
+
+                expected_time = DateTimeUtils.convert_avg_time_to_t_format(statistic['average_time_elapsed'])
+
+                # If there is not one then create an occurrence entity with the initial structure
+                occurrence = {
+                    "sequence": sequence,
+                    "expectation": {
+                        "origin": "initial",
+                        "status": "active",
+                        "time": expected_time,  # Based on the statistics
+                        "updated_at": datetime.utcnow().isoformat()
+                    },
+                    "slo": {
+                        "origin": "initial",
+                        "status": "inactive",
+                        "time": "undefined",
+                        "updated_at": datetime.utcnow().isoformat()
+                    },
+                    "sla": {
+                        "origin": "initial",
+                        "status": "inactive",
+                        "time": "undefined",
+                        "updated_at": datetime.utcnow().isoformat()
+                    }
+                }
+
+                # Append the new occurrence entity to the daily_occurrences list
+                event_metadata['daily_occurrences'].append(occurrence)
+
+            # Update the event_metadata document with the new occurrences
+            self.db_helper.update_metadata_with_occurrences(event_metadata['event_name'],
+                                                            event_metadata['event_status'],
+                                                            event_metadata['daily_occurrences'])
+
+        return {'success': True, 'message': "Daily occurrences created or updated from statistics"}

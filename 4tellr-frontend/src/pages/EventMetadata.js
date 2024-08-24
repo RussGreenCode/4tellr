@@ -1,6 +1,5 @@
-// src/pages/EventMetadata.js
 import React, { useState, useEffect, useMemo } from 'react';
-import { Box, Typography, TextField, Button, Autocomplete, Checkbox, ListItemText, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Typography, TextField, Button, Autocomplete, Tabs, Tab } from '@mui/material';
 import axios from 'axios';
 import MiniGanttChartD3 from '../components/MiniGanttChart';
 import ScatterPlotComponent from "../components/ScatterPlotComponent";
@@ -13,6 +12,7 @@ const EventMetadata = () => {
   const [metadata, setMetadata] = useState({});
   const [events, setEvents] = useState([]);
   const [processes, setProcesses] = useState([]);
+  const [selectedOccurrenceIndex, setSelectedOccurrenceIndex] = useState(0);
   const [expectationTime, setExpectationTime] = useState('');
   const [sloTime, setSloTime] = useState('');
   const [slaTime, setSlaTime] = useState('');
@@ -34,12 +34,16 @@ const EventMetadata = () => {
   }, [selectedMetadataId]);
 
   useEffect(() => {
-    if (metadata !== {}) {
+    if (metadata.daily_occurrences && metadata.daily_occurrences.length > 0) {
+      const selectedOccurrence = metadata.daily_occurrences[selectedOccurrenceIndex];
+      setExpectationTime(selectedOccurrence.expectation.time);
+      setSloTime(selectedOccurrence.slo.time);
+      setSlaTime(selectedOccurrence.sla.time);
       fetchEventStats();
       fetchProcesses();
       fetchAllSuccessEvents();
     }
-  }, [metadata]);
+  }, [metadata, selectedOccurrenceIndex]);
 
   const fetchEventMetadataList = async () => {
     try {
@@ -62,9 +66,10 @@ const EventMetadata = () => {
         setMetadata(response.data);
         setEventName(response.data.event_name);
         setEventStatus(response.data.event_status);
-        setExpectationTime(response.data.expectation.time);
-        setSloTime(response.data.slo.time);
-        setSlaTime(response.data.sla.time);
+        // Initialize occurrence-related states
+        if (response.data.daily_occurrences && response.data.daily_occurrences.length > 0) {
+          setSelectedOccurrenceIndex(0); // Select the first occurrence by default
+        }
         setDependencies(response.data.dependencies || []);
       } else {
         console.error('No metadata found for the selected ID ', selectedMetadataId);
@@ -120,15 +125,26 @@ const EventMetadata = () => {
 
   const handleSave = async () => {
     try {
+      const updatedOccurrences = metadata.daily_occurrences.map((occurrence, index) => {
+        if (index === selectedOccurrenceIndex) {
+          return {
+            ...occurrence,
+            expectation: { ...occurrence.expectation, time: expectationTime },
+            slo: { ...occurrence.slo, time: sloTime },
+            sla: { ...occurrence.sla, time: slaTime }
+          };
+        }
+        return occurrence;
+      });
+
       const response = await axios.put(`http://127.0.0.1:5000/api/event/event_metadata`, {
         id: selectedMetadataId,
         event_name: eventName,
         event_status: eventStatus,
-        expectation_time: expectationTime,
-        slo_time: sloTime,
-        sla_time: slaTime,
+        daily_occurrences: updatedOccurrences,
         dependencies,
       });
+
       console.log('Save response:', response.data);
     } catch (error) {
       console.error('Error saving metadata:', error);
@@ -137,6 +153,10 @@ const EventMetadata = () => {
 
   const handleMetadataSelect = (event, value) => {
     setSelectedMetadataId(value ? value._id : '');
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedOccurrenceIndex(newValue);
   };
 
   const transformMonthlyEvents = (events) => {
@@ -194,26 +214,35 @@ const EventMetadata = () => {
           </Box>
           <Box mt={3}>
             <Typography variant="h6">Edit Event Metadata</Typography>
-            <TeePlusTimeInput
-              label="Expectation Time"
-              value={expectationTime}
-              onChange={setExpectationTime}
-            />
-            <TimeInput
-              label="SLO Time"
-              baseValue={expectationTime}
-              value={sloTime}
-              onChange={setSloTime}
-            />
-            <TimeInput
-              label="SLA Time"
-              baseValue={expectationTime}
-              value={slaTime}
-              onChange={setSlaTime}
-            />
-            <Button variant="contained" color="primary" onClick={handleSave}>
-              Save
-            </Button>
+            <Tabs value={selectedOccurrenceIndex} onChange={handleTabChange} aria-label="occurrence tabs">
+              {metadata.daily_occurrences && metadata.daily_occurrences.map((occurrence, index) => (
+                <Tab key={index} label={`Occurrence ${index + 1}`} />
+              ))}
+            </Tabs>
+            {metadata.daily_occurrences && metadata.daily_occurrences.length > 0 && (
+              <Box mt={2}>
+                <TeePlusTimeInput
+                  label="Expectation Time"
+                  value={expectationTime}
+                  onChange={setExpectationTime}
+                />
+                <TimeInput
+                  label="SLO Time"
+                  baseValue={expectationTime}
+                  value={sloTime}
+                  onChange={setSloTime}
+                />
+                <TimeInput
+                  label="SLA Time"
+                  baseValue={expectationTime}
+                  value={slaTime}
+                  onChange={setSlaTime}
+                />
+                <Button variant="contained" color="primary" onClick={handleSave}>
+                  Save
+                </Button>
+              </Box>
+            )}
           </Box>
         </Box>
       )}

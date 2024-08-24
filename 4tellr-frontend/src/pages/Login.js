@@ -1,15 +1,20 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { Box, Button, TextField, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {EventsContext} from "../contexts/EventsContext";
 import axios from "axios";
 
-const Login = ({ onLogin }) => {
-  const {setCurrentUser, fetchUser} = useContext(EventsContext);
+const Login = ({ onLogin, onLogout}) => {
+  const {setCurrentUser, fetchUser, resetState} = useContext(EventsContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const navigate = useNavigate(); // Get the navigate function from react-router-dom
+
+  useEffect(() => {
+    onLogout();
+    resetState();
+  }, []);
 
   const handleLogin = async () => {
     try {

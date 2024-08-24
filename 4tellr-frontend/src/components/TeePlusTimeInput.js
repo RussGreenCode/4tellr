@@ -12,11 +12,12 @@ const TeePlusTimeInput = ({ label, value, onChange, fixedWidth = 600 }) => {
 
   useEffect(() => {
     if (value) {
-      const initialDate = new Date(value);
-      setDays(Math.floor((initialDate - new Date(initialDate.getUTCFullYear(), initialDate.getUTCMonth(), initialDate.getUTCDate())) / (24 * 60 * 60 * 1000)) + 1);
-      setHours(initialDate.getUTCHours());
-      setMinutes(initialDate.getUTCMinutes());
-      setSeconds(initialDate.getUTCSeconds());
+      const {days, hours, minutes, seconds} = DateTimeUtils.parseTPlusTime(value)
+
+      setDays(days);
+      setHours(hours);
+      setMinutes(minutes);
+      setSeconds(seconds);
     }
   }, [value]);
 

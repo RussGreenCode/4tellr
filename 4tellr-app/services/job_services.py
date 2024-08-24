@@ -10,47 +10,74 @@ class JobServices:
         self.event_helper = EventServices(db_helper, logger)
 
 
+    def calculate_processes_for_average_outcomes(self):
 
-    def calculate_job_length_statistics(self, business_date):
+        outcomes = self.db_helper.get_last_months_average_outcomes()['data']
 
-        started_events = self.db_helper.query_outcomes_by_date_and_status(business_date, 'STARTED')['data']
-        success_events = self.db_helper.query_outcomes_by_date_and_status(business_date, 'SUCCESS')['data']
+        self.calculate_processes(None, outcomes, 'monthly_average')
+
+    def calculate_processes_for_business_date(self, business_date):
+
+        if business_date:
+            outcomes = self.db_helper.query_outcomes_by_date(business_date)['data']
+
+        self.calculate_processes(business_date, outcomes, 'daily')
+
+    def calculate_processes(self, business_date, outcomes, frequency):
         metadata = self.db_helper.get_all_event_metadata()['data']
 
-        job_lengths = []
-        for started_event in started_events:
-            event_name = started_event['eventName']
-            start_time = datetime.fromisoformat(started_event['eventTime'])
-            expected_start_time = datetime.fromisoformat(started_event['expectedTime'])
+        processes = []
 
-            success_event = next((e for e in success_events if e['eventName'] == event_name), None)
-            event_metadata = next(
-                (e for e in metadata if e['event_name'] == event_name and e['event_status'] == 'STARTED'), None)
+        # Group outcomes by event_name and sequence
+        grouped_outcomes = {}
+        for outcome in outcomes:
+            key = (outcome['eventName'], outcome['sequence'])
+            if key not in grouped_outcomes:
+                grouped_outcomes[key] = []
+            grouped_outcomes[key].append(outcome)
 
-            if success_event:
+        # Process each group of outcomes
+        for (event_name, sequence), events in grouped_outcomes.items():
+            started_event = next((e for e in events if e['eventStatus'] == 'STARTED'), None)
+            success_event = next((e for e in events if e['eventStatus'] == 'SUCCESS'), None)
 
+            if started_event and success_event:
+                start_time = datetime.fromisoformat(started_event['eventTime'])
+                expected_start_time = datetime.fromisoformat(started_event['expectedTime'])
                 end_time = datetime.fromisoformat(success_event['eventTime'])
+                expected_end_time = datetime.fromisoformat(success_event['expectedTime'])
                 duration_seconds = (end_time - start_time).total_seconds()
                 outcome = success_event['outcomeStatus']
-                expected_end_time = datetime.fromisoformat(success_event['expectedTime'])
-                job_lengths.append({
+
+                # Retrieve corresponding metadata - only started events have dependencies
+                started_event_metadata = next((e for e in metadata if e['event_name'] == event_name and e['event_status'] == 'STARTED'), None)
+
+                processes.append({
                     'event_name': event_name,
+                    'sequence': sequence,
                     'business_date': business_date,
+                    'frequency': frequency,
                     'start_time': start_time,
                     'expected_start_time': expected_start_time,
                     'end_time': end_time,
                     'expected_end_time': expected_end_time,
                     'duration_seconds': duration_seconds,
                     'outcome': outcome,
-                    'dependencies': event_metadata.get('dependencies', {})
+                    'dependencies': started_event_metadata.get('dependencies', {}) if started_event_metadata else {}
                 })
 
-        if job_lengths:
-            result = self.db_helper.save_job_statistics(job_lengths)
+        # Save job statistics if there are any processes to save
+        if processes:
+            self.db_helper.save_processes(processes)
 
     def delete_processes_for_date(self, business_date):
 
         result = self.db_helper.delete_processes_for_date(business_date)
+        return result
+
+    def delete_average_processes(self):
+
+        result = self.db_helper.delete_average_processes()
         return result
 
     def create_slo_sla_for_metadata_without_them(self, slo_threshold, sla_threshold):
@@ -64,8 +91,19 @@ class JobServices:
 
             # Iterate through the metadata
             for metadata in metadata_list:
-                # Check if both SLO and SLA times are missing
-                if (metadata['slo']['time'] == 'undefined') and (metadata['sla']['time'] == 'undefined'):
+                # Assume initially that SLO and SLA times are defined
+                slo_defined = True
+                sla_defined = True
+
+                # Check each daily occurrence for undefined SLO and SLA times
+                for occurrence in metadata.get('daily_occurrences', []):
+                    if occurrence['slo']['time'] == 'undefined':
+                        slo_defined = False
+                    if occurrence['sla']['time'] == 'undefined':
+                        sla_defined = False
+
+                # If either SLO or SLA is undefined in any occurrence, add to the list
+                if not slo_defined or not sla_defined:
                     events_without_slo_sla.append({
                         'event_name': metadata['event_name'],
                         'event_status': metadata['event_status']
@@ -78,6 +116,7 @@ class JobServices:
         except Exception as e:
             self.logger.error(f"Error in create_slo_sla_for_metadata_without_them: {e}")
             return {'success': False, 'error': str(e)}
+
 
 
 

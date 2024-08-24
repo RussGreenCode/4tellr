@@ -78,7 +78,7 @@ function App() {
                 </Grid>
               </>
             ) : (
-              <Login onLogin={handleLogin} />
+              <Login onLogin={handleLogin} onLogout={handleLogout} />
             )}
           </Box>
         </Router>

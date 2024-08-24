@@ -1,5 +1,15 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Ignore all __pycache__ directories
+__pycache__/
+
+# Other files and directories to ignore
+*.pyc
+*.pyo
+*.pyd
+
+
+
 # dependencies
 4tellr-frontend/node_modules
 4tellr-frontend/.pnp
@@ -14,22 +24,7 @@ system-sim/.idea
 system-sim/.venv
 system-sim/pyenv.cfg
 system-sim/.gitignore
-4tellr-app/__pycache__/
-system-sim/__pycache__/
-system-sim/api_helper/__pycache__/
 .gitignore.swp
-4tellr-app/helpers/__pycache__/
-4tellr-app/app/__pycache__/
-4tellr-app/app/endpoints/__pycache__/
-BankingSimulator/src/__pycache__/
-BankingSimulator/src/helpers/__pycache__/
-4tellr-app/utils/__pycache__/
-4tellr-app/utils/__pycache__/
-services/__pycache__/
-4tellr-app/services/__pycache__/
-4tellr-app/app/api/__pycache__/
-4tellr-app/app/api/__pycache__/
-
 
 
 # testing

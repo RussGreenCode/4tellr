@@ -1,0 +1,68 @@
+{
+  "application": "MarketRisk",
+  "processes": [
+    {
+      "process_id": "MarketRisk_VaR_Calculation_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00,T+1 12:00,T+1 16:00",
+      "processing_time": "15 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_Stress_Testing_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 09:00,T+1 12:00,T+1 15:00",
+      "processing_time": "30 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_Limit_Monitoring_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:30,T+1 11:00,T+1 12:30,T+1 15:00",
+      "processing_time": "10 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_PnL_Attribution_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 10:00,T+1 13:00,T+1 16:30",
+      "processing_time": "20 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_Position_Reconciliation_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 09:30,T+1 12:30,T+1 16:00",
+      "processing_time": "25 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_Market_Data_Validation_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 09:45,T+1 13:00,T+1 16:00",
+      "processing_time": "15 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_Liquidity_Risk_Monitoring_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 09:30,T+1 12:30,T+1 15:30",
+      "processing_time": "20 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_Trade_Surveillance_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00,T+1 11:00,T+1 15:00,T+1 18:00",
+      "processing_time": "30 minutes",
+      "dependencies": []
+    },
+    {
+      "process_id": "MarketRisk_Collateral_Management_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 07:00,T+1 12:00,T+1 18:00",
+      "processing_time": "25 minutes",
+      "dependencies": []
+    }
+  ]
+}

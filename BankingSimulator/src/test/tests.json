@@ -86,6 +86,13 @@
       "dependencies": [
         "Unscheduled_Multiple_Dependencies"
       ]
+    },
+    {
+      "process_id": "Multiple_Daily_Jobs_Daily",
+      "type": "PROCESS",
+      "schedule_time": "T+1 08:00,T+1 12:00,T+1 16:00",
+      "processing_time": "15 minutes",
+      "dependencies": []
     }
   ]
 }

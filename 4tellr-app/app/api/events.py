@@ -153,9 +153,10 @@ async def event_metadata_list(event_helper: EventServices = Depends(get_event_he
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/api/process/get_process_statistics_list')
-async def get_process_stats_list(event_helper: EventServices = Depends(get_event_helper)):
+async def get_process_stats_list(business_date: str, event_helper: EventServices = Depends(get_event_helper)):
+
     try:
-        items = event_helper.get_process_stats_list()
+        items = event_helper.get_process_stats_list(business_date)
         return items
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -196,6 +197,16 @@ async def save_event_metadata_dependencies(data: dict, event_helper: EventServic
             raise HTTPException(status_code=400, detail=f'{field} is required')
     try:
         items = event_helper.update_metadata_with_dependencies(data)
+        return items
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post('/api/event/create_daily_occurrences')
+async def create_daily_occurrences_from_statistics(data: dict, event_helper: EventServices = Depends(get_event_helper)):
+
+    try:
+        items = event_helper.create_daily_occurrences_from_statistics(data)
         return items
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -89,6 +89,109 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.logger.error(f"Error querying events by date: {e}")
             return {'success': False, 'error': str(e)}
 
+    def query_outcomes_by_date(self, business_date):
+        try:
+            events = list(self.event_collection.find({
+                'businessDate': business_date,
+                'type': 'outcome',
+            }))
+            return {'success': True, 'data': self._serialize_id(events)}
+        except Exception as e:
+            self.logger.error(f"Error querying events by date: {e}")
+            return {'success': False, 'error': str(e)}
+
+    from datetime import datetime, timedelta
+
+    def get_last_months_average_outcomes(self):
+        try:
+            today = datetime.now()
+            one_month_ago = today - timedelta(days=30)
+
+            # Query outcomes within the last month
+            outcomes = list(self.event_collection.find({
+                'type': 'outcome',
+                'eventTime': {'$gte': one_month_ago.isoformat(), '$lt': today.isoformat()}
+            }))
+
+            # Group outcomes by eventName, eventStatus, and sequence
+            grouped_outcomes = {}
+            for outcome in outcomes:
+                key = (outcome['eventName'], outcome['eventStatus'], outcome.get('sequence'))
+                if key not in grouped_outcomes:
+                    grouped_outcomes[key] = []
+                grouped_outcomes[key].append(outcome)
+
+            # Calculate average outcomes for each group
+            averaged_outcomes = []
+            for (event_name, event_status, sequence), events in grouped_outcomes.items():
+
+                # Initialize total deltas
+                total_event_time_delta = 0
+                total_expected_time_delta = 0
+                total_slo_time_delta = 0
+                total_sla_time_delta = 0
+                count = len(events)
+
+                for e in events:
+
+                    # Convert businessDate to a datetime object
+                    business_date = datetime.fromisoformat(e['businessDate'])
+                    # Ensure business_date is offset-aware if event times are offset-aware
+                    if datetime.fromisoformat(e['eventTime']).tzinfo:
+                        business_date = business_date.replace(tzinfo=datetime.fromisoformat(e['eventTime']).tzinfo)
+
+                    event_time_delta = datetime.fromisoformat(e['eventTime']) - business_date
+                    expected_time_delta = datetime.fromisoformat(e['expectedTime']) - business_date
+                    slo_time_delta = (
+                                datetime.fromisoformat(e['sloTime']) - business_date) if 'sloTime' in e else timedelta(
+                        0)
+                    sla_time_delta = (
+                                datetime.fromisoformat(e['slaTime']) - business_date) if 'slaTime' in e else timedelta(
+                        0)
+
+                    total_event_time_delta += event_time_delta.total_seconds()
+                    total_expected_time_delta += expected_time_delta.total_seconds()
+                    total_slo_time_delta += slo_time_delta.total_seconds()
+                    total_sla_time_delta += sla_time_delta.total_seconds()
+
+                # Average the deltas
+                avg_event_time_delta = total_event_time_delta / count
+                avg_expected_time_delta = total_expected_time_delta / count
+                avg_slo_time_delta = total_slo_time_delta / count
+                avg_sla_time_delta = total_sla_time_delta / count
+
+                today_date = datetime.fromisoformat(datetime.today().date().isoformat())
+
+                # Add the average deltas back to the business date
+                avg_event_time = today_date + timedelta(seconds=avg_event_time_delta)
+                avg_expected_time = today_date + timedelta(seconds=avg_expected_time_delta)
+                avg_slo_time = today_date + timedelta(
+                    seconds=avg_slo_time_delta) if total_slo_time_delta > 0 else None
+                avg_sla_time = today_date + timedelta(
+                    seconds=avg_sla_time_delta) if total_sla_time_delta > 0 else None
+
+                # Assuming outcome status is the most common one in the group (ON_TIME, DELAYED, etc.)
+                outcome_statuses = [e['outcomeStatus'] for e in events]
+                avg_outcome_status = max(set(outcome_statuses), key=outcome_statuses.count)
+
+                averaged_outcomes.append({
+                    'eventName': event_name,
+                    'eventStatus': event_status,
+                    'sequence': sequence,
+                    'businessDate': today_date.date().isoformat(),  # Use today's date as a placeholder
+                    'eventTime': avg_event_time.isoformat(),
+                    'expectedTime': avg_expected_time.isoformat(),
+                    'sloTime': avg_slo_time.isoformat() if avg_slo_time else None,
+                    'slaTime': avg_sla_time.isoformat() if avg_sla_time else None,
+                    'delta': avg_event_time_delta,
+                    'outcomeStatus': avg_outcome_status
+                })
+
+            return {'success': True, 'data': self._serialize_id(averaged_outcomes)}
+        except Exception as e:
+            self.logger.error(f"Error calculating last month's average outcomes: {e}")
+            return {'success': False, 'error': str(e)}
+
     def scan_events_last_month(self):
         try:
             today = datetime.now()
@@ -156,6 +259,20 @@ class MongoDBHelper(DatabaseHelperInterface):
         except Exception as e:
             self.logger.error(f"Error retrieving events: {str(e)}")
             return {'success': False, 'error': str(e)}
+
+    def get_event_by_name_status_date(self, event_name, event_status, business_date):
+        try:
+            events = list(self.event_collection.find({
+                'businessDate': business_date,
+                'eventName': event_name,
+                'eventStatus': event_status
+            }))
+            self.logger.info(f"Retrieved {len(events)} events.")
+            return {'success': True, 'data': self._serialize_id(events)}
+        except Exception as e:
+            self.logger.error(f"Error retrieving events: {str(e)}")
+            return {'success': False, 'error': str(e)}
+
 
     def get_events_by_type_and_date(self, business_date):
         try:
@@ -366,47 +483,38 @@ class MongoDBHelper(DatabaseHelperInterface):
             self.logger.error(f"Error updating favourite alerts for user with email '{email}': {str(e)}")
             return {'success': False, 'error': str(e)}
 
-    def save_job_statistics(self, job_lengths):
+    def save_processes(self, processes):
 
         try:
-            self.process_stats_collection.insert_many(job_lengths)
-            self.logger.info(f"Saved '{len(job_lengths)}' stats successfully")
+            self.process_stats_collection.insert_many(processes)
+            self.logger.info(f"Saved '{len(processes)}' stats successfully")
             return {'success': True, 'message': 'Group saved successfully'}
         except Exception as e:
             self.logger.error(f"Error saving stats: {e}")
             return {'success': False, 'error': str(e)}
 
-    def get_process_stats_list(self):
+    def get_process_stats_list(self, business_date):
         try:
-            items = list(self.process_stats_collection.find({}, {
-                'event_name': 1,
-                'business_date': 1,
-                'start_time': 1,
-                'end_time': 1,
-                'expected_start_time': 1,
-                'expected_end_time': 1,
-                'duration_seconds': 1,
-                'outcome': 1,
-                'expected_time': 1
-            }))
+            # Query the database with a filter on business_date
+            items = list(self.process_stats_collection.find(
+                {'business_date': business_date}
+            ))
 
             # Convert ObjectId to string and datetime to ISO format
             for item in items:
                 item['_id'] = str(item['_id'])
-                item['start_time'] = item['start_time'].isoformat() if item['start_time'] else None
-                item['end_time'] = item['end_time'].isoformat() if item['end_time'] else None
-                item['expected_start_time'] = item['expected_start_time'].isoformat() if item[
-                    'expected_start_time'] else None
-                item['expected_end_time'] = item['expected_end_time'].isoformat() if item['expected_end_time'] else None
+                for time_field in ['start_time', 'end_time', 'expected_start_time', 'expected_end_time']:
+                    if item.get(time_field):
+                        item[time_field] = item[time_field].isoformat()
 
             return {'success': True, 'data': items}
         except Exception as e:
-            self.logger.error(f"Error getting latest process stats: {e}")
+            self.logger.error(f"Error getting process stats: {e}")
             return {'success': False, 'error': str(e)}
 
     def get_process_by_name(self, event_name):
         try:
-            process_statistics = self.process_stats_collection.find_one({'event_name': event_name})
+            process_statistics = list(self.process_stats_collection.find({'event_name': event_name, 'frequency': 'monthly_average'}))
             if process_statistics:
                 self.logger.info(f"Processes with name '{event_name}' retrieved successfully.")
                 return {'success': True, 'data': self._serialize_id(process_statistics)}
@@ -427,6 +535,19 @@ class MongoDBHelper(DatabaseHelperInterface):
             return {'success': True, 'message': f"Deleted {result.deleted_count} processes"}
         except Exception as e:
             self.logger.error(f"Error deleting processes for business date {business_date}: {e}")
+            return {'success': False, 'error': str(e)}
+
+
+    def delete_average_processes(self):
+        try:
+            # Perform the deletion
+            result = self.process_stats_collection.delete_many({'frequency': 'monthly_average'})
+
+            self.logger.info(
+                f"Deleted {result.deleted_count} average processes")
+            return {'success': True, 'message': f"Deleted {result.deleted_count} average processes"}
+        except Exception as e:
+            self.logger.error(f"Error deleting average processes: {e}")
             return {'success': False, 'error': str(e)}
 
     def create_event_metadata_from_events(self, business_date):
@@ -543,24 +664,12 @@ class MongoDBHelper(DatabaseHelperInterface):
 
         event_name = event_metadata.get('event_name')
         event_status = event_metadata.get('event_status')
-        slo_time = event_metadata.get('slo_time')
-        sla_time = event_metadata.get('sla_time')
-        current_time = datetime.now().isoformat()
-        origin = event_metadata.get('origin')
-        status = event_metadata.get('status')
 
 
         try:
             result = self.event_metadata_collection.update_one(
                 {'event_name': event_name, 'event_status': event_status},
-                {'$set': {'slo': {'origin': origin,
-                                  'status': status,
-                                  'time': slo_time,
-                                  'updated_at': current_time},
-                          'sla': {'origin': origin,
-                                  'status': status,
-                                  'time': sla_time,
-                                  'updated_at': current_time}}
+                {'$set': {'daily_occurrences': event_metadata.get('daily_occurrences')}
                  }
             )
             self.logger.info(f"Metadata with name: '{event_name}' added successfully.")
@@ -570,14 +679,49 @@ class MongoDBHelper(DatabaseHelperInterface):
             return {'success': False, 'error': str(e)}
 
 
-    def update_metadata_with_expectation(self, event_name, event_status, avg_time_elapsed):
+    def update_metadata_with_statistics(self, event_name, event_status, num_of_events_per_day, statistics):
         try:
             result = self.event_metadata_collection.update_one(
                 {'event_name': event_name, 'event_status': event_status},
-                {'$set': {'expectation': {'origin': 'auto', 'status': 'active', 'time': avg_time_elapsed}}}
+                {'$set': {
+                    'statistics': statistics,
+                    'num_of_events_per_day': num_of_events_per_day
+                }}
             )
-            self.logger.info(f"Event with name: '{event_name}' and status: '{event_status}' updated successfully.")
+
+            if result.matched_count == 0:
+                self.logger.warning(
+                    f"No record found for event_name: '{event_name}' and event_status: '{event_status}'. No update was performed.")
+                return {'success': False,
+                        'message': f"No record found for event_name: '{event_name}' and event_status: '{event_status}'"}
+
+            self.logger.info(
+                f"Event statistics with name: '{event_name}' and status: '{event_status}' updated successfully.")
             return {'success': True, 'message': 'Event Metadata saved successfully'}
+
+        except Exception as e:
+            self.logger.error(f"Error saving Metadata: {e}")
+            return {'success': False, 'error': str(e)}
+
+    def update_metadata_with_occurrences(self, event_name, event_status, occurrences):
+        try:
+            result = self.event_metadata_collection.update_one(
+                {'event_name': event_name, 'event_status': event_status},
+                {'$set': {
+                    'daily_occurrences': occurrences
+                }}
+            )
+
+            if result.matched_count == 0:
+                self.logger.warning(
+                    f"No record found for event_name: '{event_name}' and event_status: '{event_status}'. No update was performed.")
+                return {'success': False,
+                        'message': f"No record found for event_name: '{event_name}' and event_status: '{event_status}'"}
+
+            self.logger.info(
+                f"Event occurrences with name: '{event_name}' and status: '{event_status}' updated successfully.")
+            return {'success': True, 'message': 'Event Metadata saved successfully'}
+
         except Exception as e:
             self.logger.error(f"Error saving Metadata: {e}")
             return {'success': False, 'error': str(e)}

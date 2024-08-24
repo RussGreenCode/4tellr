@@ -72,6 +72,8 @@ function CalendarSummary() {
     }));
   };
 
+
+
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const startDay = getDay(startOfMonth(currentDate));
   const paddingDays = (startDay + 6) % 7; // Adjust for start of week on Monday

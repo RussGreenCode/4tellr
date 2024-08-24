@@ -1,32 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import { Box, Typography, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import {EventsContext} from "../contexts/EventsContext";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const ProcessStatistics = () => {
+  const { businessDate } = useContext(EventsContext);
   const [processes, setProcesses] = useState([]);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('duration_seconds');
 
   useEffect(() => {
-    fetchProcessStatistics();
-  }, []);
+    const fetchProcessStatistics = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:5000/api/process/get_process_statistics_list', {
+          params: { business_date: businessDate }
+        });
 
-  const fetchProcessStatistics = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:5000/api/process/get_process_statistics_list');
-      if (response.data) {
-        setProcesses(response.data);
-      } else {
-        console.error('Error fetching process statistics:', response.data.error);
+        if (response.data) {
+          setProcesses(response.data);
+        } else {
+          console.error('Error fetching process statistics:', response.data.error);
+        }
+      } catch (error) {
+        console.error('Error fetching process statistics:', error);
       }
-    } catch (error) {
-      console.error('Error fetching process statistics:', error);
-    }
-  };
+    };
+
+    fetchProcessStatistics();
+  }, [businessDate]);
+
 
 
   const handleSort = (property) => {

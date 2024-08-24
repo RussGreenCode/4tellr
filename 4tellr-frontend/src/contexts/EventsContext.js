@@ -186,8 +186,11 @@ export const EventsProvider = ({ children }) => {
 
 
   useEffect(() => {
-    fetchEvents(businessDate);
+    if (Object.keys(currentUser).length > 0) {
+      fetchEvents(businessDate);
+    }
   }, [businessDate, currentUser]);
+
 
 
   function filterFavouriteEvents(events) {
@@ -212,7 +215,9 @@ export const EventsProvider = ({ children }) => {
   }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, selectedEventList, favouriteGroups]);
 
   useEffect(() => {
-    fetchGroupList()
+    if (Object.keys(currentUser).length > 0) {
+      fetchGroupList()
+    }
   }, []);
 
   const handleManualRefresh = () => {

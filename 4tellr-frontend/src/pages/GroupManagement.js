@@ -8,7 +8,7 @@ import { EventsContext } from '../contexts/EventsContext';
 import '../styles/GroupManagement.css';
 
 const GroupManagement = () => {
-  const { setFilteredEvents, groupList, fetchGroupList } = useContext(EventsContext);
+  const [ groupList, setGroupList] = useState([]);
   const [availableOptions, setAvailableOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [groupName, setGroupName] = useState('');
@@ -21,8 +21,8 @@ const GroupManagement = () => {
 
 
   useEffect(() => {
+    fetchGroupList();
     fetchAvailableOptions();
-    fetchGroups();
   }, []);
 
   const fetchAvailableOptions = async () => {
@@ -34,21 +34,25 @@ const GroupManagement = () => {
     }
   };
 
-  const fetchGroups = () => {
+  const fetchGroupList = async (date) => {
     try {
-      fetchGroupList()
-      setGroups(groupList);
-      setFilteredGroups(groupList);
+      console.log('Refreshing Group List:');
+      const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
+      setGroups(response.data);
+      setFilteredGroups(response.data);
     } catch (error) {
-      console.error('Error fetching groups:', error);
+      console.error('Error refreshing group list:', error)
     }
+
   };
+
+
 
   const handleSaveGroup = async () => {
     try {
       const newGroup = { name: groupName, description, events: selectedOptions };
       await axios.post('http://127.0.0.1:5000/api/save_group', newGroup);
-      fetchGroups();
+      fetchGroupList();
       resetForm();
     } catch (error) {
       console.error('Error saving group:', error);
@@ -63,7 +67,7 @@ const GroupManagement = () => {
           description,
           events: selectedOptions,
         });
-        fetchGroups();
+        fetchGroupList();
         resetForm();
       } catch (error) {
         console.error('Error updating group:', error);
@@ -76,7 +80,7 @@ const GroupManagement = () => {
   const handleDeleteGroup = async (groupToDelete) => {
     try {
       await axios.post('http://127.0.0.1:5000/api/delete_group', { name: groupToDelete.group_name });
-      fetchGroups();
+      fetchGroupList();
       resetForm();
 
     } catch (error) {

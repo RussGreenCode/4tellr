@@ -86,11 +86,13 @@ class EventGenerator:
                 process["businessDate"] = business_date  # Assign business date to each process
                 self.process_status[process["process_id"]] = "PENDING"
                 if not process["dependencies"]:
-                    schedule_time = self.parse_schedule_time(business_date, process['schedule_time'])
-                    randomized_start_time = self.randomize_start_time(schedule_time, has_dependencies=False)
-                    process_queue.append((randomized_start_time, process, "STARTED"))
-                    logging.info(
-                        f"Added initial process to queue: {process['process_id']} scheduled for {randomized_start_time}")
+                    schedule_times = process['schedule_time'].split(",")
+                    for schedule_time in schedule_times:
+                        schedule_datetime = self.parse_schedule_time(business_date, schedule_time)
+                        randomized_start_time = self.randomize_start_time(schedule_datetime, has_dependencies=False)
+                        process_queue.append((randomized_start_time, process, "STARTED"))
+                        logging.info(
+                            f"Added initial process to queue: {process['process_id']} scheduled for {randomized_start_time}")
         return process_queue
 
     def update_virtual_time(self):
@@ -110,7 +112,7 @@ class EventGenerator:
             while process_queue and current_time >= process_queue[0][0]:
                 next_time, next_process, status = process_queue.pop(0)
                 logging.info(
-                    f"Waking up to process event: {next_process['process_id']} with status: {status} scheduled for: {next_time}")
+                    f"Waking up at {current_time} to process event: {next_process['process_id']} with status: {status} scheduled for: {next_time}")
 
                 if status == "STARTED" and not self.dependencies_met(next_process):
                     logging.info(f"Dependencies not met for: {next_process['process_id']}. Requeuing.")
@@ -161,8 +163,6 @@ class EventGenerator:
                                     f"Scheduled dependent process: {process['process_id']} to start at: {dependent_start_time}")
 
                 elif status == "ERROR":
-                    event = self.event_helper.generate_event(next_process, status, current_time, business_date)
-                    self.event_helper.output_event(event)
                     self.process_status[next_process["process_id"]] = status
 
                     retry_time = current_time + timedelta(minutes=self.retry_delay)
@@ -170,8 +170,6 @@ class EventGenerator:
                     logging.info(f"Scheduled retry of process: {next_process['process_id']} to start at: {retry_time}")
 
                 elif status == "SUCCESS":
-                    event = self.event_helper.generate_event(next_process, status, current_time, business_date)
-                    self.event_helper.output_event(event)
                     self.process_status[next_process["process_id"]] = status
 
                     for config in self.configs:
@@ -183,6 +181,8 @@ class EventGenerator:
                                     f"Dependencies met, scheduling process: {process['process_id']} to start at: {dependent_start_time}")
 
             if process_queue:
+                process_queue.sort(key=lambda x: x[0])
+
                 next_time = process_queue[0][0]
                 time_to_wait = (next_time - current_time).total_seconds() / self.multiplier
                 if time_to_wait > 0:

@@ -1,4 +1,3 @@
-// src/utils/CategoriseProcesses.js
 import { useState, useEffect } from 'react';
 
 const CategoriseProcesses = (events, setUpcomingProcesses, setOngoingProcesses, setJustFinishedProcesses) => {
@@ -18,15 +17,34 @@ const CategoriseProcesses = (events, setUpcomingProcesses, setOngoingProcesses, 
     return acc;
   }, {});
 
+  const isValidDate = (dateString) => {
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date);
+  };
+
+  const logInvalidTimeValue = (event) => {
+    console.error(`Invalid or missing TimeValue for event: ${event.eventName}, status: ${event.eventStatus}`);
+  };
 
   for (const eventName in eventsByName) {
     const eventGroup = eventsByName[eventName];
     const startedEvent = eventGroup.find(event => event.eventStatus === 'STARTED' && event.type === 'EVT');
     const successEvent = eventGroup.find(event => event.eventStatus === 'SUCCESS' && event.type === 'EVT');
-    const expectedStartedEvent = eventGroup.find(event => event.eventStatus === 'STARTED'  && event.type === 'EXP');
-    const expectedSuccessEvent = eventGroup.find(event => event.eventStatus === 'SUCCESS'  && event.type === 'EXP');
+    const expectedStartedEvent = eventGroup.find(event => event.eventStatus === 'STARTED' && event.type === 'EXP');
+    const expectedSuccessEvent = eventGroup.find(event => event.eventStatus === 'SUCCESS' && event.type === 'EXP');
+
 
     if (startedEvent && successEvent) {
+      if (startedEvent.outcomeStatus === 'NEW' || successEvent.outcomeStatus === 'NEW') {
+        continue;
+      }
+
+      if (!isValidDate(startedEvent.TimeValue) || !isValidDate(successEvent.TimeValue)) {
+        logInvalidTimeValue(startedEvent);
+        logInvalidTimeValue(successEvent);
+        continue;
+      }
+
       const durationSeconds = (new Date(successEvent.TimeValue) - new Date(startedEvent.TimeValue)) / 1000;
       const process = {
         event_name: eventName,
@@ -43,6 +61,18 @@ const CategoriseProcesses = (events, setUpcomingProcesses, setOngoingProcesses, 
         justFinishedProcesses.push(process);
       }
     } else if (startedEvent && !successEvent) {
+
+      if (startedEvent.outcomeStatus === 'NEW') {
+        continue;
+      }
+
+      if (!isValidDate(startedEvent.TimeValue) || !isValidDate(expectedStartedEvent?.TimeValue) || !isValidDate(expectedSuccessEvent?.TimeValue)) {
+        logInvalidTimeValue(startedEvent);
+        if (expectedStartedEvent) logInvalidTimeValue(expectedStartedEvent);
+        if (expectedSuccessEvent) logInvalidTimeValue(expectedSuccessEvent);
+        continue;
+      }
+
       const expectedDurationSeconds = (new Date(expectedSuccessEvent.TimeValue) - new Date(expectedStartedEvent.TimeValue)) / 1000;
       const expectedEndTime = new Date(new Date(startedEvent.TimeValue).getTime() + expectedDurationSeconds * 1000);
       const process = {
@@ -58,6 +88,12 @@ const CategoriseProcesses = (events, setUpcomingProcesses, setOngoingProcesses, 
 
       ongoingProcesses.push(process);
     } else if (!startedEvent && expectedStartedEvent && expectedSuccessEvent) {
+      if (!isValidDate(expectedStartedEvent.TimeValue) || !isValidDate(expectedSuccessEvent.TimeValue)) {
+        logInvalidTimeValue(expectedStartedEvent);
+        logInvalidTimeValue(expectedSuccessEvent);
+        continue;
+      }
+
       const expectedStartTime = new Date(expectedStartedEvent.TimeValue);
       const expectedEndTime = new Date(expectedSuccessEvent.TimeValue);
 

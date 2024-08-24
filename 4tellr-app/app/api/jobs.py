@@ -26,6 +26,9 @@ class NewThresholds(BaseModel):
     slo_threshold: int
     sla_threshold: int
 
+class EventMetadataRequest(BaseModel):
+    businessDate: str
+
 
 def get_job_helper(request: Request):
     return JobServices(request.app.state.DB_HELPER, request.app.state.LOGGER)
@@ -34,21 +37,36 @@ def get_event_helper(request: Request):
     return EventServices(request.app.state.DB_HELPER, request.app.state.LOGGER)
 
 
-@router.get("/api/job/calculate_job_length_statistics")
-async def calculate_job_length_statistics(businessDate: str, request: Request, jobs_helper: JobServices = Depends(get_job_helper)):
+@router.post("/api/job/calculate_job_length_statistics")
+async def calculate_job_length_statistics(request_data: EventMetadataRequest, request: Request, jobs_helper: JobServices = Depends(get_job_helper)):
+
+    businessDate = request_data.businessDate
+
     if not businessDate:
         raise HTTPException(status_code=400, detail="business_date parameter is required")
 
     try:
         jobs_helper.delete_processes_for_date(businessDate)
-        result = jobs_helper.calculate_job_length_statistics(businessDate)
+        result = jobs_helper.calculate_processes_for_business_date(businessDate)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/api/job/calculate_average_processes")
+async def calculate_average_processes(request: Request, jobs_helper: JobServices = Depends(get_job_helper)):
 
-@router.get("/api/job/create_event_metadata_from_events")
-async def create_event_metadata_from_events(businessDate: str, request: Request, event_helper: EventServices = Depends(get_event_helper)):
+    try:
+        jobs_helper.delete_average_processes()
+        result = jobs_helper.calculate_processes_for_average_outcomes()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/job/create_event_metadata_from_events")
+async def create_event_metadata_from_events( request_data: EventMetadataRequest, request: Request,
+                                                event_helper: EventServices = Depends(get_event_helper)):
+
+    businessDate = request_data.businessDate
 
     if not businessDate:
         raise HTTPException(status_code=400, detail="business_date parameter is required")
