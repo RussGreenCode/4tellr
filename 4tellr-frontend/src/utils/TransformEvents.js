@@ -27,6 +27,8 @@ export const transformEventsForChart = (events) => {
       time: eventTime.getTime(),
       event: event.eventName,
       status: event.eventStatus,
+      sequence: event.eventSequence,
+      businessDate: event.businessDate,
       result: event.plotStatus,
       size: 5,
       color,

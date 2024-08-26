@@ -23,6 +23,11 @@ class BusinessDateRequest(BaseModel):
 class BusinessDatesRequest(BaseModel):
     businessDates: list[str]
 
+class EventRequest(BaseModel):
+    event_name: str
+    event_status: str
+    business_date: str
+
 
 @router.get('/api/events')
 async def get_events_by_date(business_date: str, event_helper: EventServices = Depends(get_event_helper)):
@@ -30,6 +35,22 @@ async def get_events_by_date(business_date: str, event_helper: EventServices = D
         raise HTTPException(status_code=400, detail='business_date parameter is required')
     try:
         events = event_helper.query_events_by_date(business_date)
+        return events
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get('/api/event')
+async def get_event_info_by_date(
+    event_name: str = Query(..., alias="event_name"),
+    event_status: str = Query(..., alias="event_status"),
+    business_date: str = Query(..., alias="business_date"),
+    event_helper: EventServices = Depends(get_event_helper)
+):
+    if not business_date:
+        raise HTTPException(status_code=400, detail='business_date parameter is required')
+    try:
+        events = event_helper.get_event_info_by_date(event_name, event_status, business_date)
         return events
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

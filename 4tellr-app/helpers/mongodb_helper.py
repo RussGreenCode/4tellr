@@ -80,8 +80,8 @@ class MongoDBHelper(DatabaseHelperInterface):
     def query_outcomes_by_date_and_status(self, business_date, status):
         try:
             events = list(self.event_collection.find({
-                'eventStatus': status,
                 'businessDate': business_date,
+                'eventStatus': status,
                 'type': 'outcome',
             }))
             return {'success': True, 'data': self._serialize_id(events)}
@@ -613,6 +613,20 @@ class MongoDBHelper(DatabaseHelperInterface):
                 return {'success': True, 'data': self._serialize_id(metadata)}
             else:
                 return {'success': False, 'message': 'No metadata found for the provided ID'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+
+    def get_event_info_by_date(self, event_name, event_status, business_date):
+        try:
+            event_data = list(self.event_collection.find({'businessDate': business_date,
+                                                        'eventName': event_name,
+                                                        'eventStatus': event_status,
+                                                        'type': 'outcome'}))
+            if event_data:
+                return {'success': True, 'data': self._serialize_id(event_data)}
+            else:
+                return {'success': False, 'message': 'No event data found for the provided ID'}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 

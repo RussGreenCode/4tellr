@@ -48,7 +48,7 @@ const generateRegularTimeIntervals = (minTime, maxTime, maxTicks) => {
   return intervals;
 };
 
-const ScatterPlotComponent = ({ data, width = 1200, height = 400, textSize = 10 }) => {
+const ScatterPlotComponent = ({ data, width = 1200, height = 350, textSize = 10 }) => {
   const plotRef = useRef(null);
   const theme = useTheme(); // Use the theme context
 

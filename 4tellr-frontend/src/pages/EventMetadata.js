@@ -41,7 +41,6 @@ const EventMetadata = () => {
       setSlaTime(selectedOccurrence.sla.time);
       fetchEventStats();
       fetchProcesses();
-      fetchAllSuccessEvents();
     }
   }, [metadata, selectedOccurrenceIndex]);
 

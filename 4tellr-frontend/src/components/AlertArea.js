@@ -110,7 +110,7 @@ const AlertArea = () => {
       {tabIndex === 1 && (
         <Box>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={12}>
               {selectedEvent && Object.keys(selectedEvent).length > 0 ? (
                 <EventDetailsComponent event={selectedEvent} loading={loading} />
               ) : (

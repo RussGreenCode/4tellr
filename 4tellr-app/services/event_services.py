@@ -57,6 +57,7 @@ class EventServices:
             event_type = item.get('eventType')
             event_name = item.get('eventName')
             event_status = item.get('eventStatus')
+            event_sequence = item.get('sequence')
             event_key = event_name + '#' + event_status
             outcome_status = item.get('outcomeStatus', 'N/A')
 
@@ -74,6 +75,8 @@ class EventServices:
                         'eventName': event_name,
                         'eventKey': event_key,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': slo_time,
                         'outcomeStatus': outcome_status,
                         'plotStatus': StatusUtilities.get_plot_status("SLO", outcome_status)
@@ -87,6 +90,8 @@ class EventServices:
                         'eventName': event_name,
                         'eventKey': event_key,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': sla_time,
                         'outcomeStatus': outcome_status,
                         'plotStatus': StatusUtilities.get_plot_status("SLA", outcome_status)
@@ -100,6 +105,8 @@ class EventServices:
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': event_time,
                         'outcomeStatus': outcome_status,
                         'plotStatus': outcome_status
@@ -113,6 +120,8 @@ class EventServices:
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': expected_arrival,
                         'outcomeStatus': outcome_status,
                         'plotStatus': outcome_status
@@ -126,6 +135,7 @@ class EventServices:
             event_type = item.get('eventType')
             event_name = item.get('eventName')
             event_status = item.get('eventStatus')
+            event_sequence = item.get('eventSequence', None)
             event_key = event_name + '#' + event_status
 
             if event_id.startswith('EXP#') and event_key not in processed_event_keys:
@@ -146,6 +156,8 @@ class EventServices:
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': time_value,
                         'outcomeStatus': 'NO_EVT_YET',
                         'plotStatus': expectation_outcome
@@ -168,6 +180,8 @@ class EventServices:
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': time_value,
                         'outcomeStatus': 'NO_EVT_YET',
                         'plotStatus': expectation_outcome
@@ -190,6 +204,8 @@ class EventServices:
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': time_value,
                         'outcomeStatus': 'NO_EVT_YET',
                         'plotStatus': expectation_outcome
@@ -204,6 +220,8 @@ class EventServices:
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': time_value,
                         'outcomeStatus': 'ERROR',
                         'plotStatus': 'ERROR'
@@ -216,6 +234,8 @@ class EventServices:
                         'eventKey': event_key,
                         'eventName': event_name,
                         'eventStatus': event_status,
+                        'eventSequence': event_sequence,
+                        'businessDate': business_date,
                         'TimeValue': time_value,
                         'outcomeStatus': 'NEW_EVT',
                         'plotStatus': 'NEW_EVT'
@@ -752,6 +772,14 @@ class EventServices:
 
         # Return the metadata for the event
         return response['data']
+
+    def get_event_info_by_date(self, event_name, event_status, business_date):
+        # Go get the  eventy data for the business date
+        response = self.db_helper.get_event_info_by_date(event_name, event_status, business_date)
+
+        # Return the metadata for the event
+        return response['data']
+
 
     def update_metadata_with_dependencies(self, event_metadata):
 
