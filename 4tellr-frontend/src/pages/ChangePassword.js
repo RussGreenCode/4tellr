@@ -4,6 +4,8 @@ import { Box, Button, Typography, TextField, List, ListItem, ListItemText, Check
 import axios from 'axios';
 import { EventsContext } from '../contexts/EventsContext';
 import '../styles/UserProfile.css';
+import config from '../config';
+
 
 const UserProfile = ({ email }) => {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -23,7 +25,7 @@ const UserProfile = ({ email }) => {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/change_password', {
+      const response = await axios.post(`${config.baseUrl}/api/change_password`, {
         email,
         currentPassword,
         newPassword,

@@ -4,6 +4,7 @@ import { Box, Button, Typography, List, ListItem, ListItemText, ListItemIcon, Ch
 import axios from 'axios';
 import { EventsContext } from '../contexts/EventsContext';
 import '../styles/GroupManagement.css';
+import config from '../config';
 
 const FavouriteGroups = () => {
   const { currentUser, fetchUser, groupList, setGroupList, fetchGroupList} = useContext(EventsContext);
@@ -26,7 +27,7 @@ const FavouriteGroups = () => {
 
   const fetchGroups = async () => {
     try {
-      //const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
+      //const response = await axios.get(`${config.baseUrl}/api/get_groups`);
       fetchGroupList()
       const allGroups = groupList.map(group => group.group_name);
       const filteredGroups = allGroups.filter(group => !currentUser.favourite_groups.includes(group));
@@ -66,7 +67,7 @@ const FavouriteGroups = () => {
 
   const handleSaveFavourites = async () => {
     try {
-      await axios.post('http://127.0.0.1:5000/api/save_user_favourite_groups', {
+      await axios.post(`${config.baseUrl}/api/save_user_favourite_groups`, {
         email: currentUser.email,
         favourite_groups: favouriteGroups
       });

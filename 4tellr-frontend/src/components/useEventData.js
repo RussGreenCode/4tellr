@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const transformDataForChart = (events) => {
   console.log('Transforming events:', events); // Log events before transforming
@@ -22,7 +23,7 @@ export default function useEventData(businessDate) {
     const fetchEvents = async () => {
       console.log('Fetching events for date:', businessDate); // Log the API call
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/events', {
+        const response = await axios.get(`${config.baseUrl}/api/events`, {
           params: { businessDate }
         });
         console.log('Fetched events:', response.data); // Log the response

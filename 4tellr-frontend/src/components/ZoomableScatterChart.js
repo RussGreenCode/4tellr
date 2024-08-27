@@ -22,19 +22,6 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const getColor = (type, outcomeStatus) => {
-  if (type === 'EVT') {
-    switch (outcomeStatus) {
-      case 'NEW': return 'white';
-      case 'ON_TIME': return 'lightgreen';
-      case 'MEETS_SLO': return 'darkgreen';
-      case 'MEETS_SLA': return 'orange';
-      default: return 'red';
-    }
-  } else {
-    return type === 'EXP' ? 'green' : (type === 'SLO' ? 'amber' : 'red');
-  }
-};
 
 const CustomShape = (props) => {
   const { cx, cy, payload } = props;

@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 from app.api import register_routes
@@ -21,10 +21,11 @@ def create_app():
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["*"],
     )
 
     # Add log request middleware
-    app.add_middleware(LogRequestMiddleware)
+    # app.add_middleware(LogRequestMiddleware)
 
     config = load_config('../config.txt')
 
@@ -64,6 +65,8 @@ def create_app():
     # Shut down the scheduler when exiting the app
     atexit.register(lambda: scheduler.shutdown())
 
+
+
     return app
 
 
@@ -87,4 +90,4 @@ def load_config(config_file):
 app = create_app()
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=5000)
+    uvicorn.run(app, host='0.0.0.0', port=8000)

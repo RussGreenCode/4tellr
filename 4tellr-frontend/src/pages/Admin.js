@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Grid } from '@mui/material';
 import '../styles/App.css';
+import config from '../config';
 
 const Admin = () => {
   const [businessDate, setBusinessDate] = useState('');

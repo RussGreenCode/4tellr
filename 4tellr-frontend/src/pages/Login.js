@@ -3,6 +3,7 @@ import { Box, Button, TextField, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import {EventsContext} from "../contexts/EventsContext";
 import axios from "axios";
+import config from '../config';
 
 const Login = ({ onLogin, onLogout}) => {
   const {setCurrentUser, fetchUser, resetState} = useContext(EventsContext);
@@ -19,7 +20,11 @@ const Login = ({ onLogin, onLogout}) => {
   const handleLogin = async () => {
     try {
       const userDetails = { email: email, password: password };
-      const response = await axios.post('http://127.0.0.1:5000/api/login', userDetails);
+
+
+      const app_prefix=`${config.baseUrl}/api/login`
+
+      const response = await axios.post(app_prefix, userDetails);
 
       if(response.data.isAuthenticated) {
         setIsAuthenticated(response.data.isAuthenticated);

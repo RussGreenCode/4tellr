@@ -7,6 +7,7 @@ import { EventsContext } from '../contexts/EventsContext';
 import '../styles/App.css';
 import { exportToCSV } from '../utils/ExportUtils';
 import axios from 'axios';
+import config from '../config';
 
 const Menu = ({ setIsAuthenticated }) => {
   const { events, filteredEvents, resetState } = useContext(EventsContext);
@@ -27,7 +28,7 @@ const Menu = ({ setIsAuthenticated }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://127.0.0.1:5000/api/logout');
+      await axios.post(`${config.baseUrl}/api/logout`);
       setIsAuthenticated(false);
       resetState()
       navigate('/');

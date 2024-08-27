@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import {EventsContext} from "../contexts/EventsContext";
+import config from '../config';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -16,7 +17,7 @@ const ProcessStatistics = () => {
   useEffect(() => {
     const fetchProcessStatistics = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/process/get_process_statistics_list', {
+        const response = await axios.get(`${config.baseUrl}/api/process/get_process_statistics_list`, {
           params: { business_date: businessDate }
         });
 

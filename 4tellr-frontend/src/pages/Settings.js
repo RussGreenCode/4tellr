@@ -1,5 +1,6 @@
 // src/pages/Settings.js
 import React from 'react';
+import config from '../config';
 
 class Settings extends React.Component {
     render() {

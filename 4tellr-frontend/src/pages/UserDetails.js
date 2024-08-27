@@ -2,6 +2,7 @@
 import React, { useContext } from 'react';
 import { EventsContext } from '../contexts/EventsContext';
 import { Typography, List, ListItem, ListItemText, Box } from '@mui/material';
+import config from '../config';
 
 const UserDetails = () => {
   const { currentUser } = useContext(EventsContext);

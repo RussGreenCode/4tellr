@@ -3,6 +3,7 @@ import React, {useState, useContext, useEffect} from 'react';
 import { Box, Button, Typography, TextField, List, ListItem, ListItemText } from '@mui/material';
 import axios from 'axios';
 import '../styles/UserManagement.css';
+import config from '../config';
 
 const UserManagement = () => {
   const [emailList, setEmailList] = useState('');
@@ -15,7 +16,7 @@ const UserManagement = () => {
 
   const getUsers = async () => {
      try {
-      const response = await axios.get('http://127.0.0.1:5000/api/get_users');
+      const response = await axios.get(`${config.baseUrl}/api/get_users`);
       const allUsers = response.data;
       setUsers(allUsers);
     } catch (error) {
@@ -26,7 +27,7 @@ const UserManagement = () => {
   const handleAddUsers = async () => {
     const emails = emailList.split(',').map(email => email.trim());
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/add_users', { emails });
+      const response = await axios.post(`${config.baseUrl}/api/add_users`, { emails });
       setStatusMessages(response.data.map(status => ({
         email: status.email,
         status: status.success ? 'success' : 'error',
@@ -41,7 +42,7 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userToDelete) => {
     try {
-      const response = await axios.delete(`http://127.0.0.1:5000/api/delete_user/${userToDelete.email}`);
+      const response = await axios.delete(`${config.baseUrl}/api/delete_user/${userToDelete.email}`);
       setStatusMessages(response.data.map(status => ({
         email: status.email,
         status: status.success ? 'success' : 'error',

@@ -4,6 +4,7 @@ import { Box, Button, Typography, List, ListItem, ListItemText, ListItemIcon, Ch
 import axios from 'axios';
 import { EventsContext } from '../contexts/EventsContext';
 import '../styles/GroupManagement.css';
+import config from '../config';
 
 const FavouriteAlerts = () => {
   const {currentUser, fetchUser} = useContext(EventsContext);
@@ -27,7 +28,7 @@ const FavouriteAlerts = () => {
   const fetchAlerts = async () => {
     try {
 
-      const response = await axios.get('http://127.0.0.1:5000/api/alerts');
+      const response = await axios.get(`${config.baseUrl}/api/alerts`);
       const alertList = response.data;
 
       const allAlerts = alertList.map(alert => alert.alert_name);
@@ -68,7 +69,7 @@ const FavouriteAlerts = () => {
 
   const handleSaveFavourites = async () => {
     try {
-      await axios.post('http://127.0.0.1:5000/api/save_user_favourite_alerts', {
+      await axios.post(`${config.baseUrl}/api/save_user_favourite_alerts`, {
         email: currentUser.email,
         favourite_alerts: favouriteAlerts
       });

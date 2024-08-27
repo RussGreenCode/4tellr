@@ -343,7 +343,7 @@ class MongoDBHelper(DatabaseHelperInterface):
 
     def get_all_groups(self):
         try:
-            groups = list(self.groups_collection.find({}, {'_id': 0, 'group_name': 1, 'description': 1}))
+            groups = list(self.groups_collection.find({}, {'_id': 0, 'group_name': 1, 'description': 1, 'events': 1}))
             self.logger.info(f"Retrieved {len(groups)} groups.")
             return {'success': True, 'data': self._serialize_id(groups)}
         except Exception as e:

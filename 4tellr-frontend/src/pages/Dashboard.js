@@ -7,6 +7,7 @@ import MiniGanttChartD3 from '../components/MiniGanttChart';
 import { EventsContext } from '../contexts/EventsContext';
 import { filterFavouriteEvents } from '../utils/FilterFavouriteEvents';
 import '../styles/GantChartD3.css';
+import config from '../config';
 
 const Dashboard = () => {
   const { events, favouriteGroups, metrics, favouriteMetrics, ongoingProcesses, upcomingProcesses, justFinishedProcesses } = useContext(EventsContext);

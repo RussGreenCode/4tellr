@@ -6,9 +6,10 @@ import 'react-dual-listbox/lib/react-dual-listbox.css';
 import axios from 'axios';
 import { EventsContext } from '../contexts/EventsContext';
 import '../styles/GroupManagement.css';
+import config from '../config';
 
 const GroupManagement = () => {
-  const [ groupList, setGroupList] = useState([]);
+  const { setGroupList } = useContext(EventsContext);
   const [availableOptions, setAvailableOptions] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [groupName, setGroupName] = useState('');
@@ -27,7 +28,7 @@ const GroupManagement = () => {
 
   const fetchAvailableOptions = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/get_expectation_list');
+      const response = await axios.get(`${config.baseUrl}/api/get_expectation_list`);
       setAvailableOptions(response.data.map(event => ({ value: event.event_name_and_status, label: event.event_name_and_status })));
     } catch (error) {
       console.error('Error fetching available options:', error);
@@ -37,8 +38,9 @@ const GroupManagement = () => {
   const fetchGroupList = async (date) => {
     try {
       console.log('Refreshing Group List:');
-      const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
+      const response = await axios.get(`${config.baseUrl}/api/get_groups`);
       setGroups(response.data);
+      setGroupList(response.data);
       setFilteredGroups(response.data);
     } catch (error) {
       console.error('Error refreshing group list:', error)
@@ -51,7 +53,7 @@ const GroupManagement = () => {
   const handleSaveGroup = async () => {
     try {
       const newGroup = { name: groupName, description, events: selectedOptions };
-      await axios.post('http://127.0.0.1:5000/api/save_group', newGroup);
+      await axios.post(`${config.baseUrl}/api/save_group`, newGroup);
       fetchGroupList();
       resetForm();
     } catch (error) {
@@ -62,7 +64,7 @@ const GroupManagement = () => {
   const handleUpdateGroup = async () => {
     if (selectedGroup && groupName && selectedOptions.length > 0) {
       try {
-        await axios.put(`http://127.0.0.1:5000/api/update_group/${selectedGroup}`, {
+        await axios.put(`${config.baseUrl}/api/update_group/${selectedGroup}`, {
           groupName,
           description,
           events: selectedOptions,
@@ -79,7 +81,7 @@ const GroupManagement = () => {
 
   const handleDeleteGroup = async (groupToDelete) => {
     try {
-      await axios.post('http://127.0.0.1:5000/api/delete_group', { name: groupToDelete.group_name });
+      await axios.post(`${config.baseUrl}/api/delete_group`, { name: groupToDelete.group_name });
       fetchGroupList();
       resetForm();
 
@@ -90,7 +92,7 @@ const GroupManagement = () => {
 
   const handleEditGroup = async (group) => {
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/get_group_details', { name: group.group_name });
+      const response = await axios.post(`${config.baseUrl}/api/get_group_details`, { name: group.group_name });
       const retrievedGroup = response.data;
 
 
@@ -105,7 +107,7 @@ const GroupManagement = () => {
   const handleFavoriteGroup = async (groupId) => {
     setFavoriteGroup(groupId);
     try {
-      await axios.post('http://127.0.0.1:5000/api/favorite_group', { groupId });
+      await axios.post(`${config.baseUrl}/api/favorite_group`, { groupId });
     } catch (error) {
       console.error('Error setting favorite group:', error);
     }

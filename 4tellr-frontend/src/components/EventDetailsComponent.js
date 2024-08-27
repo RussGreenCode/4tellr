@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Typography, Paper, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { styled } from '@mui/system';
 import axios from 'axios';
+import config from '../config';
 
 // Define styled components
 const StyledTableCellHeader = styled(TableCell)(({ theme }) => ({
@@ -43,7 +44,7 @@ const EventDetailsComponent = ({ event, children }) => {
   const fetchEventData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/event', {
+      const response = await axios.get(`${config.baseUrl}/api/event`, {
         params: {
           event_name: event.event,        // Assuming event.event is the event name
           event_status: event.status,     // Assuming event.status is the event status

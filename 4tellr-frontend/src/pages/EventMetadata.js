@@ -5,6 +5,7 @@ import MiniGanttChartD3 from '../components/MiniGanttChart';
 import ScatterPlotComponent from "../components/ScatterPlotComponent";
 import TimeInput from '../components/TimeInput';
 import TeePlusTimeInput from '../components/TeePlusTimeInput';
+import config from '../config';
 
 const EventMetadata = () => {
   const [eventName, setEventName] = useState('');
@@ -46,7 +47,7 @@ const EventMetadata = () => {
 
   const fetchEventMetadataList = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/event/event_metadata_list');
+      const response = await axios.get(`${config.baseUrl}/api/event/event_metadata_list`);
       if (response.data && response.data.length > 0) {
         setEventMetadataList(response.data);
         setFilteredEventMetadataList(response.data);
@@ -60,7 +61,7 @@ const EventMetadata = () => {
 
   const fetchMetadata = async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/api/event/get_event_metadata`, { params: { id: selectedMetadataId } });
+      const response = await axios.get(`${config.baseUrl}/api/event/get_event_metadata`, { params: { id: selectedMetadataId } });
       if (response.data) {
         setMetadata(response.data);
         setEventName(response.data.event_name);
@@ -85,7 +86,7 @@ const EventMetadata = () => {
 
     try {
       if (Object.keys(metadata).length !== 0) {
-        const response = await axios.get('http://127.0.0.1:5000/api/event_details', {
+        const response = await axios.get(`${config.baseUrl}/api/event_details`, {
           params: {
             event_name: event_name,
             event_status: event_status,
@@ -102,7 +103,7 @@ const EventMetadata = () => {
     try {
       if (Object.keys(metadata).length !== 0) {
         const event_name = eventName
-        const response = await axios.get(`http://127.0.0.1:5000/api/process/get_process_statistics`, { params: { event_name } });
+        const response = await axios.get(`${config.baseUrl}/api/process/get_process_statistics`, { params: { event_name } });
         setProcesses(response.data);
       }
     } catch (error) {
@@ -136,7 +137,7 @@ const EventMetadata = () => {
         return occurrence;
       });
 
-      const response = await axios.put(`http://127.0.0.1:5000/api/event/event_metadata`, {
+      const response = await axios.put(`${config.baseUrl}/api/event/event_metadata`, {
         id: selectedMetadataId,
         event_name: eventName,
         event_status: eventStatus,

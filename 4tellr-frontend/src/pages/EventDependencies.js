@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import '../styles/GroupManagement.css';
+import config from '../config';
 
 const EventDependencies = () => {
   // New Metadata Constants
@@ -45,7 +46,7 @@ const EventDependencies = () => {
 
     if (selectedMetadataId) {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/api/event/get_event_metadata`, {params: {id: selectedMetadataId}});
+        const response = await axios.get(`${config.baseUrl}/api/event/get_event_metadata`, {params: {id: selectedMetadataId}});
         if (response.data) {
           const selected =  response.data
           setSelectedMetadata(selected);
@@ -63,7 +64,7 @@ const EventDependencies = () => {
 
   const fetchEventMetadataList = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/event/event_metadata_list');
+      const response = await axios.get(`${config.baseUrl}/api/event/event_metadata_list`);
       if (response.data && response.data.length > 0) {
         setEventMetadataList(response.data);
         const startedEvents = response.data.filter(event => event.event_status === 'STARTED');
@@ -112,7 +113,7 @@ const EventDependencies = () => {
         ...selectedMetadata,
         dependencies: dependentEvents
       };
-      await axios.put(`http://127.0.0.1:5000/api/event/event_metadata_dependencies`, updatedMetadata);
+      await axios.put(`${config.baseUrl}/api/event/event_metadata_dependencies`, updatedMetadata);
       console.log('Favourites saved successfully');
     } catch (error) {
       console.error('Error saving favourite events:', error);

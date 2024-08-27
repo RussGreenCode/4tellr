@@ -1,9 +1,10 @@
-  // src/pages/ProcessStatistics.js
-  import React, {useState, useEffect, useContext} from 'react';
-  import axios from 'axios';
-  import GanttChartD3 from '../components/GanttChartD3';
-  import { Box, Typography } from '@mui/material';
+// src/pages/ProcessStatistics.js
+import React, {useState, useEffect, useContext} from 'react';
+import axios from 'axios';
+import GanttChartD3 from '../components/GanttChartD3';
+import { Box, Typography } from '@mui/material';
 import {EventsContext} from "../contexts/EventsContext";
+import config from '../config';
 
 const GanttChart = () => {
   const { businessDate } = useContext(EventsContext);
@@ -13,7 +14,7 @@ const GanttChart = () => {
   useEffect(() => {
     const fetchProcessStatistics = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/process/get_process_statistics_list', {
+        const response = await axios.get(`${config.baseUrl}/api/process/get_process_statistics_list`, {
           params: { business_date: businessDate }
         });
 

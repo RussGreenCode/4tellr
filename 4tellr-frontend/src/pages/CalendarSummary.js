@@ -4,6 +4,7 @@ import { format, startOfMonth, getDay, addDays } from 'date-fns';
 import { EventsContext } from '../contexts/EventsContext';
 import MicroBarChart from '../components/MicroBarChart';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 
 function CalendarSummary() {
   const { businessDate, setBusinessDate, fetchEvents } = useContext(EventsContext);
@@ -17,7 +18,7 @@ function CalendarSummary() {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1; // Adjust for zero-based month index
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/api/chart_data_monthly_summary?year=${year}&month=${month}`);
+        const response = await axios.get(`${config.baseUrl}/api/chart_data_monthly_summary?year=${year}&month=${month}`);
         setData(response.data);
       } catch (error) {
         console.error('Failed to fetch events', error);

@@ -8,6 +8,7 @@ import ScatterPlotComponent from './ScatterPlotComponent';
 import EventDetailsComponent from './EventDetailsComponent';
 import { generateBarData } from '../utils/MetricsHelper';
 import '../styles/AlertArea.css';
+import config from '../config';
 
 const AlertArea = () => {
   const { selectedEvent, setSearchOutcomeCriteria, tabIndex, setTabIndex, filteredMetrics,  } = useContext(EventsContext);
@@ -19,7 +20,7 @@ const AlertArea = () => {
       setLoading(true);
       const fetchMonthlyEvents = async () => {
         try {
-          const response = await axios.get('http://127.0.0.1:5000/api/event_details', {
+          const response = await axios.get(`${config.baseUrl}/api/event_details`, {
             params: {
               event_name: selectedEvent.event,
               event_status: selectedEvent.status,

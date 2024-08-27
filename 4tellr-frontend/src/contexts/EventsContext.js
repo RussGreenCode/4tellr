@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import CalculateMettics from '../metrics/CalculateMetrics'
 import CategoriseProcesses from '../utils/CategoriseProcesses'
+import config from '../config';
 
 export const EventsContext = createContext();
 
@@ -111,12 +112,15 @@ export const EventsProvider = ({ children }) => {
   const fetchEvents = async (date) => {
     try {
       console.log('Fetching events for businessDate:', date);
-      const response = await axios.get('http://127.0.0.1:5000/api/chart_data', {
+
+      const app_prefix=`${config.baseUrl}/api/chart_data`
+
+      const response = await axios.get(app_prefix, {
         params: { business_date: date }
       });
 
       // Add a method to process the events and add the groups that they exist in.
-      const modifiedEvents = addGroupInformationToEvents(response.data, favouriteGroups)
+      const modifiedEvents = addGroupInformationToEvents(response.data, groupList)
 
       setEvents(modifiedEvents);
       const calculatedMetrics = CalculateMettics(modifiedEvents);
@@ -162,7 +166,7 @@ export const EventsProvider = ({ children }) => {
   const fetchUser = async (userEmail) => {
     try {
       console.log('Retrieving User:', currentUser.email);
-      const response = await axios.get('http://127.0.0.1:5000/api/get_user', {
+      const response = await axios.get(`${config.baseUrl}/api/get_user`, {
         params: { email: userEmail }
       });
       setCurrentUser(response.data.user);
@@ -176,7 +180,7 @@ export const EventsProvider = ({ children }) => {
   const fetchGroupList = async (date) => {
     try {
       console.log('Refreshing Group List:');
-      const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
+      const response = await axios.get(`${config.baseUrl}/api/get_groups`);
       setGroupList(response.data);
     } catch (error) {
       console.error('Error refreshing group list:', error)
@@ -187,7 +191,9 @@ export const EventsProvider = ({ children }) => {
 
   useEffect(() => {
     if (Object.keys(currentUser).length > 0) {
+      fetchGroupList()
       fetchEvents(businessDate);
+
     }
   }, [businessDate, currentUser]);
 
@@ -214,12 +220,6 @@ export const EventsProvider = ({ children }) => {
 
   }, [events, searchGroupCriteria, searchApplicationCriteria, searchEventCriteria, searchStatusCriteria, searchOutcomeCriteria, selectedEventList, favouriteGroups]);
 
-  useEffect(() => {
-    if (Object.keys(currentUser).length > 0) {
-      fetchGroupList()
-    }
-  }, []);
-
   const handleManualRefresh = () => {
     fetchEvents(businessDate);
   };
@@ -228,7 +228,7 @@ export const EventsProvider = ({ children }) => {
     <EventsContext.Provider value={{ events, filteredEvents, fetchEvents, loading, setBusinessDate, businessDate,
       setSearchStatusCriteria, searchStatusCriteria, setSearchApplicationCriteria, searchApplicationCriteria, setSearchEventCriteria, searchEventCriteria, selectedEvent, setSelectedEvent,
       tabIndex, setTabIndex, currentUser, setCurrentUser, fetchUser, sortCriterion, setSortCriterion, setSelectedTypes, selectedTypes,
-      groupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
+      groupList, setGroupList, fetchGroupList, setSearchGroupCriteria, searchGroupCriteria, setShowLabels, showLabels, metrics,
       setSearchOutcomeCriteria, searchOutcomeCriteria, setSelectedEventList, timeLeft, handleManualRefresh, resetState,
       upcomingProcesses, ongoingProcesses, justFinishedProcesses,
       isDrawerOpen, setIsDrawerOpen, filteredMetrics, favouriteMetrics, favouriteGroups}}>

@@ -15,6 +15,7 @@ import axios from 'axios';
 import { EventsContext } from '../contexts/EventsContext';
 import '../styles/GroupManagement.css';
 import { Delete, Edit, FlashOn, Pause, PlayArrow as Resume } from "@mui/icons-material";
+import config from '../config';
 
 const AlertManagement = () => {
   const [alertOptions, setAlertOptions] = useState([]);
@@ -34,7 +35,7 @@ const AlertManagement = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/get_groups');
+      const response = await axios.get(`${config.baseUrl}/api/get_groups`);
       setGroups(response.data.map(group => ({ value: group.group_name, label: group.group_name })));
     } catch (error) {
       console.error('Error fetching available options:', error);
@@ -43,7 +44,7 @@ const AlertManagement = () => {
 
   const fetchAlerts = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/alerts');
+      const response = await axios.get(`${config.baseUrl}/api/alerts`);
       setAlertOptions(response.data.map(alert => ({ value: alert.group_name, label: alert.group_name })));
       const alertList = response.data;
 
@@ -59,7 +60,7 @@ const AlertManagement = () => {
 
     try {
       const newAlert = { alert_name: alertName, description: description, group_name: group_name };
-      await axios.post('http://127.0.0.1:5000/api/alerts', newAlert);
+      await axios.post(`${config.baseUrl}/api/alerts`, newAlert);
       fetchAlerts();
       resetForm();
     } catch (error) {
@@ -70,7 +71,7 @@ const AlertManagement = () => {
   const handleUpdateAlert = async () => {
     if (selectedAlert && alertName && selectedGroup) {
       try {
-        await axios.put(`http://127.0.0.1:5000/api/alerts`, {
+        await axios.put(`${config.baseUrl}/api/alerts`, {
           alert_name: alertName,
           description,
           group_name: selectedGroup.value,
@@ -87,7 +88,7 @@ const AlertManagement = () => {
 
   const handleDeleteAlert = async (alertToDelete) => {
     try {
-      await axios.delete(`http://127.0.0.1:5000/api/alerts`, {
+      await axios.delete(`${config.baseUrl}/api/alerts`, {
         params: { alert_name: alertToDelete.alert_name }
       });
       fetchAlerts();

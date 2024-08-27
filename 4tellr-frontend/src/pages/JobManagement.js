@@ -1,8 +1,9 @@
 // src/pages/JobManagement.js
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Typography, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, TextField, Select, MenuItem, Grid} from '@mui/material';
+import { Box, Button, Typography, List, ListItem, ListItemText, IconButton, TextField, Select, MenuItem, Grid} from '@mui/material';
 import { Add, Delete, Edit, Pause, PlayArrow as Resume, FlashOn, Save } from '@mui/icons-material';
 import axios from 'axios';
+import config from '../config';
 
 const JobManagement = () => {
   const [jobs, setJobs] = useState([]);
@@ -25,7 +26,7 @@ const JobManagement = () => {
 
   const fetchJobs = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:5000/api/jobs');
+      const response = await axios.get(`${config.baseUrl}/api/jobs`);
       if (response.data.success) {
         setJobs(response.data.data);
       } else {
@@ -45,8 +46,8 @@ const JobManagement = () => {
 
     try {
       const response = isEditing
-        ? await axios.put(`http://127.0.0.1:5000/api/jobs/${newJob.id}`, jobToSave)
-        : await axios.post('http://127.0.0.1:5000/api/jobs', jobToSave);
+        ? await axios.put(`${config.baseUrl}/api/jobs/${newJob.id}`, jobToSave)
+        : await axios.post(`${config.baseUrl}/api/jobs`, jobToSave);
 
       if (response.data.success) {
         fetchJobs();
@@ -71,7 +72,7 @@ const JobManagement = () => {
 
   const handleDeleteJob = async (jobId) => {
     try {
-      const response = await axios.delete(`http://127.0.0.1:5000/api/jobs/${jobId}`);
+      const response = await axios.delete(`${config.baseUrl}/api/jobs/${jobId}`);
       if (response.data.success) {
         fetchJobs();
       } else {
@@ -85,7 +86,7 @@ const JobManagement = () => {
   const handleTriggerJob = async (jobId) => {
     try {
       const params = overrideParams ? JSON.parse(overrideParams) : undefined;
-      const response = await axios.post(`http://127.0.0.1:5000/api/jobs/trigger/${jobId}`, {params});
+      const response = await axios.post(`${config.baseUrl}/api/jobs/trigger/${jobId}`, {params});
       if (response.data.success) {
         console.log('Job triggered successfully');
       } else {
@@ -98,7 +99,7 @@ const JobManagement = () => {
 
   const handlePauseJob = async (jobId) => {
     try {
-      const response = await axios.post(`http://127.0.0.1:5000/api/jobs/pause/${jobId}`);
+      const response = await axios.post(`${config.baseUrl}/api/jobs/pause/${jobId}`);
       if (response.data.success) {
         fetchJobs();
       } else {
@@ -111,7 +112,7 @@ const JobManagement = () => {
 
   const handleResumeJob = async (jobId) => {
     try {
-      const response = await axios.post(`http://127.0.0.1:5000/api/jobs/resume/${jobId}`);
+      const response = await axios.post(`${config.baseUrl}/api/jobs/resume/${jobId}`);
       if (response.data.success) {
         fetchJobs();
       } else {

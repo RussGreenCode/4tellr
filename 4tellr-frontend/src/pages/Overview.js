@@ -8,6 +8,7 @@ import { EventsContext } from '../contexts/EventsContext';
 import '../styles/Overview.css';
 import SearchBar from "../components/SearchBar";
 import FilteredSearchBar from "../components/FilteredSearchBar";
+import config from '../config';
 
 
 const drawerWidth = 300; // Fixed width for the expanded drawer
