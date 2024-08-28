@@ -24,10 +24,12 @@ def create_app():
         expose_headers=["*"],
     )
 
-    # Add log request middleware
-    # app.add_middleware(LogRequestMiddleware)
 
     config = load_config('../config.txt')
+
+    # Add log request middleware
+    if config['LOG_LEVEL'] == 'DEBUG':
+        app.add_middleware(LogRequestMiddleware)
 
     # Initialize logger
     logger = Logger(config).get_logger()
