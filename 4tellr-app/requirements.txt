@@ -11,6 +11,7 @@ click==8.1.7
 dnspython==2.6.1
 fastapi==0.112.0
 h11==0.14.0
+httpx==0.27.2
 idna==3.7
 iniconfig==2.0.0
 itsdangerous==2.2.0

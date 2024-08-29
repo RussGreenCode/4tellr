@@ -9,7 +9,8 @@ from helpers.mongodb_helper import MongoDBHelper
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.jobstores.mongodb import MongoDBJobStore
 from core.logging import Logger
-from app.middleware import LogRequestMiddleware  # Import the middleware
+from app.middleware import LogRequestMiddleware
+import os
 
 
 def create_app():
@@ -25,7 +26,7 @@ def create_app():
     )
 
 
-    config = load_config('../config.txt')
+    config = load_config()
 
     # Add log request middleware
     if config['LOG_LEVEL'] == 'DEBUG':
@@ -80,12 +81,25 @@ def setup_scheduler(app):
     atexit.register(lambda: scheduler.shutdown())
 
 
-def load_config(config_file):
+def load_config():
+    config_file_1 = '../config.txt'
+    config_file_2 = './config.txt'
+
+    if os.path.exists(config_file_1):
+        print(f"Config file found at {config_file_1}")
+        config_file = config_file_1
+    elif os.path.exists(config_file_2):
+        print(f"Config file found at {config_file_2}")
+        config_file = config_file_2
+    else:
+        raise FileNotFoundError("Config file not found in either ../config.txt or ./config.txt")
+
     config = {}
     with open(config_file, 'r') as file:
         for line in file:
             key, value = line.strip().split('=')
             config[key] = value
+
     return config
 
 
