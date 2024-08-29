@@ -9,7 +9,7 @@ from helpers.mongodb_helper import MongoDBHelper
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.jobstores.mongodb import MongoDBJobStore
 from core.logging import Logger
-from middleware import LogRequestMiddleware  # Import the middleware
+from app.middleware import LogRequestMiddleware  # Import the middleware
 
 
 def create_app():
