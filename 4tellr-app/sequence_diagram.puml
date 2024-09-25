@@ -1,0 +1,32 @@
+@startuml
+actor User
+participant KafkaConsumer
+participant EventServices
+participant MongoDBHelper
+
+User -> KafkaConsumer: Start Kafka consumer
+KafkaConsumer -> KafkaConsumer: consume_messages()
+KafkaConsumer -> KafkaConsumer: msg = consumer.poll(timeout=1.0)
+alt Message Received
+    KafkaConsumer -> KafkaConsumer: trade_event = json.loads(msg.value().decode('utf-8'))
+    KafkaConsumer -> KafkaConsumer: transformed_event = transform_message(trade_event)
+    KafkaConsumer -> EventServices: insert_event(transformed_event)
+    alt Event Exists
+        EventServices -> MongoDBHelper: get_event_metadata
+        MongoDBHelper --> EventServices: Event metadata
+        EventServices -> MongoDBHelper: update_event(event_data)
+        MongoDBHelper --> EventServices: Update Result
+    else New Event
+        EventServices -> MongoDBHelper: insert_event(event_data)
+        MongoDBHelper --> EventServices: Insert Result
+        EventServices -> EventServices: insert_event_outcome(event_data, existing_event_data)
+        EventServices -> MongoDBHelper: get_event_metadata_by_name_and_status
+        MongoDBHelper --> EventServices: Event metadata
+        EventServices -> MongoDBHelper: insert_event(outcome_data)
+        MongoDBHelper --> EventServices: Outcome Insert Result
+    end
+    EventServices --> KafkaConsumer: event_id
+end
+KafkaConsumer --> User: Processed and inserted event
+@enduml
+
