@@ -160,7 +160,7 @@ def process_trade(trade_id, steps, producer, topic):
         "trade_id": trade_id,
         "status": "STARTED",
         "timestamp": start_time.isoformat(),
-        "process_id": f"TRADE_START--{trade_id}"
+        "process_id": f"TRADE_START-{trade_id}"
     }
     publish_message(producer, topic, start_message)
 
@@ -210,8 +210,11 @@ def process_trade(trade_id, steps, producer, topic):
     completion_message = {
         "trade_id": trade_id,
         "status": "SUCCESS",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
+        "process_id": f"TRADE_START-{trade_id}"
     }
+    
+
     logging.info(f"Trade {trade_id} completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     publish_message(producer, topic, completion_message)
 

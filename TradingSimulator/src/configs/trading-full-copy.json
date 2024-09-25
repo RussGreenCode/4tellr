@@ -1,0 +1,133 @@
+{
+  "__comment": "This configuration file defines the steps in the trading process simulation. Each object in the array represents a step in the process, including its ID, processing time, application, dependencies, and scheduled time (if applicable). This file is used by the trade simulation scripts to determine the flow and timing of trade processing events.",
+  "steps": [
+  {
+    "process_id": "Order_Submission",
+    "process_group": "Trade_Processing",
+    "processing_time": "5 ms",
+    "application": "Trader_App",
+    "scheduled_time": "",
+    "dependencies": []
+  },
+  {
+    "process_id": "Order_Validation",
+    "process_group": "Trade_Processing",
+    "processing_time": "10 ms",
+    "application": "Broker_System",
+    "scheduled_time": "",
+    "dependencies": ["Order_Submission"]
+  },
+  {
+    "process_id": "Order_Routing",
+    "process_group": "Trade_Processing",
+    "processing_time": "15 ms",
+    "application": "Broker_System",
+    "scheduled_time": "",
+    "dependencies": ["Order_Validation"]
+  },
+  {
+    "process_id": "Order_Queueing",
+    "process_group": "Trade_Processing",
+    "processing_time": "10 ms",
+    "application": "Exchange_Matching_Engine",
+    "scheduled_time": "",
+    "dependencies": ["Order_Routing"]
+  },
+  {
+    "process_id": "Order_Matching",
+    "process_group": "Trade_Processing",
+    "processing_time": "5 ms",
+    "application": "Exchange_Matching_Engine",
+    "scheduled_time": "",
+    "dependencies": ["Order_Queueing"]
+  },
+  {
+    "process_id": "Trade_Execution",
+    "process_group": "Trade_Processing",
+    "processing_time": "5 ms",
+    "application": "Exchange_Matching_Engine",
+    "scheduled_time": "",
+    "dependencies": ["Order_Matching"]
+  },
+  {
+    "process_id": "Trade_Confirmation",
+    "process_group": "Trade_Processing",
+    "processing_time": "5 ms",
+    "application": "Exchange_System",
+    "scheduled_time": "",
+    "dependencies": ["Trade_Execution"]
+  },
+  {
+    "process_id": "Trade_Notification",
+    "process_group": "Trade_Processing",
+    "processing_time": "5 ms",
+    "application": "Broker_System",
+    "scheduled_time": "",
+    "dependencies": ["Trade_Confirmation"]
+  },
+  {
+    "process_id": "Clearing_Preparation",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "1 hour",
+    "application": "Clearing_House_System",
+    "scheduled_time": "T+1 08:00:00",
+    "dependencies": ["Trade_Notification"]
+  },
+  {
+    "process_id": "Clearing_Process",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "2 hours",
+    "application": "Clearing_House_System",
+    "scheduled_time": "T+1 09:00:00",
+    "dependencies": ["Clearing_Preparation"]
+  },
+  {
+    "process_id": "Netting",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "1 hour",
+    "application": "Clearing_House_System",
+    "scheduled_time": "T+1 11:00:00",
+    "dependencies": ["Clearing_Process"]
+  },
+  {
+    "process_id": "Settlement_Preparation",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "1 hour",
+    "application": "Custodian_Bank",
+    "scheduled_time": "T+2 08:00:00",
+    "dependencies": ["Netting"]
+  },
+  {
+    "process_id": "Settlement",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "2 hours",
+    "application": "Custodian_Bank",
+    "scheduled_time": "T+2 10:00:00",
+    "dependencies": ["Settlement_Preparation"]
+  },
+  {
+    "process_id": "Reconciliation",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "2 hours",
+    "application": "Broker_System",
+    "scheduled_time": "T+2 12:00:00",
+    "dependencies": ["Settlement"]
+  },
+  {
+    "process_id": "Regulatory_Reporting",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "3 hours",
+    "application": "Compliance_System",
+    "scheduled_time": "T+2 15:00:00",
+    "dependencies": ["Reconciliation"]
+  },
+  {
+    "process_id": "Trade_Archiving",
+    "process_group": "Post-Trade_Processing",
+    "processing_time": "Ongoing",
+    "application": "Exchange_System",
+    "scheduled_time": "",
+    "dependencies": ["Regulatory_Reporting"]
+  }
+]
+}
