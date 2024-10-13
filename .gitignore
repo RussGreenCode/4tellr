@@ -1,45 +1,31 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Ignore all __pycache__ directories and Python bytecode files
+**/__pycache__/
+*.py[cod]
 
-# Ignore all __pycache__ directories
-__pycache__/
+# Ignore the mongo-data directory
+mongo-data/
 
-# Other files and directories to ignore
-*.pyc
-*.pyo
-*.pyd
+# Ignore dependencies
+4tellr-frontend/node_modules/
+4tellr-frontend/.pnp*
+4tellr-app/.venv/
+4tellr-app/pyenv.cfg
 
+# Ignore all .idea directories
+**/.idea/
 
+# Ignore all virtual environments
+**/.venv/
 
-# dependencies
-4tellr-frontend/node_modules
-4tellr-frontend/.pnp
-4tellr-frontend/.pnp.js
-4tellr-app/.venv/bin
-4tellr-app/.venv/lib
-4tellr-app/pyennv.cfg
-4tellr-frontend/.idea
-4tellr-app/.idea
-.idea/
-system-sim/.idea
-system-sim/.venv
-system-sim/pyenv.cfg
-system-sim/.gitignore
-.gitignore.swp
+# Ignore testing files
+4tellr-frontend/coverage/
 
+# Ignore production build directory
+4tellr-frontend/build/
 
-# testing
-4tellr-frontend/coverage
-
-# production
-4tellr-frontend/build
-
-# misc
+# Miscellaneous
 4tellr-frontend/.DS_Store
-4tellr-frontend/.env.local
-4tellr-frontend/.env.development.local
-4tellr-frontend/.env.test.local
-4tellr-frontend/.env.production.local
-
+4tellr-frontend/.env*
 4tellr-frontend/npm-debug.log*
 4tellr-frontend/yarn-debug.log*
 4tellr-frontend/yarn-error.log*

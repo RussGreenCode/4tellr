@@ -15,7 +15,7 @@ const Admin = () => {
       return;
     }
 
-    fetch(`${baseUrl}/api/events/generate-expectations`, {
+    fetch(`${config.baseUrl}/api/events/generate-expectations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ const Admin = () => {
       businessDates.push(date.toISOString().split('T')[0]);
     }
 
-    fetch(`${baseUrl}/api/events/delete_events`, {
+    fetch(`${config.baseUrl}/api/events/delete_events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ const Admin = () => {
   };
 
   const handleUpdateExpectedTimes = () => {
-    fetch(`${baseUrl}/api/events/expected-times/update`, {
+    fetch(`${config.baseUrl}/api/events/expected-times/update`, {
       method: 'POST',
     })
       .then(response => response.json())
