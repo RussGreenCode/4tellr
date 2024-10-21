@@ -1,0 +1,20 @@
+[DEFAULT]
+ AWS_ACCESS_KEY_ID=your_access_key_id
+ AWS_SECRET_ACCESS_KEY=your_secret_access_key
+ AWS_REGION=us-east-1
+ EVENT_TABLE=event_details
+ STATS_TABLE=event_statistics
+ MONITORING_GROUPS_TABLE=monitoring_groups
+ USER_TABLE=user
+ ENVIRONMENT=local
+ LOCAL_DYNAMODB_ENDPOINT=http://localhost:8000
+ DATABASE_TYPE=mongoDB
+ LOG_LEVEL=DEBUG
+ MONGO_URI=mongodb://localhost:27017/4tellr
+
+[KAFKA]
+ BOOTSTRAP_SERVERS = localhost:9092
+ TOPIC = trade_events
+ GROUP_ID = trade-group-106
+
+
