@@ -1,3 +1,6 @@
 {
-    "trades_per_second": 2
+    "trades_per_second": 100,
+    "kafka_bootstrap_servers": "localhost:9092",
+    "kafka_topic": "trade_events",
+    "client_id": "trade_simulator"
 }
